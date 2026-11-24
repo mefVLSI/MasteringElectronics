@@ -1,0 +1,2594 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OsciloLab — Aprende a Usar el Osciloscopio desde Cero</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans para lectura clara y JetBrains Mono para pantallas técnicas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            lab: {
+              bg: '#090d16',
+              card: '#0f1624',
+              panel: '#131c2e',
+              border: '#1e293b',
+              phosphor: '#00ff88',
+              cyan: '#00e5ff',
+              amber: '#ffb300',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Estilos personalizados de Laboratorio Electrónico Oscuro ("Dark Lab UI") */
+    body {
+      background-color: #090d16;
+      color: #e2e8f0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 15% 15%, rgba(0, 229, 255, 0.06) 0%, transparent 35%),
+        radial-gradient(circle at 85% 25%, rgba(0, 255, 136, 0.05) 0%, transparent 35%);
+    }
+
+    /* Efecto cristal/panel de laboratorio */
+    .lab-card {
+      background: linear-gradient(180deg, rgba(19, 28, 46, 0.85) 0%, rgba(13, 19, 33, 0.92) 100%);
+      border: 1px solid #1e293b;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+      transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .lab-card:hover {
+      border-color: rgba(0, 229, 255, 0.35);
+    }
+
+    /* Marco realista de pantalla CRT / Digital de osciloscopio */
+    .scope-bezel {
+      background: linear-gradient(145deg, #161f33 0%, #0b101b 100%);
+      border: 2px solid #26344d;
+      box-shadow:
+        0 0 35px rgba(0, 255, 136, 0.08),
+        inset 0 2px 12px rgba(0, 0, 0, 0.85);
+    }
+
+    .scope-screen-wrap {
+      position: relative;
+      background-color: #04110b;
+      border: 1px solid rgba(0, 255, 136, 0.25);
+      box-shadow: inset 0 0 28px rgba(0, 255, 136, 0.08);
+      overflow: hidden;
+    }
+
+    /* Sutil textura de líneas de barrido en pantalla */
+    .scope-screen-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0, 0, 0, 0.14) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Sliders personalizados estilo instrumento */
+    input[type="range"].lab-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: #1e293b;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"].lab-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #00e5ff;
+      border: 2px solid #090d16;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"].lab-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    input[type="range"].lab-slider.amber-slider::-webkit-slider-thumb {
+      background: #ffb300;
+      box-shadow: 0 0 10px rgba(255, 179, 0, 0.7);
+    }
+
+    input[type="range"].lab-slider.green-slider::-webkit-slider-thumb {
+      background: #00ff88;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+    }
+
+    /* Tarjetas 3D Flip para el Glosario Bilingüe */
+    .flip-card {
+      perspective: 1000px;
+      height: 195px;
+      cursor: pointer;
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front,
+    .flip-card-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 1rem;
+    }
+
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Animaciones suaves de transición de pestañas */
+    .section-view {
+      animation: fadeSlideIn 0.35s ease-out;
+    }
+
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Resaltado de zona activa en diagrama de anatomía */
+    .anatomy-zone-active {
+      box-shadow: 0 0 0 2px #00e5ff, 0 0 22px rgba(0, 229, 255, 0.35) !important;
+      border-color: #00e5ff !important;
+    }
+
+    /* Ocultar barra de scroll en navegación móvil manteniendo funcionalidad */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-cyan-400/20 selection:text-cyan-300">
+
+  <!-- ==================== BARRA DE NAVEGACIÓN SUPERIOR FIJA ==================== -->
+  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/90">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+        <!-- Logo e Identidad -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(0,255,136,0.2)]">
+              <!-- Ícono SVG de onda senoidal -->
+              <svg class="w-6 h-6 text-[#00ff88]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0 3.5-4 5 0" />
+                <line x1="2" y1="12" x2="22" y2="12" stroke-opacity="0.3" stroke-dasharray="2 2" />
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-lg tracking-tight text-white">Oscilo<span class="text-[#00ff88]">Lab</span></span>
+                <span class="hidden sm:inline-block text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
+                  Bilingüe ES / EN
+                </span>
+              </div>
+              <p class="text-xs text-slate-400">Guía Interactiva de Osciloscopio (Oscilloscope Guide)</p>
+            </div>
+          </div>
+
+          <!-- Indicador rápido de progreso en móvil -->
+          <div class="md:hidden text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg" id="mobile-score-badge">
+            Quiz: 0/6
+          </div>
+        </div>
+
+        <!-- Pestañas de Navegación (4 Secciones) -->
+        <nav aria-label="Secciones principales" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+          <button onclick="switchSection('intro')" id="tab-intro" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all bg-cyan-500/15 text-[#00e5ff] border border-cyan-400/50 shadow-[0_0_15px_rgba(0,229,255,0.15)]">
+            <span class="font-mono text-xs opacity-80">01</span>
+            <span>Inicio y Conceptos</span>
+          </button>
+          <button onclick="switchSection('simulator')" id="tab-simulator" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
+            <span class="font-mono text-xs opacity-80">02</span>
+            <span>Simulador Interactivo</span>
+          </button>
+          <button onclick="switchSection('waveforms')" id="tab-waveforms" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
+            <span class="font-mono text-xs opacity-80">03</span>
+            <span>Formas de Onda y Ejemplos</span>
+          </button>
+          <button onclick="switchSection('exercises')" id="tab-exercises" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
+            <span class="font-mono text-xs opacity-80">04</span>
+            <span>Ejercicios Prácticos</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== CONTENEDOR PRINCIPAL ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- =======================================================================
+         SECCIÓN 1: INICIO, CONCEPTOS Y ANATOMÍA DEL OSCILOSCOPIO
+    ======================================================================== -->
+    <section id="section-intro" class="section-view space-y-10">
+      <!-- Hero Motivador -->
+      <div class="lab-card rounded-3xl p-6 sm:p-10 relative overflow-hidden">
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-[#00ff88]/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-7 space-y-5">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-[#00ff88] text-xs font-semibold">
+              <span class="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse"></span>
+              Nivel Inicial • Ideal para recién graduados de bachillerato
+            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+              Aprende a ver la <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff88] to-[#00e5ff]">electricidad en movimiento</span>
+            </h1>
+            <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+              ¿Alguna vez quisiste ver cómo viaja una señal dentro de un circuito electrónico? El <strong class="text-white">Osciloscopio (Oscilloscope)</strong> es el instrumento estrella de todo laboratorio de electrónica, ingeniería y robótica. Aquí aprenderás a dominarlo paso a paso, sin conocimientos previos y dominando su vocabulario en <span class="text-[#00e5ff] font-semibold">español e inglés</span>.
+            </p>
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button onclick="switchSection('simulator')" class="px-5 py-3 rounded-xl bg-[#00ff88] hover:bg-emerald-300 text-slate-950 font-bold text-sm transition shadow-[0_0_20px_rgba(0,255,136,0.3)] flex items-center gap-2">
+                <span>Probar el Simulador Ahora</span>
+                <span>→</span>
+              </button>
+              <a href="#anatomia-interactiva" class="px-5 py-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white border border-slate-700 font-semibold text-sm transition">
+                Explorar Partes del Equipo
+              </a>
+            </div>
+          </div>
+
+          <!-- Tarjetas de Analogías Cotidianas -->
+          <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+            <div class="bg-[#090d16]/80 border border-slate-800 rounded-2xl p-4 flex items-start gap-4">
+              <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-xl">
+                💓
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Como un monitor cardíaco para circuitos</h3>
+                <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Así como un electrocardiograma muestra los latidos del corazón en una pantalla, el <strong class="text-slate-200">Osciloscopio (Oscilloscope)</strong> dibuja los "latidos eléctricos" de cualquier componente.
+                </p>
+              </div>
+            </div>
+
+            <div class="bg-[#090d16]/80 border border-slate-800 rounded-2xl p-4 flex items-start gap-4">
+              <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 text-xl">
+                🎥
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Una cámara superlenta de la electricidad</h3>
+                <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Un multímetro solo te da un número promedio. El osciloscopio congela señales que cambian millones de veces por segundo graficando <strong class="text-[#00ff88]">Voltaje (Voltage - Eje Y)</strong> contra <strong class="text-[#00e5ff]">Tiempo (Time - Eje X)</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANATOMÍA INTERACTIVA DEL OSCILOSCOPIO -->
+      <div id="anatomia-interactiva" class="space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div>
+            <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Explora el Panel Frontal</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+              Anatomía del Osciloscopio <span class="text-slate-400 font-normal text-lg">(Oscilloscope Anatomy)</span>
+            </h2>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400">
+            Haz clic o toca cualquiera de las <strong class="text-white">5 zonas</strong> para descubrir qué hace cada control.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          <!-- Representación Visual Interactiva del Equipo -->
+          <div class="lg:col-span-7 scope-bezel rounded-3xl p-4 sm:p-6 flex flex-col justify-between gap-4">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-400 border-b border-slate-800 pb-2">
+              <span class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_#00ff88]"></span>
+                DSO-1000 EDU • 100 MHz
+              </span>
+              <span>Haz clic en un bloque</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-stretch">
+              <!-- ZONA 1: PANTALLA Y CUADRÍCULA (SCREEN & GRATICULE) -->
+              <button type="button" onclick="selectAnatomy('screen')" id="zone-btn-screen"
+                class="anatomy-zone anatomy-zone-active sm:col-span-7 text-left rounded-2xl bg-[#04130c] border-2 border-[#00ff88]/50 p-3.5 transition-all relative overflow-hidden group">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] font-mono font-bold text-[#00ff88] bg-emerald-500/15 px-2 py-0.5 rounded">
+                    1. Pantalla (Screen & Graticule)
+                  </span>
+                  <span class="text-[10px] font-mono text-emerald-300/70">10 × 8 Div</span>
+                </div>
+                <!-- Mini cuadrícula SVG ilustrativa -->
+                <svg viewBox="0 0 200 130" class="w-full h-36 rounded-lg bg-[#030e09] border border-emerald-500/20">
+                  <!-- Cuadrícula -->
+                  <g stroke="#00ff88" stroke-opacity="0.18" stroke-width="0.7">
+                    <line x1="20" y1="0" x2="20" y2="130"/><line x1="40" y1="0" x2="40" y2="130"/>
+                    <line x1="60" y1="0" x2="60" y2="130"/><line x1="80" y1="0" x2="80" y2="130"/>
+                    <line x1="100" y1="0" x2="100" y2="130" stroke-opacity="0.45"/>
+                    <line x1="120" y1="0" x2="120" y2="130"/><line x1="140" y1="0" x2="140" y2="130"/>
+                    <line x1="160" y1="0" x2="160" y2="130"/><line x1="180" y1="0" x2="180" y2="130"/>
+                    <line x1="0" y1="22" x2="200" y2="22"/><line x1="0" y1="44" x2="200" y2="44"/>
+                    <line x1="0" y1="65" x2="200" y2="65" stroke-opacity="0.45"/>
+                    <line x1="0" y1="86" x2="200" y2="86"/><line x1="0" y1="108" x2="200" y2="108"/>
+                  </g>
+                  <!-- Onda senoidal -->
+                  <path d="M 0 65 Q 25 15, 50 65 T 100 65 T 150 65 T 200 65" fill="none" stroke="#00ff88" stroke-width="2.5" />
+                  <!-- Etiquetas Ejes -->
+                  <text x="8" y="14" fill="#00e5ff" font-size="8" font-family="monospace">↑ Y: Voltaje (Voltage)</text>
+                  <text x="108" y="122" fill="#ffb300" font-size="8" font-family="monospace">→ X: Tiempo (Time)</text>
+                </svg>
+              </button>
+
+              <!-- CONTROLES DERECHOS (VERTICAL, HORIZONTAL, TRIGGER) -->
+              <div class="sm:col-span-5 flex flex-col gap-3">
+                <!-- ZONA 2: SECCIÓN VERTICAL -->
+                <button type="button" onclick="selectAnatomy('vertical')" id="zone-btn-vertical"
+                  class="anatomy-zone text-left rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 hover:border-cyan-400/60 p-3 transition-all">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-mono font-bold text-[#00e5ff]">2. Vertical (Vertical System)</span>
+                    <span class="w-5 h-5 rounded-full border-2 border-cyan-400 bg-slate-800 flex items-center justify-center text-[9px] font-mono text-cyan-300">V</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-1">Volts/Div & Posición Vertical</p>
+                </button>
+
+                <!-- ZONA 3: SECCIÓN HORIZONTAL -->
+                <button type="button" onclick="selectAnatomy('horizontal')" id="zone-btn-horizontal"
+                  class="anatomy-zone text-left rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 hover:border-cyan-400/60 p-3 transition-all">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-mono font-bold text-emerald-300">3. Horizontal (Time Base)</span>
+                    <span class="w-5 h-5 rounded-full border-2 border-emerald-400 bg-slate-800 flex items-center justify-center text-[9px] font-mono text-emerald-300">T</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-1">Time/Div & Posición Horizontal</p>
+                </button>
+
+                <!-- ZONA 4: CONTROL DE DISPARO (TRIGGER) -->
+                <button type="button" onclick="selectAnatomy('trigger')" id="zone-btn-trigger"
+                  class="anatomy-zone text-left rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 hover:border-amber-400/60 p-3 transition-all">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-mono font-bold text-[#ffb300]">4. Disparo (Trigger System)</span>
+                    <span class="w-5 h-5 rounded-full border-2 border-amber-400 bg-slate-800 flex items-center justify-center text-[9px] font-mono text-amber-300">⚡</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-1">Trigger Level & Sincronización</p>
+                </button>
+              </div>
+            </div>
+
+            <!-- ZONA 5: CANALES DE ENTRADA Y SONDA (INPUT CHANNELS & PROBE) -->
+            <button type="button" onclick="selectAnatomy('probe')" id="zone-btn-probe"
+              class="anatomy-zone w-full text-left rounded-2xl bg-slate-900/95 border-2 border-slate-700/80 hover:border-cyan-400/60 p-3.5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-full border-2 border-amber-400 bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-amber-300">CH1</span>
+                  <span class="w-7 h-7 rounded-full border-2 border-cyan-400 bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-cyan-300">CH2</span>
+                </div>
+                <div>
+                  <span class="text-xs font-mono font-bold text-white block">5. Canales de Entrada y Sonda (Input Channels & Probe)</span>
+                  <span class="text-[11px] text-slate-400">Conector BNC, Punta de Sonda (Probe Tip) y Pinza de Tierra (Ground Clip)</span>
+                </div>
+              </div>
+              <span class="text-[11px] font-mono text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/30 self-start sm:self-center">
+                Acoplamiento (Coupling)
+              </span>
+            </button>
+          </div>
+
+          <!-- Panel de Explicación Detallada de la Zona Seleccionada -->
+          <div class="lg:col-span-5 lab-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
+            <div id="anatomy-detail-content" class="space-y-4">
+              <!-- Se rellena dinámicamente con JS -->
+            </div>
+
+            <!-- Botones rápidos de navegación entre las 5 zonas -->
+            <div class="pt-6 mt-6 border-t border-slate-800 flex flex-wrap gap-2">
+              <button onclick="selectAnatomy('screen')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">1. Pantalla</button>
+              <button onclick="selectAnatomy('vertical')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">2. Vertical</button>
+              <button onclick="selectAnatomy('horizontal')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">3. Horizontal</button>
+              <button onclick="selectAnatomy('trigger')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">4. Disparo</button>
+              <button onclick="selectAnatomy('probe')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">5. Sonda</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MINI GLOSARIO BILINGÜE INTERACTIVO (TARJETAS FLIP + BUSCADOR) -->
+      <div class="space-y-5 pt-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Vocabulario Técnico Esencial</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+              Glosario Bilingüe Interactivo <span class="text-slate-400 font-normal text-lg">(Bilingual Glossary)</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">
+              Los osciloscopios reales tienen sus botones rotulados en inglés. Haz clic en cada tarjeta para voltearla y ver su significado sencillo.
+            </p>
+          </div>
+
+          <!-- Buscador rápido -->
+          <div class="relative w-full md:w-80">
+            <input
+              type="text"
+              id="glossary-search"
+              oninput="filterGlossary()"
+              placeholder="Buscar término (ej. Trigger, Período, Sonda)..."
+              class="w-full bg-slate-900/90 border border-slate-700 focus:border-[#00e5ff] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Grid de tarjetas Flip -->
+        <div id="glossary-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Renderizado dinámico por JS -->
+        </div>
+      </div>
+
+      <!-- Pie de sección con botón de avance -->
+      <div class="flex justify-end pt-4">
+        <button onclick="switchSection('simulator')" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg flex items-center gap-2">
+          <span>Siguiente: Ir al Simulador Interactivo</span>
+          <span>→</span>
+        </button>
+      </div>
+    </section>
+
+
+    <!-- =======================================================================
+         SECCIÓN 2: SIMULADOR INTERACTIVO DE OSCILOSCOPIO EN TIEMPO REAL
+    ======================================================================== -->
+    <section id="section-simulator" class="section-view hidden space-y-6">
+      <!-- Encabezado y Presets Rápidos -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Laboratorio Virtual en Tiempo Real</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">
+            Simulador de Osciloscopio <span class="text-slate-400 font-normal text-lg">(Interactive Oscilloscope)</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Modifica la señal de entrada y ajusta las escalas <strong class="text-slate-200">Volts/Div</strong>, <strong class="text-slate-200">Base de Tiempo (Time Base)</strong> y <strong class="text-amber-400">Disparo (Trigger)</strong>.
+          </p>
+        </div>
+
+        <!-- Botones de Ejemplos Rápidos (Quick Presets) -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-mono text-slate-400 mr-1">Ajustes Rápidos:</span>
+          <button onclick="applySimulatorPreset('audio')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-cyan-500/20 hover:text-[#00e5ff] border border-slate-700 transition">
+            🎵 Audio 500 Hz
+          </button>
+          <button onclick="applySimulatorPreset('arduino')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-emerald-500/20 hover:text-[#00ff88] border border-slate-700 transition">
+            🤖 Pulso Digital 1 kHz
+          </button>
+          <button onclick="applySimulatorPreset('triangle')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-amber-500/20 hover:text-amber-300 border border-slate-700 transition">
+            📐 Rampa 250 Hz
+          </button>
+        </div>
+      </div>
+
+      <!-- DISEÑO PRINCIPAL DEL SIMULADOR: PANTALLA + PANELES DE CONTROL -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+
+        <!-- COLUMNA IZQUIERDA (7 cols): PANTALLA DEL OSCILOSCOPIO + CÁLCULOS EN VIVO -->
+        <div class="xl:col-span-7 space-y-5">
+          <!-- Carcasa del Osciloscopio -->
+          <div class="scope-bezel rounded-3xl p-4 sm:p-5 space-y-3">
+            <!-- Barra superior OSD (On-Screen Display) de la pantalla -->
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono px-1">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/40 font-bold">
+                  CH1 ON
+                </span>
+                <span class="text-slate-300" id="osd-volts-div">Volts/Div: 1.0 V</span>
+                <span class="text-slate-600">|</span>
+                <span class="text-[#00e5ff]" id="osd-time-div">Time/Div: 1.0 ms</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span id="osd-trigger-badge" class="px-2 py-0.5 rounded bg-amber-500/20 text-[#ffb300] border border-amber-500/40 font-semibold">
+                  TRIG: ON (0.00 V)
+                </span>
+                <!-- Botón para mostrar/ocultar guías visuales de conteo de cuadros -->
+                <button onclick="toggleMeasureGuides()" id="btn-guides" class="px-2.5 py-0.5 rounded bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 hover:bg-cyan-500/30 transition text-[11px]">
+                  📏 Guías: ON
+                </button>
+              </div>
+            </div>
+
+            <!-- Contenedor del Canvas 10x8 -->
+            <div class="scope-screen-wrap rounded-2xl w-full aspect-[10/8]">
+              <canvas id="sim-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+            </div>
+
+            <!-- Barra inferior OSD: Cursor en tiempo real y aviso de estado -->
+            <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-400 px-1">
+              <div id="cursor-readout" class="text-emerald-300/90">
+                Cursor: Pasa el ratón o toca la pantalla para medir (V, ms)
+              </div>
+              <div class="text-slate-500">
+                Cuadrícula (Graticule): 10 Div (X) × 8 Div (Y)
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL EN VIVO: CÁLCULOS Y LECTURA PASO A PASO (LIVE MATH & READING) -->
+          <div class="lab-card rounded-3xl p-5 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/40 flex items-center justify-center text-[#00e5ff] font-mono font-bold">
+                  fx
+                </span>
+                <div>
+                  <h3 class="font-bold text-white text-base">Cálculos y Lectura Paso a Paso <span class="text-slate-400 font-normal text-xs">(Live Math & Reading)</span></h3>
+                  <p class="text-xs text-slate-400">Observa cómo se obtienen los valores contando los cuadros de la pantalla</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Alerta pedagógica dinámica si la onda se sale de escala o está sin disparo -->
+            <div id="sim-pedagogical-alert" class="hidden rounded-xl p-3 text-xs border"></div>
+
+            <!-- Tarjetas de Fórmulas en Vivo -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 font-mono">
+              <!-- 1. Voltaje Pico a Pico (Vpp) -->
+              <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-1.5">
+                <div class="text-[11px] text-slate-400 font-sans font-semibold">
+                  1. Voltaje Pico a Pico <span class="text-[#00ff88]">(Vpp)</span>
+                </div>
+                <div class="text-xs text-slate-300" id="math-vpp-formula">
+                  4.0 div × 1.0 V/div
+                </div>
+                <div class="text-lg font-bold text-[#00ff88]" id="math-vpp-result">
+                  = 4.00 Vpp
+                </div>
+                <div class="text-[11px] text-slate-400 border-t border-slate-800/80 pt-1" id="math-vp-result">
+                  Voltaje Pico (Vp): 2.00 V
+                </div>
+              </div>
+
+              <!-- 2. Período (Period - T) -->
+              <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-1.5">
+                <div class="text-[11px] text-slate-400 font-sans font-semibold">
+                  2. Período <span class="text-[#00e5ff]">(Period - T)</span>
+                </div>
+                <div class="text-xs text-slate-300" id="math-t-formula">
+                  2.0 div × 1.0 ms/div
+                </div>
+                <div class="text-lg font-bold text-[#00e5ff]" id="math-t-result">
+                  = 2.00 ms
+                </div>
+                <div class="text-[11px] text-slate-400 border-t border-slate-800/80 pt-1" id="math-t-sec">
+                  En segundos: 0.00200 s
+                </div>
+              </div>
+
+              <!-- 3. Frecuencia (Frequency - f) -->
+              <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-1.5">
+                <div class="text-[11px] text-slate-400 font-sans font-semibold">
+                  3. Frecuencia <span class="text-[#ffb300]">(Frequency - f)</span>
+                </div>
+                <div class="text-xs text-slate-300" id="math-f-formula">
+                  f = 1 / 0.00200 s
+                </div>
+                <div class="text-lg font-bold text-[#ffb300]" id="math-f-result">
+                  = 500 Hz
+                </div>
+                <div class="text-[11px] text-slate-400 border-t border-slate-800/80 pt-1" id="math-cycles-visible">
+                  Ciclos en pantalla: 5.0
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA (5 cols): GENERADOR DE SEÑALES + CONTROLES DEL OSCILOSCOPIO -->
+        <div class="xl:col-span-5 space-y-5">
+
+          <!-- PANEL A: GENERADOR DE SEÑALES (SIGNAL GENERATOR) -->
+          <div class="lab-card rounded-3xl p-5 space-y-4 border-l-4 border-l-[#00e5ff]">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-mono uppercase tracking-wider text-[#00e5ff]">Fuente Externa</span>
+                <h3 class="font-bold text-white text-base">Generador de Señales <span class="text-slate-400 font-normal text-xs">(Signal Generator)</span></h3>
+              </div>
+              <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
+                OUT → CH1
+              </span>
+            </div>
+
+            <!-- Selector de Forma de Onda (Waveform) -->
+            <div class="space-y-2">
+              <label class="text-xs font-semibold text-slate-300 block">
+                Forma de Onda <span class="text-slate-400 font-normal">(Waveform)</span>
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="setSimWaveform('sine')" id="wf-btn-sine"
+                  class="wf-btn px-3 py-2.5 rounded-xl text-xs font-semibold border transition flex items-center gap-2 bg-cyan-500/20 text-[#00e5ff] border-cyan-400">
+                  <span>〰️</span>
+                  <span>Senoidal (Sine)</span>
+                </button>
+                <button type="button" onclick="setSimWaveform('square')" id="wf-btn-square"
+                  class="wf-btn px-3 py-2.5 rounded-xl text-xs font-semibold border transition flex items-center gap-2 bg-slate-900/90 text-slate-300 border-slate-700 hover:border-slate-500">
+                  <span>⎍</span>
+                  <span>Cuadrada (Square)</span>
+                </button>
+                <button type="button" onclick="setSimWaveform('triangle')" id="wf-btn-triangle"
+                  class="wf-btn px-3 py-2.5 rounded-xl text-xs font-semibold border transition flex items-center gap-2 bg-slate-900/90 text-slate-300 border-slate-700 hover:border-slate-500">
+                  <span>📐</span>
+                  <span>Triangular (Triangle)</span>
+                </button>
+                <button type="button" onclick="setSimWaveform('sawtooth')" id="wf-btn-sawtooth"
+                  class="wf-btn px-3 py-2.5 rounded-xl text-xs font-semibold border transition flex items-center gap-2 bg-slate-900/90 text-slate-300 border-slate-700 hover:border-slate-500">
+                  <span>🪚</span>
+                  <span>Sierra (Sawtooth)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Deslizador de Voltaje Pico (Peak Voltage - Vp) -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <label for="sim-vp" class="font-semibold text-slate-300">
+                  Voltaje Pico <span class="text-slate-400 font-normal">(Peak Voltage - Vp)</span>
+                </label>
+                <span id="sim-vp-val" class="font-mono font-bold text-[#00ff88] bg-emerald-500/10 px-2 py-0.5 rounded">
+                  2.0 V (4.0 Vpp)
+                </span>
+              </div>
+              <input type="range" id="sim-vp" min="0.5" max="5.0" step="0.5" value="2.0" oninput="updateSimFromInputs()" class="lab-slider green-slider" />
+              <div class="flex justify-between text-[10px] font-mono text-slate-500">
+                <span>0.5 V</span>
+                <span>2.5 V</span>
+                <span>5.0 V</span>
+              </div>
+            </div>
+
+            <!-- Deslizador de Frecuencia (Frequency - f) -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <label for="sim-freq" class="font-semibold text-slate-300">
+                  Frecuencia <span class="text-slate-400 font-normal">(Frequency - f)</span>
+                </label>
+                <span id="sim-freq-val" class="font-mono font-bold text-[#00e5ff] bg-cyan-500/10 px-2 py-0.5 rounded">
+                  500 Hz
+                </span>
+              </div>
+              <input type="range" id="sim-freq" min="100" max="2000" step="100" value="500" oninput="updateSimFromInputs()" class="lab-slider" />
+              <div class="flex justify-between text-[10px] font-mono text-slate-500">
+                <span>100 Hz</span>
+                <span>1000 Hz</span>
+                <span>2000 Hz</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL B: CONTROLES DEL OSCILOSCOPIO (OSCILLOSCOPE CONTROLS) -->
+          <div class="lab-card rounded-3xl p-5 space-y-5 border-l-4 border-l-[#00ff88]">
+            <div>
+              <span class="text-[11px] font-mono uppercase tracking-wider text-[#00ff88]">Panel del Instrumento</span>
+              <h3 class="font-bold text-white text-base">Controles del Osciloscopio <span class="text-slate-400 font-normal text-xs">(Oscilloscope Controls)</span></h3>
+            </div>
+
+            <!-- Escalas Discretas: Volts/Div y Base de Tiempo (Time Base) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Selector Voltios/División (Volts/Div) -->
+              <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+                <div class="text-xs font-semibold text-slate-200">
+                  Voltios/División <span class="block text-[11px] text-slate-400 font-normal">(Volts/Div — Escala Y)</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                  <button type="button" onclick="stepVoltsDiv(-1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-base border border-slate-700 transition">−</button>
+                  <div id="ctrl-volts-display" class="font-mono font-extrabold text-base text-[#00ff88]">1 V</div>
+                  <button type="button" onclick="stepVoltsDiv(1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-base border border-slate-700 transition">+</button>
+                </div>
+                <div class="grid grid-cols-4 gap-1 pt-1" id="volts-pills">
+                  <!-- Botones discretos generados por JS -->
+                </div>
+              </div>
+
+              <!-- Selector Base de Tiempo (Time Base - Time/Div) -->
+              <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+                <div class="text-xs font-semibold text-slate-200">
+                  Base de Tiempo <span class="block text-[11px] text-slate-400 font-normal">(Time Base / Time/Div — X)</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                  <button type="button" onclick="stepTimeDiv(-1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-base border border-slate-700 transition">−</button>
+                  <div id="ctrl-time-display" class="font-mono font-extrabold text-base text-[#00e5ff]">1 ms</div>
+                  <button type="button" onclick="stepTimeDiv(1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-base border border-slate-700 transition">+</button>
+                </div>
+                <div class="grid grid-cols-5 gap-1 pt-1" id="time-pills">
+                  <!-- Botones discretos generados por JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Deslizadores de Posición Vertical y Posición Horizontal -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center text-xs">
+                  <label for="sim-posy" class="font-semibold text-slate-300">Posición Vertical <span class="text-slate-400 font-normal">(Vertical Pos)</span></label>
+                  <button type="button" onclick="resetPosition('y')" class="text-[11px] font-mono text-cyan-400 hover:underline" id="sim-posy-val">0.0 div</button>
+                </div>
+                <input type="range" id="sim-posy" min="-3.0" max="3.0" step="0.5" value="0" oninput="updateSimFromInputs()" class="lab-slider green-slider" />
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center text-xs">
+                  <label for="sim-posx" class="font-semibold text-slate-300">Posición Horizontal <span class="text-slate-400 font-normal">(Horiz. Pos)</span></label>
+                  <button type="button" onclick="resetPosition('x')" class="text-[11px] font-mono text-cyan-400 hover:underline" id="sim-posx-val">0.0 div</button>
+                </div>
+                <input type="range" id="sim-posx" min="-4.0" max="4.0" step="0.5" value="0" oninput="updateSimFromInputs()" class="lab-slider" />
+              </div>
+            </div>
+
+            <!-- Control de Disparo (Trigger System) -->
+            <div class="bg-[#090d16] border border-amber-500/30 rounded-2xl p-4 space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <span class="text-xs font-bold text-[#ffb300] block">Sistema de Disparo (Trigger System)</span>
+                  <span class="text-[11px] text-slate-400">Congela la onda en pantalla. Apágalo para ver cómo "corre" la señal.</span>
+                </div>
+                <button type="button" onclick="toggleTrigger()" id="btn-trigger-toggle"
+                  class="px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(255,179,0,0.4)] transition shrink-0">
+                  Disparo: ON
+                </button>
+              </div>
+
+              <div id="trigger-level-group" class="space-y-1.5 pt-1">
+                <div class="flex justify-between items-center text-xs">
+                  <label for="sim-trig-level" class="font-semibold text-slate-300">
+                    Nivel de Disparo <span class="text-slate-400 font-normal">(Trigger Level)</span>
+                  </label>
+                  <span id="sim-trig-val" class="font-mono font-bold text-[#ffb300]">0.00 V</span>
+                </div>
+                <input type="range" id="sim-trig-level" min="-5.0" max="5.0" step="0.25" value="0" oninput="updateSimFromInputs()" class="lab-slider amber-slider" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Pie de sección con botón de avance -->
+      <div class="flex justify-between items-center pt-4">
+        <button onclick="switchSection('intro')" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition">
+          ← Anterior: Conceptos
+        </button>
+        <button onclick="switchSection('waveforms')" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg flex items-center gap-2">
+          <span>Siguiente: Formas de Onda y Ejemplos</span>
+          <span>→</span>
+        </button>
+      </div>
+    </section>
+
+
+    <!-- =======================================================================
+         SECCIÓN 3: FORMAS DE ONDA Y EJEMPLOS DE MEDICIÓN Y LECTURA
+    ======================================================================== -->
+    <section id="section-waveforms" class="section-view hidden space-y-10">
+      <!-- Subsección A: Formas de Onda Fundamentales -->
+      <div class="space-y-5">
+        <div>
+          <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Catálogo Visual de Señales</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+            Formas de Onda Fundamentales <span class="text-slate-400 font-normal text-lg">(Fundamental Waveforms)</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
+            Cada circuito electrónico habla un "idioma" distinto. Reconocer la <strong class="text-white">Forma de Onda (Waveform)</strong> en la pantalla del osciloscopio te dice inmediatamente qué tipo de señal estás midiendo.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Tarjeta 1: Onda Senoidal (Sine Wave) -->
+          <article class="lab-card rounded-3xl p-5 flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-[#00ff88] border border-emerald-500/30 font-mono text-xs font-bold">
+                  Señal Analógica
+                </span>
+                <span class="text-xs font-mono text-slate-400">Sine Wave</span>
+              </div>
+              <h3 class="text-xl font-extrabold text-white">Onda Senoidal <span class="block text-sm font-normal text-slate-400">(Sine Wave)</span></h3>
+
+              <!-- Canvas de muestra -->
+              <div class="scope-screen-wrap rounded-2xl w-full aspect-[10/6]">
+                <canvas id="wf-card-sine" class="w-full h-full block"></canvas>
+              </div>
+
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Es la onda más pura y suave de la naturaleza. Sube y baja de forma continua y curva, pasando por valores positivos y negativos sin cambios bruscos.
+              </p>
+            </div>
+
+            <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-1.5">
+              <span class="text-[11px] font-mono uppercase text-[#00ff88] font-bold">¿Dónde la encontrarás?</span>
+              <ul class="text-xs text-slate-400 space-y-1 list-disc list-inside">
+                <li>Corriente alterna (AC) de los tomacorrientes del hogar.</li>
+                <li>Notas musicales, micrófonos y señales de audio.</li>
+                <li>Ondas de radio y sensores analógicos.</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Tarjeta 2: Onda Cuadrada (Square Wave) -->
+          <article class="lab-card rounded-3xl p-5 flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="px-2.5 py-1 rounded-lg bg-cyan-500/15 text-[#00e5ff] border border-cyan-500/30 font-mono text-xs font-bold">
+                  Señal Digital
+                </span>
+                <span class="text-xs font-mono text-slate-400">Square Wave</span>
+              </div>
+              <h3 class="text-xl font-extrabold text-white">Onda Cuadrada <span class="block text-sm font-normal text-slate-400">(Square Wave)</span></h3>
+
+              <!-- Canvas de muestra -->
+              <div class="scope-screen-wrap rounded-2xl w-full aspect-[10/6]">
+                <canvas id="wf-card-square" class="w-full h-full block"></canvas>
+              </div>
+
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Salta casi instantáneamente entre dos niveles fijos: estado <strong class="text-[#00ff88]">ALTO (HIGH / 1 lógico)</strong> y estado <strong class="text-slate-200">BAJO (LOW / 0 lógico)</strong>.
+              </p>
+            </div>
+
+            <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-1.5">
+              <span class="text-[11px] font-mono uppercase text-[#00e5ff] font-bold">¿Dónde la encontrarás?</span>
+              <ul class="text-xs text-slate-400 space-y-1 list-disc list-inside">
+                <li>Placas <strong class="text-slate-200">Arduino</strong>, ESP32 y microcontroladores.</li>
+                <li>Señales de reloj (Clock) en computadoras.</li>
+                <li>Control de velocidad de motores (PWM).</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Tarjeta 3: Onda Triangular (Triangle Wave) -->
+          <article class="lab-card rounded-3xl p-5 flex flex-col justify-between space-y-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-[#ffb300] border border-amber-500/30 font-mono text-xs font-bold">
+                  Rampa Lineal
+                </span>
+                <span class="text-xs font-mono text-slate-400">Triangle Wave</span>
+              </div>
+              <h3 class="text-xl font-extrabold text-white">Onda Triangular <span class="block text-sm font-normal text-slate-400">(Triangle Wave)</span></h3>
+
+              <!-- Canvas de muestra -->
+              <div class="scope-screen-wrap rounded-2xl w-full aspect-[10/6]">
+                <canvas id="wf-card-triangle" class="w-full h-full block"></canvas>
+              </div>
+
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                El voltaje sube en línea recta a velocidad constante hasta un pico máximo y luego desciende en línea recta con la misma pendiente formando picos afilados.
+              </p>
+            </div>
+
+            <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-1.5">
+              <span class="text-[11px] font-mono uppercase text-[#ffb300] font-bold">¿Dónde la encontrarás?</span>
+              <ul class="text-xs text-slate-400 space-y-1 list-disc list-inside">
+                <li>Generadores de funciones y circuitos de barrido.</li>
+                <li>Sintetizadores musicales electrónicos.</li>
+                <li>Temporizadores y convertidores analógico-digitales.</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- Subsección B: Ejemplos Guiados de Medición y Lectura (Con flechas acotadas) -->
+      <div class="space-y-6 pt-4">
+        <div>
+          <span class="font-mono text-xs uppercase tracking-widest text-[#ffb300]">Aprende Contando Cuadros</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+            Ejemplos de Medición y Lectura <span class="text-slate-400 font-normal text-lg">(Measurement Examples)</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
+            Para leer un osciloscopio solo necesitas multiplicar el número de cuadros (<strong class="text-white">Divisiones / Divisions</strong>) por el valor de la perilla correspondiente. Mira estos tres ejemplos acotados:
+          </p>
+        </div>
+
+        <!-- EJEMPLO 1: VOLTAJE PICO A PICO (Vpp) Y AMPLITUD -->
+        <div class="lab-card rounded-3xl p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-6 scope-bezel rounded-2xl p-3">
+            <div class="flex justify-between text-[11px] font-mono text-slate-300 mb-1.5 px-1">
+              <span class="text-[#00ff88] font-bold">CH1: 2 V/Div</span>
+              <span>M: 1 ms/Div</span>
+            </div>
+            <div class="scope-screen-wrap rounded-xl w-full aspect-[10/7]">
+              <canvas id="example-canvas-1" class="w-full h-full block"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-6 space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[#00ff88] text-xs font-mono font-bold">
+              Ejemplo 1 • Medición Vertical (Eje Y)
+            </div>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-white">
+              Cómo medir el Voltaje Pico a Pico <span class="text-[#00ff88]">(Vpp)</span> y la Amplitud <span class="text-slate-400 text-base font-normal">(Amplitude)</span>
+            </h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Observa la escala vertical en la esquina superior de la pantalla: dice <strong class="text-[#00ff88] font-mono">2 V/Div</strong> (cada cuadro vertical vale 2 Voltios).
+            </p>
+            <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-4 space-y-2.5 font-mono text-xs sm:text-sm">
+              <div class="flex items-start gap-2">
+                <span class="text-[#00ff88] font-bold">Paso 1:</span>
+                <span class="text-slate-300">Cuenta los cuadros verticales desde el valle inferior hasta el pico superior: hay <strong class="text-white">4 divisiones verticales</strong>.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-[#00ff88] font-bold">Paso 2:</span>
+                <span class="text-slate-300">Multiplica por la escala vertical: <strong class="text-[#00ff88]">4 div × 2 V/div = 8 Vpp</strong> (Voltaje Pico a Pico).</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-[#00e5ff] font-bold">Paso 3:</span>
+                <span class="text-slate-300">Para hallar la <strong class="text-white">Amplitud o Voltaje Pico (Vp)</strong>, cuenta desde el eje central (0 V) hasta arriba: <strong class="text-[#00e5ff]">2 div × 2 V/div = 4 Vp</strong>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EJEMPLO 2: PERÍODO (T) Y FRECUENCIA (f) -->
+        <div class="lab-card rounded-3xl p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-6 scope-bezel rounded-2xl p-3 lg:order-2">
+            <div class="flex justify-between text-[11px] font-mono text-slate-300 mb-1.5 px-1">
+              <span>CH1: 1 V/Div</span>
+              <span class="text-[#00e5ff] font-bold">M (Time Base): 1 ms/Div</span>
+            </div>
+            <div class="scope-screen-wrap rounded-xl w-full aspect-[10/7]">
+              <canvas id="example-canvas-2" class="w-full h-full block"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-6 space-y-4 lg:order-1">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-[#00e5ff] text-xs font-mono font-bold">
+              Ejemplo 2 • Medición Horizontal (Eje X)
+            </div>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-white">
+              Cómo medir el Período <span class="text-[#00e5ff]">(Period - T)</span> y calcular la Frecuencia <span class="text-[#ffb300]">(Frequency - f)</span>
+            </h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              La <strong class="text-white">Base de Tiempo (Time Base)</strong> está ajustada en <strong class="text-[#00e5ff] font-mono">1 ms/Div</strong> (cada cuadro horizontal equivale a 1 milisegundo = 0.001 segundos).
+            </p>
+            <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-4 space-y-2.5 font-mono text-xs sm:text-sm">
+              <div class="flex items-start gap-2">
+                <span class="text-[#00e5ff] font-bold">Paso 1:</span>
+                <span class="text-slate-300">Identifica <strong class="text-white">1 ciclo completo</strong> (sube, baja y regresa al punto de inicio). Ocupa <strong class="text-white">5 cuadros horizontales</strong>.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-[#00e5ff] font-bold">Paso 2:</span>
+                <span class="text-slate-300">Calcula el Período (T): <strong class="text-[#00e5ff]">T = 5 div × 1 ms/div = 5 ms</strong> (que es <strong class="text-white">0.005 s</strong>).</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-[#ffb300] font-bold">Paso 3:</span>
+                <span class="text-slate-300">Calcula la Frecuencia (f = 1 / T): <strong class="text-[#ffb300]">f = 1 / 0.005 s = 200 Hz</strong> (200 ciclos por segundo).</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EJEMPLO 3: LECTURA DE ONDA CUADRADA DIGITAL TTL (5V / 500 Hz) -->
+        <div class="lab-card rounded-3xl p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-6 scope-bezel rounded-2xl p-3">
+            <div class="flex justify-between text-[11px] font-mono text-slate-300 mb-1.5 px-1">
+              <span class="text-[#00ff88] font-bold">CH1: 2 V/Div</span>
+              <span class="text-[#00e5ff] font-bold">M: 0.5 ms/Div</span>
+            </div>
+            <div class="scope-screen-wrap rounded-xl w-full aspect-[10/7]">
+              <canvas id="example-canvas-3" class="w-full h-full block"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-6 space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-[#ffb300] text-xs font-mono font-bold">
+              Ejemplo 3 • Señal Digital Real (Arduino / TTL)
+            </div>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-white">
+              Lectura completa de una Onda Cuadrada <span class="text-slate-400 text-base font-normal">(Square Wave Reading)</span>
+            </h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Las señales digitales suelen oscilar entre <strong class="text-white">0 V (BAJO / LOW)</strong> y <strong class="text-[#00ff88]">+5 V (ALTO / HIGH)</strong>. Observa cómo se mide ambos ejes a la vez:
+            </p>
+            <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-4 space-y-2.5 font-mono text-xs sm:text-sm">
+              <div class="flex items-start gap-2">
+                <span class="text-[#00ff88] font-bold">Voltaje:</span>
+                <span class="text-slate-300">De 0 V a +5 V hay <strong class="text-white">2.5 cuadros verticales</strong>. Con escala de <strong class="text-white">2 V/div</strong>: <strong class="text-[#00ff88]">2.5 × 2 V = 5.0 V</strong>.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-[#00e5ff] font-bold">Período:</span>
+                <span class="text-slate-300">Un pulso completo (ALTO + BAJO) dura <strong class="text-white">4 cuadros horizontales</strong>. Con <strong class="text-white">0.5 ms/div</strong>: <strong class="text-[#00e5ff]">T = 4 × 0.5 ms = 2.0 ms (0.002 s)</strong>.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-[#ffb300] font-bold">Frecuencia:</span>
+                <span class="text-slate-300"><strong class="text-[#ffb300]">f = 1 / 0.002 s = 500 Hz</strong>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pie de sección con botón de avance -->
+      <div class="flex justify-between items-center pt-4">
+        <button onclick="switchSection('simulator')" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition">
+          ← Anterior: Simulador
+        </button>
+        <button onclick="switchSection('exercises')" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg flex items-center gap-2">
+          <span>Siguiente: Ejercicios Prácticos</span>
+          <span>→</span>
+        </button>
+      </div>
+    </section>
+
+
+    <!-- =======================================================================
+         SECCIÓN 4: EJERCICIOS PRÁCTICOS CON RETROALIMENTACIÓN INMEDIATA
+    ======================================================================== -->
+    <section id="section-exercises" class="section-view hidden space-y-8">
+      <!-- Encabezado y Barra de Progreso -->
+      <div class="lab-card rounded-3xl p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span class="font-mono text-xs uppercase tracking-widest text-[#ffb300]">Autoevaluación Interactiva</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">
+              Ejercicios Prácticos <span class="text-slate-400 font-normal text-lg">(Practice Quiz)</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">
+              Pon a prueba tu lectura de pantalla y dominio de controles. Recibirás explicación detallada al instante en cada pregunta.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="bg-[#090d16] border border-slate-800 rounded-2xl px-4 py-2.5 text-center">
+              <span class="text-[11px] font-mono text-slate-400 block">Puntaje (Score)</span>
+              <span id="quiz-score-display" class="font-mono text-xl font-extrabold text-[#00ff88]">0 / 6</span>
+            </div>
+            <button onclick="resetQuiz()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition">
+              ↻ Reiniciar
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between text-xs font-mono text-slate-400">
+            <span id="quiz-progress-text">Respondidas: 0 de 6</span>
+            <span id="quiz-progress-pct">0%</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+            <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-[#00ff88] to-[#00e5ff] transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenedor de las 6 Preguntas -->
+      <div id="quiz-container" class="space-y-6">
+        <!-- Generado dinámicamente por JS -->
+      </div>
+
+      <!-- Tarjeta de Resumen Final (se muestra al completar las 6 preguntas) -->
+      <div id="quiz-final-summary" class="hidden lab-card rounded-3xl p-8 text-center space-y-5 border-2 border-[#00ff88]/50 shadow-[0_0_40px_rgba(0,255,136,0.12)]">
+        <div id="final-badge-icon" class="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-3xl">
+          🏆
+        </div>
+        <div class="space-y-2 max-w-xl mx-auto">
+          <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">¡Evaluación Completada!</span>
+          <h3 id="final-title" class="text-2xl sm:text-3xl font-extrabold text-white">¡Excelente trabajo de laboratorio!</h3>
+          <p id="final-message" class="text-sm sm:text-base text-slate-300 leading-relaxed"></p>
+        </div>
+        <div class="inline-flex items-center gap-4 bg-[#090d16] border border-slate-800 rounded-2xl px-6 py-3 font-mono">
+          <div>
+            <span class="text-xs text-slate-400 block">Aciertos</span>
+            <span id="final-score-num" class="text-2xl font-extrabold text-[#00ff88]">6 / 6</span>
+          </div>
+          <div class="w-px h-8 bg-slate-800"></div>
+          <div>
+            <span class="text-xs text-slate-400 block">Porcentaje</span>
+            <span id="final-score-pct" class="text-2xl font-extrabold text-[#00e5ff]">100%</span>
+          </div>
+        </div>
+        <div class="pt-2 flex flex-wrap justify-center gap-3">
+          <button onclick="resetQuiz()" class="px-6 py-3 rounded-xl bg-[#00ff88] hover:bg-emerald-300 text-slate-950 font-bold text-sm transition shadow-lg">
+            ↻ Volver a Intentar los Ejercicios
+          </button>
+          <button onclick="switchSection('simulator')" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm border border-slate-700 transition">
+            Seguir Practicando en el Simulador
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== PIE DE PÁGINA ==================== -->
+  <footer class="border-t border-slate-800/80 bg-[#070a11] py-6 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-[#00ff88]"></span>
+        <span><strong class="text-slate-200">OsciloLab</strong> — Plataforma Educativa Interactiva para Estudiantes de Bachillerato</span>
+      </div>
+      <div class="font-mono text-slate-500">
+        Terminología Bilingüe: Español / English
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== LÓGICA JAVASCRIPT COMPLETA ==================== -->
+  <script>
+    /* =========================================================================
+       1. NAVEGACIÓN ENTRE SECCIONES Y REDIBUJADO RESPONSIVO DE CANVAS
+    ========================================================================= */
+    let activeSection = 'intro';
+
+    function switchSection(sectionId) {
+      activeSection = sectionId;
+
+      // Ocultar todas las secciones
+      document.querySelectorAll('.section-view').forEach(el => el.classList.add('hidden'));
+
+      // Mostrar la sección elegida
+      const target = document.getElementById(`section-${sectionId}`);
+      if (target) {
+        target.classList.remove('hidden');
+      }
+
+      // Actualizar estilos de pestañas en la barra superior
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.className = 'nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent';
+      });
+
+      const activeBtn = document.getElementById(`tab-${sectionId}`);
+      if (activeBtn) {
+        activeBtn.className = 'nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all bg-cyan-500/15 text-[#00e5ff] border border-cyan-400/50 shadow-[0_0_15px_rgba(0,229,255,0.15)]';
+      }
+
+      // Subir suavemente al inicio
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Redibujar canvases visibles después de quitar 'hidden' para asegurar dimensiones exactas
+      requestAnimationFrame(() => {
+        redrawAllVisibleCanvases();
+      });
+    }
+
+    function redrawAllVisibleCanvases() {
+      if (activeSection === 'simulator') {
+        drawSimulatorCanvas();
+      } else if (activeSection === 'waveforms') {
+        drawWaveformShowcaseCards();
+        drawMeasurementExamples();
+      } else if (activeSection === 'exercises') {
+        drawAllQuizCanvases();
+      }
+    }
+
+    /* =========================================================================
+       2. SECCIÓN 1: ANATOMÍA INTERACTIVA Y GLOSARIO BILINGÜE
+    ========================================================================= */
+    const anatomyData = {
+      screen: {
+        badge: '1. Pantalla y Cuadrícula',
+        english: 'Screen & Graticule',
+        color: 'text-[#00ff88]',
+        borderColor: 'border-emerald-500/30',
+        bgColor: 'bg-emerald-500/10',
+        summary: 'Es el lienzo cuadriculado donde se dibuja la señal eléctrica en tiempo real.',
+        points: [
+          '<strong>Cuadrícula (Graticule):</strong> Está dividida típicamente en <strong>10 columnas horizontales</strong> y <strong>8 filas verticales</strong>. Cada cuadro se llama una <em>División (Division)</em>.',
+          '<strong>Eje Vertical (Y):</strong> Representa el <strong>Voltaje (Voltage)</strong>. Cuanto más alta sea la onda, mayor voltaje tiene.',
+          '<strong>Eje Horizontal (X):</strong> Representa el <strong>Tiempo (Time)</strong> avanzando de izquierda a derecha.'
+        ],
+        tip: 'Consejo de laboratorio: Las líneas centrales X e Y tienen pequeñas marcas cada 0.2 cuadros (sub-ticks) para medir con máxima precisión.'
+      },
+      vertical: {
+        badge: '2. Sección Vertical',
+        english: 'Vertical System (Volts/Div)',
+        color: 'text-[#00e5ff]',
+        borderColor: 'border-cyan-500/30',
+        bgColor: 'bg-cyan-500/10',
+        summary: 'Controla la altura y posición vertical de la onda en la pantalla (como un zoom vertical).',
+        points: [
+          '<strong>Voltios por División (Volts/Div):</strong> Define cuántos voltios vale cada cuadro vertical. Si está en <em>2 V/Div</em>, una onda de 3 cuadros de alto mide 6 V.',
+          '<strong>Posición Vertical (Vertical Position):</strong> Sube o baja toda la señal en la pantalla sin cambiar su voltaje real, útil para centrar la onda o comparar dos señales.'
+        ],
+        tip: 'Consejo de laboratorio: Si la onda es tan grande que se corta arriba y abajo, aumenta el valor de Volts/Div.'
+      },
+      horizontal: {
+        badge: '3. Sección Horizontal',
+        english: 'Horizontal System (Time Base)',
+        color: 'text-emerald-300',
+        borderColor: 'border-emerald-500/30',
+        bgColor: 'bg-emerald-500/10',
+        summary: 'Controla la escala de tiempo de izquierda a derecha (como un zoom horizontal).',
+        points: [
+          '<strong>Base de Tiempo (Time Base / Time/Div):</strong> Define cuánto tiempo representa cada cuadro horizontal (por ejemplo, <em>1 ms/Div</em> = 1 milisegundo por cuadro).',
+          '<strong>Posición Horizontal (Horizontal Position):</strong> Desplaza la onda hacia la izquierda o derecha para alinear un ciclo con las líneas de la cuadrícula.'
+        ],
+        tip: 'Consejo de laboratorio: Si ves demasiados ciclos apretados como una mancha sólida, reduce el valor de Time/Div para "estirar" la onda.'
+      },
+      trigger: {
+        badge: '4. Sistema de Disparo',
+        english: 'Trigger System & Trigger Level',
+        color: 'text-[#ffb300]',
+        borderColor: 'border-amber-500/30',
+        bgColor: 'bg-amber-500/10',
+        summary: 'Es el "sincronizador" que congela una señal repetitiva para que no se vea corriendo sin parar.',
+        points: [
+          '<strong>Disparo (Trigger):</strong> Le dice al osciloscopio en qué instante exacto empezar a dibujar cada barrido, logrando que cada ciclo se superponga exactamente sobre el anterior.',
+          '<strong>Nivel de Disparo (Trigger Level):</strong> Es un umbral de voltaje (marcado con una flecha o línea) que la señal debe cruzar para activar el dibujo.'
+        ],
+        tip: 'Consejo de laboratorio: Si la imagen corre descontrolada por la pantalla, verifica que el Trigger Level esté dentro de la altura de la onda.'
+      },
+      probe: {
+        badge: '5. Canales de Entrada y Sonda',
+        english: 'Input Channels (CH1/CH2) & Probe',
+        color: 'text-white',
+        borderColor: 'border-slate-600',
+        bgColor: 'bg-slate-800/80',
+        summary: 'Son los puertos físicos y cables especiales que conectan tu circuito con el osciloscopio.',
+        points: [
+          '<strong>Canales de Entrada (Input Channels - CH1 / CH2):</strong> Permiten medir 2 señales al mismo tiempo (por ejemplo, la entrada y salida de un amplificador).',
+          '<strong>Sonda (Probe) y Pinza de Tierra (Ground Clip):</strong> La punta toca el punto donde quieres medir el voltaje y la pinza negra (caimán) siempre va al negativo o tierra (GND) del circuito.',
+          '<strong>Acoplamiento (Coupling - DC / AC / GND):</strong> En modo <em>DC</em> ves la señal completa; en modo <em>AC</em> filtras el voltaje continuo y ves solo las variaciones.'
+        ],
+        tip: '¡Importante! Nunca conectes la Pinza de Tierra (Ground Clip) a un punto con voltaje positivo, ya que está conectada a tierra física.'
+      }
+    };
+
+    function selectAnatomy(zoneKey) {
+      const data = anatomyData[zoneKey];
+      if (!data) return;
+
+      // Actualizar estado visual de los botones del panel
+      document.querySelectorAll('.anatomy-zone').forEach(btn => {
+        btn.classList.remove('anatomy-zone-active');
+      });
+      const activeZone = document.getElementById(`zone-btn-${zoneKey}`);
+      if (activeZone) {
+        activeZone.classList.add('anatomy-zone-active');
+      }
+
+      // Inyectar contenido explicativo
+      const container = document.getElementById('anatomy-detail-content');
+      container.innerHTML = `
+        <div class="space-y-3">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full ${data.bgColor} border ${data.borderColor} ${data.color} text-xs font-mono font-bold">
+            ${data.badge} • ${data.english}
+          </div>
+          <h3 class="text-xl sm:text-2xl font-extrabold text-white">
+            ${data.badge.replace(/^\d+\.\s*/, '')} <span class="text-slate-400 font-normal text-base">(${data.english})</span>
+          </h3>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            ${data.summary}
+          </p>
+        </div>
+
+        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-300 pt-2">
+          ${data.points.map(pt => `
+            <li class="flex items-start gap-2.5 bg-[#090d16]/75 border border-slate-800/90 rounded-xl p-3">
+              <span class="${data.color} font-bold mt-0.5">▹</span>
+              <span>${pt}</span>
+            </li>
+          `).join('')}
+        </ul>
+
+        <div class="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-xs text-amber-200/95">
+          💡 ${data.tip}
+        </div>
+      `;
+    }
+
+    // Datos del Glosario Bilingüe Interactivo
+    const glossaryTerms = [
+      {
+        es: 'Base de Tiempo',
+        en: 'Time Base (Time/Div)',
+        icon: '⏱️',
+        tag: 'Eje X',
+        def: 'Control que ajusta cuánto tiempo vale cada división horizontal de la pantalla (ej. 1 ms por cuadro).'
+      },
+      {
+        es: 'Voltios por División',
+        en: 'Volts per Division (Volts/Div)',
+        icon: '📏',
+        tag: 'Eje Y',
+        def: 'Control de escala vertical que determina cuántos voltios representa cada cuadro de altura.'
+      },
+      {
+        es: 'Disparo',
+        en: 'Trigger',
+        icon: '🎯',
+        tag: 'Sincronía',
+        def: 'Mecanismo que estabiliza ondas repetitivas iniciando cada dibujo siempre en el mismo punto de la señal.'
+      },
+      {
+        es: 'Voltaje Pico a Pico',
+        en: 'Peak-to-Peak Voltage (Vpp)',
+        icon: '↕️',
+        tag: 'Medición',
+        def: 'Diferencia total de voltaje medida desde el punto más bajo (valle) hasta el punto más alto (pico) de la onda.'
+      },
+      {
+        es: 'Amplitud / Voltaje Pico',
+        en: 'Amplitude / Peak Voltage (Vp)',
+        icon: '⛰️',
+        tag: 'Medición',
+        def: 'Altura máxima de la onda medida desde su eje central (0 V) hasta el pico superior. En ondas simétricas: Vp = Vpp / 2.'
+      },
+      {
+        es: 'Período',
+        en: 'Period (T)',
+        icon: '🔄',
+        tag: 'Tiempo',
+        def: 'Tiempo exacto que tarda una onda en completar un ciclo entero. Se mide en segundos (s) o milisegundos (ms).'
+      },
+      {
+        es: 'Frecuencia',
+        en: 'Frequency (f)',
+        icon: '📶',
+        tag: 'Ciclos/seg',
+        def: 'Cantidad de ciclos completos que ocurren en 1 segundo. Se mide en Hertz (Hz) y se calcula como f = 1 / T.'
+      },
+      {
+        es: 'Cuadrícula',
+        en: 'Graticule',
+        icon: '⊞',
+        tag: 'Pantalla',
+        def: 'Rejilla de referencia dibujada sobre la pantalla (generalmente 10×8 cuadros) para medir visualmente.'
+      },
+      {
+        es: 'Sonda y Pinza de Tierra',
+        en: 'Probe & Ground Clip',
+        icon: '🔌',
+        tag: 'Conexión',
+        def: 'Cable coaxial de medición. La punta captura la señal y la pinza de tierra (GND) se conecta a la referencia de 0 V.'
+      },
+      {
+        es: 'Acoplamiento',
+        en: 'Coupling (AC / DC / GND)',
+        icon: '🔀',
+        tag: 'Entrada',
+        def: 'Selecciona cómo entra la señal: DC muestra todo, AC bloquea el voltaje continuo y GND muestra la línea de 0 V.'
+      },
+      {
+        es: 'Forma de Onda',
+        en: 'Waveform',
+        icon: '〰️',
+        tag: 'Señal',
+        def: 'Silueta geométrica que dibuja el voltaje a través del tiempo (senoidal, cuadrada, triangular, diente de sierra).'
+      },
+      {
+        es: 'Ciclo de Trabajo',
+        en: 'Duty Cycle',
+        icon: '📊',
+        tag: 'Digital',
+        def: 'Porcentaje de tiempo que una señal cuadrada permanece en estado ALTO (HIGH) durante un período completo.'
+      }
+    ];
+
+    function renderGlossary(filterText = '') {
+      const grid = document.getElementById('glossary-grid');
+      const query = filterText.trim().toLowerCase();
+
+      const filtered = glossaryTerms.filter(item =>
+        item.es.toLowerCase().includes(query) ||
+        item.en.toLowerCase().includes(query) ||
+        item.def.toLowerCase().includes(query) ||
+        item.tag.toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-8 text-slate-400 text-sm bg-slate-900/50 rounded-2xl border border-slate-800">
+            No se encontraron términos para "<strong class="text-white">${filterText}</strong>". Intenta con otra palabra.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map((item, idx) => `
+        <div class="flip-card" onclick="this.classList.toggle('flipped')" role="button" tabindex="0" aria-label="${item.es} (${item.en})">
+          <div class="flip-card-inner">
+            <!-- Cara Frontal -->
+            <div class="flip-card-front lab-card p-5 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">${item.icon}</span>
+                <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
+                  ${item.tag}
+                </span>
+              </div>
+              <div>
+                <h4 class="font-extrabold text-white text-base leading-snug">${item.es}</h4>
+                <p class="font-mono text-xs text-[#00ff88] mt-1">${item.en}</p>
+              </div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-between pt-2 border-t border-slate-800/80">
+                <span>Toca para ver definición</span>
+                <span>↻</span>
+              </div>
+            </div>
+
+            <!-- Cara Trasera -->
+            <div class="flip-card-back bg-[#0c1526] border border-[#00e5ff]/50 p-5 flex flex-col justify-between shadow-xl">
+              <div class="text-xs font-mono font-bold text-[#00e5ff] border-b border-slate-800 pb-1.5">
+                ${item.es} (${item.en})
+              </div>
+              <p class="text-xs text-slate-200 leading-relaxed my-auto">
+                ${item.def}
+              </p>
+              <div class="text-[10px] font-mono text-slate-400 text-right">
+                Toca para volver ↺
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterGlossary() {
+      const val = document.getElementById('glossary-search').value;
+      renderGlossary(val);
+    }
+
+
+    /* =========================================================================
+       3. UTILIDADES DE DIBUJO DE PANTALLA DE OSCILOSCOPIO (CANVAS HIGH-DPI)
+    ========================================================================= */
+    function setupHighDPICanvas(canvas) {
+      if (!canvas) return null;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return null;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    /**
+     * Dibuja la cuadrícula clásica 10x8 del osciloscopio con marcas de subdivisión
+     * en los ejes centrales X e Y.
+     */
+    function drawGraticule(ctx, width, height) {
+      const cols = 10;
+      const rows = 8;
+      const cellW = width / cols;
+      const cellH = height / rows;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      // Fondo verde muy oscuro tipo fósforo apagado
+      ctx.fillStyle = '#04120b';
+      ctx.fillRect(0, 0, width, height);
+
+      // Líneas de cuadrícula principales
+      ctx.lineWidth = 1;
+      for (let c = 1; c < cols; c++) {
+        const x = c * cellW;
+        ctx.strokeStyle = (c === 5) ? 'rgba(0, 255, 136, 0.42)' : 'rgba(0, 255, 136, 0.14)';
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+
+      for (let r = 1; r < rows; r++) {
+        const y = r * cellH;
+        ctx.strokeStyle = (r === 4) ? 'rgba(0, 255, 136, 0.42)' : 'rgba(0, 255, 136, 0.14)';
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // Sub-divisiones (sub-ticks cada 0.2 cuadros) en los ejes centrales X e Y
+      ctx.strokeStyle = 'rgba(0, 255, 136, 0.45)';
+      ctx.lineWidth = 1;
+
+      // Ticks sobre eje horizontal central (Y = centerY)
+      const totalSubX = cols * 5;
+      for (let i = 1; i < totalSubX; i++) {
+        if (i % 5 === 0) continue;
+        const x = (i / totalSubX) * width;
+        ctx.beginPath();
+        ctx.moveTo(x, centerY - 3);
+        ctx.lineTo(x, centerY + 3);
+        ctx.stroke();
+      }
+
+      // Ticks sobre eje vertical central (X = centerX)
+      const totalSubY = rows * 5;
+      for (let j = 1; j < totalSubY; j++) {
+        if (j % 5 === 0) continue;
+        const y = (j / totalSubY) * height;
+        ctx.beginPath();
+        ctx.moveTo(centerX - 3, y);
+        ctx.lineTo(centerX + 3, y);
+        ctx.stroke();
+      }
+    }
+
+    /**
+     * Evalúa una forma de onda normalizada en [-1, 1] dada la fase en ciclos [0, 1).
+     * Todas están definidas para cruzar 0 en sentido ascendente (flanco de subida).
+     */
+    function evaluateNormalizedWave(type, phaseCycles) {
+      // Asegurar fase positiva en [0, 1)
+      const p = ((phaseCycles % 1) + 1) % 1;
+
+      switch (type) {
+        case 'sine':
+          return Math.sin(2 * Math.PI * p);
+
+        case 'square':
+          return p < 0.5 ? 1 : -1;
+
+        case 'triangle':
+          if (p < 0.25) return 4 * p;
+          if (p < 0.75) return 2 - 4 * p;
+          return 4 * p - 4;
+
+        case 'sawtooth':
+          return 2 * p - 1;
+
+        default:
+          return Math.sin(2 * Math.PI * p);
+      }
+    }
+
+    /**
+     * Calcula la fase de disparo (en ciclos) en flanco ascendente para que la onda
+     * cruce el Trigger Level exactamente en el punto de referencia.
+     */
+    function getTriggerPhaseOffset(type, normalizedLevel) {
+      const y = Math.max(-1, Math.min(1, normalizedLevel));
+      switch (type) {
+        case 'sine':
+          return Math.asin(y) / (2 * Math.PI);
+        case 'square':
+          return 0; // Flanco de subida exacto en p = 0
+        case 'triangle':
+          return y / 4; // Rampa ascendente entre p = -0.25 y p = +0.25
+        case 'sawtooth':
+          return (y + 1) / 2; // Rampa ascendente entre p = 0 y p = 1
+        default:
+          return 0;
+      }
+    }
+
+
+    /* =========================================================================
+       4. SECCIÓN 2: SIMULADOR INTERACTIVO EN TIEMPO REAL
+    ========================================================================= */
+    const voltsDivSteps = [0.5, 1.0, 2.0, 5.0];
+    const timeDivSteps = [0.2, 0.5, 1.0, 2.0, 5.0];
+
+    const simState = {
+      waveform: 'sine',
+      vp: 2.0,          // Voltios pico (0.5 a 5.0 V)
+      freq: 500,        // Hertz (100 a 2000 Hz)
+      voltsDivIdx: 1,   // 1.0 V/div
+      timeDivIdx: 2,    // 1.0 ms/div
+      posY: 0.0,        // Divisiones (-3 a +3)
+      posX: 0.0,        // Divisiones (-4 a +4)
+      triggerOn: true,
+      triggerLevel: 0.0, // Voltios (-5.0 a +5.0 V)
+      showGuides: true,
+      freeRunPhase: 0.0,
+      lastTimestamp: 0
+    };
+
+    function initSimulatorControls() {
+      // Renderizar botones discretos para Volts/Div
+      const voltsContainer = document.getElementById('volts-pills');
+      voltsContainer.innerHTML = voltsDivSteps.map((val, idx) => `
+        <button type="button" onclick="setVoltsDivIdx(${idx})" id="vpill-${idx}"
+          class="py-1 rounded text-[11px] font-mono font-bold border transition ${idx === simState.voltsDivIdx ? 'bg-[#00ff88] text-slate-950 border-[#00ff88]' : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'}">
+          ${val}V
+        </button>
+      `).join('');
+
+      // Renderizar botones discretos para Time/Div
+      const timeContainer = document.getElementById('time-pills');
+      timeContainer.innerHTML = timeDivSteps.map((val, idx) => `
+        <button type="button" onclick="setTimeDivIdx(${idx})" id="tpill-${idx}"
+          class="py-1 rounded text-[10px] font-mono font-bold border transition ${idx === simState.timeDivIdx ? 'bg-[#00e5ff] text-slate-950 border-[#00e5ff]' : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'}">
+          ${val}m
+        </button>
+      `).join('');
+
+      // Configurar lectura interactiva al mover el cursor/dedo sobre el canvas
+      const canvas = document.getElementById('sim-canvas');
+      const readout = document.getElementById('cursor-readout');
+
+      function updateCursorInfo(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const relX = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        const relY = Math.max(0, Math.min(rect.height, clientY - rect.top));
+
+        // Convertir píxeles a divisiones desde el centro
+        const divX = (relX / rect.width) * 10 - 5;
+        const divY = 4 - (relY / rect.height) * 8;
+
+        const voltsDiv = voltsDivSteps[simState.voltsDivIdx];
+        const timeDiv = timeDivSteps[simState.timeDivIdx];
+
+        const voltageAtCursor = (divY - simState.posY) * voltsDiv;
+        const timeAtCursor = (divX - simState.posX) * timeDiv;
+
+        readout.innerHTML = `Cursor → Tiempo (Time): <strong class="text-[#00e5ff]">${timeAtCursor.toFixed(2)} ms</strong> | Voltaje (Voltage): <strong class="text-[#00ff88]">${voltageAtCursor.toFixed(2)} V</strong>`;
+      }
+
+      canvas.addEventListener('mousemove', e => updateCursorInfo(e.clientX, e.clientY));
+      canvas.addEventListener('touchmove', e => {
+        if (e.touches.length > 0) {
+          updateCursorInfo(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+
+      updateSimReadoutsAndMath();
+    }
+
+    function setSimWaveform(wf) {
+      simState.waveform = wf;
+      document.querySelectorAll('.wf-btn').forEach(btn => {
+        btn.className = 'wf-btn px-3 py-2.5 rounded-xl text-xs font-semibold border transition flex items-center gap-2 bg-slate-900/90 text-slate-300 border-slate-700 hover:border-slate-500';
+      });
+      const active = document.getElementById(`wf-btn-${wf}`);
+      if (active) {
+        active.className = 'wf-btn px-3 py-2.5 rounded-xl text-xs font-semibold border transition flex items-center gap-2 bg-cyan-500/20 text-[#00e5ff] border-cyan-400';
+      }
+      updateSimReadoutsAndMath();
+    }
+
+    function setVoltsDivIdx(idx) {
+      simState.voltsDivIdx = Math.max(0, Math.min(voltsDivSteps.length - 1, idx));
+      updateSimReadoutsAndMath();
+    }
+
+    function stepVoltsDiv(delta) {
+      setVoltsDivIdx(simState.voltsDivIdx + delta);
+    }
+
+    function setTimeDivIdx(idx) {
+      simState.timeDivIdx = Math.max(0, Math.min(timeDivSteps.length - 1, idx));
+      updateSimReadoutsAndMath();
+    }
+
+    function stepTimeDiv(delta) {
+      setTimeDivIdx(simState.timeDivIdx + delta);
+    }
+
+    function resetPosition(axis) {
+      if (axis === 'y') {
+        simState.posY = 0;
+        document.getElementById('sim-posy').value = 0;
+      } else {
+        simState.posX = 0;
+        document.getElementById('sim-posx').value = 0;
+      }
+      updateSimReadoutsAndMath();
+    }
+
+    function toggleTrigger() {
+      simState.triggerOn = !simState.triggerOn;
+      const btn = document.getElementById('btn-trigger-toggle');
+      const trigGroup = document.getElementById('trigger-level-group');
+
+      if (simState.triggerOn) {
+        btn.textContent = 'Disparo: ON';
+        btn.className = 'px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(255,179,0,0.4)] transition shrink-0';
+        trigGroup.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        btn.textContent = 'Disparo: OFF';
+        btn.className = 'px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-slate-800 text-slate-300 border border-slate-600 transition shrink-0';
+        trigGroup.classList.add('opacity-40', 'pointer-events-none');
+      }
+      updateSimReadoutsAndMath();
+    }
+
+    function toggleMeasureGuides() {
+      simState.showGuides = !simState.showGuides;
+      const btn = document.getElementById('btn-guides');
+      btn.textContent = simState.showGuides ? '📏 Guías: ON' : '📏 Guías: OFF';
+      btn.className = simState.showGuides
+        ? 'px-2.5 py-0.5 rounded bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 hover:bg-cyan-500/30 transition text-[11px]'
+        : 'px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition text-[11px]';
+    }
+
+    function updateSimFromInputs() {
+      simState.vp = parseFloat(document.getElementById('sim-vp').value);
+      simState.freq = parseInt(document.getElementById('sim-freq').value, 10);
+      simState.posY = parseFloat(document.getElementById('sim-posy').value);
+      simState.posX = parseFloat(document.getElementById('sim-posx').value);
+      simState.triggerLevel = parseFloat(document.getElementById('sim-trig-level').value);
+
+      updateSimReadoutsAndMath();
+    }
+
+    function applySimulatorPreset(preset) {
+      if (preset === 'audio') {
+        setSimWaveform('sine');
+        simState.vp = 2.0;
+        simState.freq = 500;
+        simState.voltsDivIdx = 1; // 1.0 V
+        simState.timeDivIdx = 2;  // 1.0 ms
+        simState.posY = 0;
+        simState.posX = 0;
+        simState.triggerOn = true;
+        simState.triggerLevel = 0;
+      } else if (preset === 'arduino') {
+        setSimWaveform('square');
+        simState.vp = 2.5; // 5 Vpp
+        simState.freq = 1000;
+        simState.voltsDivIdx = 2; // 2.0 V
+        simState.timeDivIdx = 1;  // 0.5 ms
+        simState.posY = 1.25; // Apoyado sobre 0V (0 a +5V)
+        simState.posX = 0;
+        simState.triggerOn = true;
+        simState.triggerLevel = 2.5;
+      } else if (preset === 'triangle') {
+        setSimWaveform('triangle');
+        simState.vp = 3.0;
+        simState.freq = 200;
+        simState.voltsDivIdx = 2; // 2.0 V
+        simState.timeDivIdx = 3;  // 2.0 ms
+        simState.posY = 0;
+        simState.posX = 0;
+        simState.triggerOn = true;
+        simState.triggerLevel = 0;
+      }
+
+      // Sincronizar controles HTML
+      document.getElementById('sim-vp').value = simState.vp;
+      document.getElementById('sim-freq').value = simState.freq;
+      document.getElementById('sim-posy').value = simState.posY;
+      document.getElementById('sim-posx').value = simState.posX;
+      document.getElementById('sim-trig-level').value = simState.triggerLevel;
+
+      const btn = document.getElementById('btn-trigger-toggle');
+      const trigGroup = document.getElementById('trigger-level-group');
+      btn.textContent = 'Disparo: ON';
+      btn.className = 'px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(255,179,0,0.4)] transition shrink-0';
+      trigGroup.classList.remove('opacity-40', 'pointer-events-none');
+
+      updateSimReadoutsAndMath();
+    }
+
+    function updateSimReadoutsAndMath() {
+      const voltsDiv = voltsDivSteps[simState.voltsDivIdx];
+      const timeDivMs = timeDivSteps[simState.timeDivIdx];
+      const vpp = simState.vp * 2;
+
+      // Actualizar etiquetas de sliders y displays discretos
+      document.getElementById('sim-vp-val').textContent = `${simState.vp.toFixed(1)} V (${vpp.toFixed(1)} Vpp)`;
+      document.getElementById('sim-freq-val').textContent = `${simState.freq} Hz`;
+      document.getElementById('ctrl-volts-display').textContent = `${voltsDiv} V`;
+      document.getElementById('ctrl-time-display').textContent = `${timeDivMs} ms`;
+      document.getElementById('sim-posy-val').textContent = `${simState.posY >= 0 ? '+' : ''}${simState.posY.toFixed(1)} div`;
+      document.getElementById('sim-posx-val').textContent = `${simState.posX >= 0 ? '+' : ''}${simState.posX.toFixed(1)} div`;
+      document.getElementById('sim-trig-val').textContent = `${simState.triggerLevel >= 0 ? '+' : ''}${simState.triggerLevel.toFixed(2)} V`;
+
+      // Actualizar pills activos
+      voltsDivSteps.forEach((_, idx) => {
+        const el = document.getElementById(`vpill-${idx}`);
+        if (el) {
+          el.className = `py-1 rounded text-[11px] font-mono font-bold border transition ${idx === simState.voltsDivIdx ? 'bg-[#00ff88] text-slate-950 border-[#00ff88]' : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'}`;
+        }
+      });
+
+      timeDivSteps.forEach((_, idx) => {
+        const el = document.getElementById(`tpill-${idx}`);
+        if (el) {
+          el.className = `py-1 rounded text-[10px] font-mono font-bold border transition ${idx === simState.timeDivIdx ? 'bg-[#00e5ff] text-slate-950 border-[#00e5ff]' : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'}`;
+        }
+      });
+
+      // OSD en la pantalla
+      document.getElementById('osd-volts-div').textContent = `Volts/Div: ${voltsDiv} V`;
+      document.getElementById('osd-time-div').textContent = `Time/Div: ${timeDivMs} ms`;
+
+      const isTriggerLocked = simState.triggerOn && Math.abs(simState.triggerLevel) <= simState.vp + 0.001;
+      const trigBadge = document.getElementById('osd-trigger-badge');
+      if (!simState.triggerOn) {
+        trigBadge.textContent = 'TRIG: OFF (Libre)';
+        trigBadge.className = 'px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 font-semibold';
+      } else if (isTriggerLocked) {
+        trigBadge.textContent = `TRIG: LOCKED (${simState.triggerLevel.toFixed(2)} V)`;
+        trigBadge.className = 'px-2 py-0.5 rounded bg-amber-500/20 text-[#ffb300] border border-amber-500/40 font-semibold';
+      } else {
+        trigBadge.textContent = `TRIG: SIN SEÑAL (${simState.triggerLevel.toFixed(2)} V)`;
+        trigBadge.className = 'px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 font-semibold animate-pulse';
+      }
+
+      // Cálculos matemáticos paso a paso
+      const vertDivsVpp = vpp / voltsDiv;
+      const periodSec = 1 / simState.freq;
+      const periodMs = periodSec * 1000;
+      const horizDivsCycle = periodMs / timeDivMs;
+      const visibleCycles = 10 / horizDivsCycle;
+
+      document.getElementById('math-vpp-formula').textContent = `${vertDivsVpp.toFixed(2)} div × ${voltsDiv} V/div`;
+      document.getElementById('math-vpp-result').textContent = `= ${vpp.toFixed(2)} Vpp`;
+      document.getElementById('math-vp-result').textContent = `Voltaje Pico (Vp): ${simState.vp.toFixed(2)} V`;
+
+      document.getElementById('math-t-formula').textContent = `${horizDivsCycle.toFixed(2)} div × ${timeDivMs} ms/div`;
+      document.getElementById('math-t-result').textContent = `= ${periodMs.toFixed(2)} ms`;
+      document.getElementById('math-t-sec').textContent = `En segundos: ${periodSec.toFixed(5)} s`;
+
+      document.getElementById('math-f-formula').textContent = `f = 1 / ${periodSec.toFixed(5)} s`;
+      document.getElementById('math-f-result').textContent = `= ${simState.freq} Hz`;
+      document.getElementById('math-cycles-visible').textContent = `Ciclos en pantalla: ${visibleCycles.toFixed(1)}`;
+
+      // Alertas pedagógicas útiles para el estudiante
+      const alertBox = document.getElementById('sim-pedagogical-alert');
+      if (vertDivsVpp > 8) {
+        alertBox.className = 'rounded-xl p-3 text-xs border bg-rose-500/10 border-rose-500/40 text-rose-200';
+        alertBox.innerHTML = `⚠️ <strong>¡Señal recortada verticalmente!</strong> La onda ocupa <strong>${vertDivsVpp.toFixed(1)} cuadros</strong> de alto y la pantalla solo tiene 8. Aumenta <strong>Voltios/División (Volts/Div)</strong> para ver los picos completos.`;
+      } else if (!simState.triggerOn) {
+        alertBox.className = 'rounded-xl p-3 text-xs border bg-amber-500/10 border-amber-500/40 text-amber-200';
+        alertBox.innerHTML = `🔄 <strong>Disparo Apagado (Trigger OFF):</strong> Sin sincronización, cada barrido empieza en un instante distinto y la onda "corre" por la pantalla. Activa el <strong>Disparo (Trigger)</strong> para congelarla.`;
+      } else if (!isTriggerLocked) {
+        alertBox.className = 'rounded-xl p-3 text-xs border bg-amber-500/10 border-amber-500/40 text-amber-200';
+        alertBox.innerHTML = `⚡ <strong>Nivel de Disparo fuera de alcance:</strong> El <em>Trigger Level</em> (${simState.triggerLevel.toFixed(2)} V) supera la amplitud de la onda (±${simState.vp.toFixed(1)} V). Regresa el Nivel de Disparo dentro de la onda para estabilizarla.`;
+      } else if (horizDivsCycle > 10) {
+        alertBox.className = 'rounded-xl p-3 text-xs border bg-cyan-500/10 border-cyan-500/40 text-cyan-200';
+        alertBox.innerHTML = `🔍 <strong>Menos de 1 ciclo visible:</strong> Cada ciclo dura ${horizDivsCycle.toFixed(1)} cuadros. Aumenta la <strong>Base de Tiempo (Time Base / Time/Div)</strong> para observar al menos 1 o 2 ciclos completos.`;
+      } else {
+        alertBox.className = 'hidden';
+      }
+    }
+
+    /**
+     * Renderiza la pantalla completa del simulador con la onda, línea de Trigger
+     * y guías opcionales de medición de Vpp y Período (T).
+     */
+    function drawSimulatorCanvas() {
+      const canvas = document.getElementById('sim-canvas');
+      const setup = setupHighDPICanvas(canvas);
+      if (!setup) return;
+
+      const { ctx, width, height } = setup;
+      const cellW = width / 10;
+      const cellH = height / 8;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      // 1. Dibujar cuadrícula base
+      drawGraticule(ctx, width, height);
+
+      const voltsDiv = voltsDivSteps[simState.voltsDivIdx];
+      const timeDivSec = timeDivSteps[simState.timeDivIdx] * 1e-3;
+      const isTriggerLocked = simState.triggerOn && Math.abs(simState.triggerLevel) <= simState.vp + 0.001;
+
+      // Calcular desfase en ciclos
+      let phaseOffsetCycles = 0;
+      if (isTriggerLocked) {
+        const normTrig = simState.triggerLevel / simState.vp;
+        phaseOffsetCycles = getTriggerPhaseOffset(simState.waveform, normTrig);
+      } else {
+        phaseOffsetCycles = simState.freeRunPhase;
+      }
+
+      // 2. Línea punteada ámbar del Nivel de Disparo (Trigger Level)
+      if (simState.triggerOn) {
+        const trigDivY = (simState.triggerLevel / voltsDiv) + simState.posY;
+        const trigPxY = centerY - trigDivY * cellH;
+
+        if (trigPxY >= 0 && trigPxY <= height) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255, 179, 0, 0.65)';
+          ctx.lineWidth = 1.25;
+          ctx.setLineDash([6, 4]);
+          ctx.beginPath();
+          ctx.moveTo(0, trigPxY);
+          ctx.lineTo(width, trigPxY);
+          ctx.stroke();
+
+          // Marcador triangular T► en el borde izquierdo
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#ffb300';
+          ctx.beginPath();
+          ctx.moveTo(2, trigPxY - 5);
+          ctx.lineTo(11, trigPxY);
+          ctx.lineTo(2, trigPxY + 5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // 3. Dibujar la forma de onda con resplandor verde fósforo
+      ctx.save();
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 2.6;
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = 'rgba(0, 255, 136, 0.65)';
+      ctx.shadowBlur = 8;
+
+      ctx.beginPath();
+      const samples = Math.max(400, Math.floor(width));
+      for (let i = 0; i <= samples; i++) {
+        const pxX = (i / samples) * width;
+        const divX = (pxX / width) * 10 - 5; // -5 a +5 divisiones
+        const tRel = (divX - simState.posX) * timeDivSec;
+        const cycles = tRel * simState.freq + phaseOffsetCycles;
+
+        const normVal = evaluateNormalizedWave(simState.waveform, cycles);
+        const voltage = normVal * simState.vp;
+        const divY = (voltage / voltsDiv) + simState.posY;
+        const pxY = centerY - divY * cellH;
+
+        if (i === 0) {
+          ctx.moveTo(pxX, pxY);
+        } else {
+          ctx.lineTo(pxX, pxY);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // 4. Guías visuales opcionales de medición (Vpp y Período T)
+      if (simState.showGuides && isTriggerLocked) {
+        const periodMs = (1 / simState.freq) * 1000;
+        const horizDivsCycle = periodMs / timeDivSteps[simState.timeDivIdx];
+        const vertDivsVp = simState.vp / voltsDiv;
+
+        const topPxY = centerY - (simState.posY + vertDivsVp) * cellH;
+        const botPxY = centerY - (simState.posY - vertDivsVp) * cellH;
+
+        ctx.save();
+        ctx.font = '600 11px "JetBrains Mono", monospace';
+
+        // Guía vertical Vpp (si cabe razonablemente en pantalla)
+        if (vertDivsVp * 2 <= 8.2) {
+          const guideX = Math.min(width - 75, Math.max(25, centerX + simState.posX * cellW - 14));
+          ctx.strokeStyle = 'rgba(0, 255, 136, 0.75)';
+          ctx.lineWidth = 1.2;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(guideX, topPxY);
+          ctx.lineTo(guideX, botPxY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Topes horizontales
+          ctx.beginPath();
+          ctx.moveTo(guideX - 5, topPxY); ctx.lineTo(guideX + 5, topPxY);
+          ctx.moveTo(guideX - 5, botPxY); ctx.lineTo(guideX + 5, botPxY);
+          ctx.stroke();
+
+          ctx.fillStyle = '#00ff88';
+          ctx.fillText(`Vpp=${(simState.vp * 2).toFixed(1)}V`, guideX + 8, (topPxY + botPxY) / 2 + 4);
+        }
+
+        // Guía horizontal Período T (1 ciclo desde posX)
+        if (horizDivsCycle <= 9.5) {
+          const startX = centerX + simState.posX * cellW;
+          const endX = startX + horizDivsCycle * cellW;
+          const guideY = Math.min(height - 16, Math.max(22, botPxY + 14));
+
+          if (startX >= 0 && endX <= width) {
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(startX, guideY);
+            ctx.lineTo(endX, guideY);
+            ctx.moveTo(startX, guideY - 5); ctx.lineTo(startX, guideY + 5);
+            ctx.moveTo(endX, guideY - 5); ctx.lineTo(endX, guideY + 5);
+            ctx.stroke();
+
+            ctx.fillStyle = '#00e5ff';
+            ctx.fillText(`T=${periodMs.toFixed(2)}ms`, (startX + endX) / 2 - 28, guideY - 6);
+          }
+        }
+        ctx.restore();
+      }
+    }
+
+    // Bucle de animación suave para cuando el Trigger está en OFF
+    function simulatorAnimationLoop(timestamp) {
+      if (!simState.lastTimestamp) simState.lastTimestamp = timestamp;
+      const dt = (timestamp - simState.lastTimestamp) / 1000;
+      simState.lastTimestamp = timestamp;
+
+      const isTriggerLocked = simState.triggerOn && Math.abs(simState.triggerLevel) <= simState.vp + 0.001;
+      if (!isTriggerLocked) {
+        // Desplazamiento visual continuo que demuestra falta de sincronía de disparo
+        simState.freeRunPhase = (simState.freeRunPhase + dt * 1.65) % 1;
+      }
+
+      if (activeSection === 'simulator') {
+        drawSimulatorCanvas();
+      }
+
+      requestAnimationFrame(simulatorAnimationLoop);
+    }
+
+
+    /* =========================================================================
+       5. SECCIÓN 3: FORMAS DE ONDA Y EJEMPLOS DE MEDICIÓN CON FLECHAS ACOTADAS
+    ========================================================================= */
+    function drawStaticWaveformCard(canvasId, type, color) {
+      const canvas = document.getElementById(canvasId);
+      const setup = setupHighDPICanvas(canvas);
+      if (!setup) return;
+
+      const { ctx, width, height } = setup;
+      drawGraticule(ctx, width, height);
+
+      const centerY = height / 2;
+      const ampPx = (height / 8) * 2.5; // 2.5 divisiones de amplitud
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.6;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+
+      for (let i = 0; i <= width; i++) {
+        const cycles = (i / width) * 2.5; // 2.5 ciclos en pantalla
+        const val = evaluateNormalizedWave(type, cycles);
+        const y = centerY - val * ampPx;
+        if (i === 0) ctx.moveTo(i, y);
+        else ctx.lineTo(i, y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawWaveformShowcaseCards() {
+      drawStaticWaveformCard('wf-card-sine', 'sine', '#00ff88');
+      drawStaticWaveformCard('wf-card-square', 'square', '#00e5ff');
+      drawStaticWaveformCard('wf-card-triangle', 'triangle', '#ffb300');
+    }
+
+    /**
+     * Dibuja una flecha bidireccional o acotada con etiqueta clara sobre el canvas
+     */
+    function drawDimensionArrow(ctx, x1, y1, x2, y2, color, label, labelOffsetX = 0, labelOffsetY = 0) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 1.8;
+
+      // Línea principal
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      // Puntas de flecha
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const headLen = 7;
+
+      // Punta en (x2, y2)
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+
+      // Punta en (x1, y1)
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 + headLen * Math.cos(angle - Math.PI / 6), y1 + headLen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(x1 + headLen * Math.cos(angle + Math.PI / 6), y1 + headLen * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+
+      // Etiqueta con fondo oscuro legible
+      if (label) {
+        ctx.font = 'bold 11px "JetBrains Mono", monospace';
+        const metrics = ctx.measureText(label);
+        const padX = 5;
+        const boxW = metrics.width + padX * 2;
+        const boxH = 18;
+        const midX = (x1 + x2) / 2 + labelOffsetX;
+        const midY = (y1 + y2) / 2 + labelOffsetY;
+
+        ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';
+        ctx.fillRect(midX - boxW / 2, midY - boxH / 2, boxW, boxH);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(midX - boxW / 2, midY - boxH / 2, boxW, boxH);
+
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, midX, midY + 0.5);
+      }
+
+      ctx.restore();
+    }
+
+    function drawMeasurementExamples() {
+      // --- EJEMPLO 1: Vpp = 4 div x 2 V/div = 8 Vpp (Amplitud = 2 div x 2 V/div = 4 Vp) ---
+      {
+        const canvas = document.getElementById('example-canvas-1');
+        const setup = setupHighDPICanvas(canvas);
+        if (setup) {
+          const { ctx, width, height } = setup;
+          const cellW = width / 10;
+          const cellH = height / 8;
+          const centerY = height / 2;
+
+          drawGraticule(ctx, width, height);
+
+          // Onda senoidal: 2 ciclos en 10 div (5 div/ciclo), amplitud = 2 div (4 div Vpp)
+          ctx.save();
+          ctx.strokeStyle = '#00ff88';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          for (let i = 0; i <= width; i++) {
+            const divX = (i / width) * 10;
+            const y = centerY - Math.sin((divX / 5) * 2 * Math.PI) * (2 * cellH);
+            if (i === 0) ctx.moveTo(i, y);
+            else ctx.lineTo(i, y);
+          }
+          ctx.stroke();
+          ctx.restore();
+
+          // Líneas guía horizontales en pico (+2 div) y valle (-2 div)
+          const topY = centerY - 2 * cellH;
+          const botY = centerY + 2 * cellH;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255, 179, 0, 0.55)';
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(1.25 * cellW, topY); ctx.lineTo(6.2 * cellW, topY);
+          ctx.moveTo(3.75 * cellW, botY); ctx.lineTo(6.2 * cellW, botY);
+          ctx.stroke();
+          ctx.restore();
+
+          // Flecha Vpp (4 cuadros)
+          drawDimensionArrow(ctx, 5.8 * cellW, topY, 5.8 * cellW, botY, '#ffb300', '4 div (8 Vpp)', 46, 0);
+          // Flecha Amplitud Vp (2 cuadros)
+          drawDimensionArrow(ctx, 1.25 * cellW, centerY, 1.25 * cellW, topY, '#00e5ff', '2 div (4 Vp)', 42, -4);
+        }
+      }
+
+      // --- EJEMPLO 2: Período T = 5 div x 1 ms/div = 5 ms -> f = 200 Hz ---
+      {
+        const canvas = document.getElementById('example-canvas-2');
+        const setup = setupHighDPICanvas(canvas);
+        if (setup) {
+          const { ctx, width, height } = setup;
+          const cellW = width / 10;
+          const cellH = height / 8;
+          const centerY = height / 2;
+
+          drawGraticule(ctx, width, height);
+
+          // Onda senoidal: 1 ciclo = 5 divisiones (desde div 1 hasta div 6)
+          ctx.save();
+          ctx.strokeStyle = '#00ff88';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          for (let i = 0; i <= width; i++) {
+            const divX = (i / width) * 10 - 1;
+            const y = centerY - Math.sin((divX / 5) * 2 * Math.PI) * (2.5 * cellH);
+            if (i === 0) ctx.moveTo(i, y);
+            else ctx.lineTo(i, y);
+          }
+          ctx.stroke();
+          ctx.restore();
+
+          // Marcas verticales de inicio (div 1) y fin de 1 ciclo (div 6)
+          const xStart = 1 * cellW;
+          const xEnd = 6 * cellW;
+          const arrowY = centerY + 3.1 * cellH;
+
+          ctx.save();
+          ctx.strokeStyle = 'rgba(0, 229, 255, 0.65)';
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(xStart, centerY); ctx.lineTo(xStart, arrowY + 4);
+          ctx.moveTo(xEnd, centerY); ctx.lineTo(xEnd, arrowY + 4);
+          ctx.stroke();
+          ctx.restore();
+
+          drawDimensionArrow(ctx, xStart, arrowY, xEnd, arrowY, '#00e5ff', '1 Ciclo = 5 div (5 ms)', 0, -14);
+        }
+      }
+
+      // --- EJEMPLO 3: Onda Cuadrada Digital TTL (0V a +5V, 2 V/div -> 2.5 div; T = 4 div x 0.5 ms/div = 2 ms -> 500 Hz) ---
+      {
+        const canvas = document.getElementById('example-canvas-3');
+        const setup = setupHighDPICanvas(canvas);
+        if (setup) {
+          const { ctx, width, height } = setup;
+          const cellW = width / 10;
+          const cellH = height / 8;
+          const centerY = height / 2; // Línea de 0V
+
+          drawGraticule(ctx, width, height);
+
+          // Onda cuadrada de 0 a +2.5 div (+5 V), ciclo = 4 div (desde div 1)
+          ctx.save();
+          ctx.strokeStyle = '#00ff88';
+          ctx.lineWidth = 2.6;
+          ctx.beginPath();
+          for (let i = 0; i <= width; i++) {
+            const divX = (i / width) * 10 - 1;
+            const p = ((divX / 4) % 1 + 1) % 1;
+            const high = p < 0.5;
+            const y = high ? (centerY - 2.5 * cellH) : centerY;
+            if (i === 0) ctx.moveTo(i, y);
+            else ctx.lineTo(i, y);
+          }
+          ctx.stroke();
+          ctx.restore();
+
+          // Acotación vertical 2.5 div (5 V)
+          drawDimensionArrow(ctx, 2.0 * cellW, centerY, 2.0 * cellW, centerY - 2.5 * cellH, '#ffb300', '2.5 div (5V)', 44, 0);
+
+          // Acotación horizontal 4 div (2 ms)
+          const arrowY = centerY + 1.5 * cellH;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(0, 229, 255, 0.6)';
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(1 * cellW, centerY); ctx.lineTo(1 * cellW, arrowY + 4);
+          ctx.moveTo(5 * cellW, centerY); ctx.lineTo(5 * cellW, arrowY + 4);
+          ctx.stroke();
+          ctx.restore();
+
+          drawDimensionArrow(ctx, 1 * cellW, arrowY, 5 * cellW, arrowY, '#00e5ff', '4 div = 2.0 ms (500 Hz)', 0, 15);
+        }
+      }
+    }
+
+
+    /* =========================================================================
+       6. SECCIÓN 4: EJERCICIOS INTERACTIVOS CON RETROALIMENTACIÓN INMEDIATA
+    ========================================================================= */
+    const quizQuestions = [
+      {
+        id: 1,
+        type: 'canvas',
+        badge: 'Ejercicio 1 • Lectura de Voltaje (Onda Senoidal / Sine Wave)',
+        voltsLabel: 'CH1: 1 V/Div',
+        timeLabel: 'M: 2 ms/Div',
+        waveConfig: { type: 'sine', vertDivsAmp: 3, horizDivsCycle: 5 }, // 6 div Vpp = 6 Vpp (3 Vp)
+        question: 'Observa la pantalla del osciloscopio. La onda senoidal abarca 6 cuadros verticales de pico a pico (3 cuadros arriba y 3 cuadros abajo) con una escala de 1 V/Div. ¿Cuál es el Voltaje Pico a Pico (Peak-to-Peak Voltage - Vpp) y el Voltaje Pico (Vp)?',
+        options: [
+          '3 Vpp y 1.5 Vp',
+          '6 Vpp y 3 Vp',
+          '12 Vpp y 6 Vp',
+          '1 Vpp y 0.5 Vp'
+        ],
+        correctIdx: 1,
+        explanation: '<strong>¡Paso a paso!</strong><br>1. Contamos las divisiones verticales totales desde el valle inferior hasta el pico superior: <strong>6 divisiones verticales</strong>.<br>2. Multiplicamos por la escala vertical (<strong>1 V/Div</strong>): <code>6 div × 1 V/Div = 6 Vpp</code>.<br>3. Como la onda es simétrica, el Voltaje Pico (Vp o Amplitud) es la mitad: <code>6 Vpp / 2 = 3 Vp</code>.'
+      },
+      {
+        id: 2,
+        type: 'canvas',
+        badge: 'Ejercicio 2 • Cálculo de Período y Frecuencia (Onda Cuadrada / Square Wave)',
+        voltsLabel: 'CH1: 2 V/Div',
+        timeLabel: 'M: 0.5 ms/Div',
+        waveConfig: { type: 'square', vertDivsAmp: 2, horizDivsCycle: 4 }, // T = 4 * 0.5 ms = 2 ms = 0.002 s -> f = 500 Hz
+        question: 'En esta señal cuadrada digital, 1 ciclo completo ocupa exactamente 4 cuadros horizontales y la Base de Tiempo (Time Base) está en 0.5 ms/Div. ¿Cuál es su Período (Period - T) y su Frecuencia (Frequency - f)?',
+        options: [
+          'T = 4 ms y f = 250 Hz',
+          'T = 2 ms y f = 500 Hz',
+          'T = 0.5 ms y f = 2000 Hz',
+          'T = 2 ms y f = 50 Hz'
+        ],
+        correctIdx: 1,
+        explanation: '<strong>¡Excelente análisis!</strong><br>1. Calculamos el Período (T): <code>4 divisiones horizontales × 0.5 ms/Div = 2.0 ms</code>.<br>2. Convertimos milisegundos a segundos: <code>2.0 ms = 0.002 s</code>.<br>3. Calculamos la Frecuencia: <code>f = 1 / T = 1 / 0.002 s = 500 Hz</code>.'
+      },
+      {
+        id: 3,
+        type: 'canvas',
+        badge: 'Ejercicio 3 • Lectura Completa (Onda Triangular / Triangle Wave)',
+        voltsLabel: 'CH1: 0.5 V/Div',
+        timeLabel: 'M: 0.2 ms/Div',
+        waveConfig: { type: 'triangle', vertDivsAmp: 2, horizDivsCycle: 5 }, // Vpp = 4 * 0.5V = 2 Vpp; T = 5 * 0.2ms = 1 ms -> f = 1000 Hz
+        question: 'Analiza esta Onda Triangular (Triangle Wave): mide 4 cuadros verticales de pico a pico (con 0.5 V/Div) y 5 cuadros horizontales por ciclo (con 0.2 ms/Div). ¿Cuáles son sus valores correctos?',
+        options: [
+          '4 Vpp y 200 Hz',
+          '2 Vpp y 1000 Hz (1 kHz)',
+          '1 Vpp y 500 Hz',
+          '2 Vpp y 100 Hz'
+        ],
+        correctIdx: 1,
+        explanation: '<strong>¡Cálculo perfecto!</strong><br>• <strong>Voltaje Pico a Pico (Vpp):</strong> <code>4 div verticales × 0.5 V/Div = 2.0 Vpp</code>.<br>• <strong>Período (T):</strong> <code>5 div horizontales × 0.2 ms/Div = 1.0 ms = 0.001 s</code>.<br>• <strong>Frecuencia (f):</strong> <code>f = 1 / 0.001 s = 1000 Hz (1 kHz)</code>.'
+      },
+      {
+        id: 4,
+        type: 'concept',
+        badge: 'Ejercicio 4 • Uso Práctico de Controles',
+        question: 'Conectas la Sonda (Probe) a un circuito y notas que la onda es tan grande que sus picos superiores e inferiores se salen fuera de la pantalla (Screen). ¿Qué control debes ajustar para reducir su tamaño vertical y verla completa?',
+        options: [
+          'Disminuir la Base de Tiempo (Time Base / Time/Div)',
+          'Aumentar el valor de Voltios por División (Volts/Div)',
+          'Mover la Posición Horizontal (Horizontal Position)',
+          'Apagar el sistema de Disparo (Trigger)'
+        ],
+        correctIdx: 1,
+        explanation: '<strong>¡Correcto!</strong> Al aumentar <strong>Voltios por División (Volts/Div)</strong> (por ejemplo, pasar de 1 V/Div a 2 V/Div o 5 V/Div), cada cuadro vertical representa más voltios, por lo que la onda se encoge verticalmente y cabe completa dentro de las 8 divisiones de la pantalla.'
+      },
+      {
+        id: 5,
+        type: 'concept',
+        badge: 'Ejercicio 5 • Diagnóstico y Sincronización',
+        question: 'Observas que la forma de onda en la pantalla se desplaza continuamente hacia la izquierda o derecha sin detenerse, haciendo imposible contar los cuadros. ¿Qué sistema debes activar o ajustar para estabilizar la imagen?',
+        options: [
+          'El sistema de Disparo (Trigger) y su Nivel de Disparo (Trigger Level)',
+          'La Pinza de Tierra (Ground Clip)',
+          'El selector de Acoplamiento en modo GND (Coupling GND)',
+          'El brillo de la cuadrícula (Graticule)'
+        ],
+        correctIdx: 0,
+        explanation: '<strong>¡Así es!</strong> El sistema de <strong>Disparo (Trigger)</strong> sincroniza el inicio de cada barrido con un nivel de voltaje específico (<strong>Trigger Level</strong>). Cuando está bien ajustado dentro de la amplitud de la señal, congela la onda en pantalla.'
+      },
+      {
+        id: 6,
+        type: 'concept',
+        badge: 'Ejercicio 6 • Identificación de Formas de Onda',
+        question: '¿Qué tipo de forma de onda (Waveform) cambia casi instantáneamente entre dos niveles fijos de voltaje —ALTO (HIGH) y BAJO (LOW)— y es la base de la electrónica digital, Arduino y microcontroladores?',
+        options: [
+          'Onda Senoidal (Sine Wave)',
+          'Onda Cuadrada (Square Wave)',
+          'Onda Triangular (Triangle Wave)',
+          'Corriente Continua pura (Pure DC)'
+        ],
+        correctIdx: 1,
+        explanation: '<strong>¡Excelente!</strong> La <strong>Onda Cuadrada (Square Wave)</strong> representa los estados binarios 1 (ALTO / HIGH) y 0 (BAJO / LOW) utilizados en sistemas digitales, relojes de procesadores y modulación PWM.'
+      }
+    ];
+
+    let quizAnswers = {}; // { questionId: selectedOptionIndex }
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = quizQuestions.map((q, qIndex) => {
+        const answeredIdx = quizAnswers[q.id];
+        const isAnswered = answeredIdx !== undefined;
+
+        return `
+          <article class="lab-card rounded-3xl p-5 sm:p-6 space-y-5" id="quiz-card-${q.id}">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[#00e5ff] font-mono text-xs font-bold">
+                ${q.badge}
+              </span>
+              <span class="text-xs font-mono text-slate-400">Pregunta ${qIndex + 1} de ${quizQuestions.length}</span>
+            </div>
+
+            <div class="grid grid-cols-1 ${q.type === 'canvas' ? 'lg:grid-cols-12' : ''} gap-6 items-center">
+              ${q.type === 'canvas' ? `
+                <div class="lg:col-span-5 scope-bezel rounded-2xl p-3">
+                  <div class="flex justify-between text-[11px] font-mono text-slate-300 mb-1.5 px-1">
+                    <span class="text-[#00ff88] font-bold">${q.voltsLabel}</span>
+                    <span class="text-[#00e5ff] font-bold">${q.timeLabel}</span>
+                  </div>
+                  <div class="scope-screen-wrap rounded-xl w-full aspect-[10/7]">
+                    <canvas id="quiz-canvas-${q.id}" class="w-full h-full block"></canvas>
+                  </div>
+                </div>
+              ` : ''}
+
+              <div class="${q.type === 'canvas' ? 'lg:col-span-7' : ''} space-y-4">
+                <h3 class="text-base sm:text-lg font-bold text-white leading-snug">
+                  ${q.question}
+                </h3>
+
+                <!-- Opciones de Respuesta -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  ${q.options.map((opt, optIdx) => {
+                    let btnStyle = 'bg-[#090d16] hover:bg-slate-800/90 border-slate-700 text-slate-200';
+                    let statusIcon = `<span class="w-6 h-6 rounded-lg bg-slate-800 text-slate-400 font-mono text-xs flex items-center justify-center shrink-0">${String.fromCharCode(65 + optIdx)}</span>`;
+
+                    if (isAnswered) {
+                      if (optIdx === q.correctIdx) {
+                        btnStyle = 'bg-emerald-500/20 border-[#00ff88] text-white shadow-[0_0_15px_rgba(0,255,136,0.2)]';
+                        statusIcon = `<span class="w-6 h-6 rounded-lg bg-[#00ff88] text-slate-950 font-bold text-xs flex items-center justify-center shrink-0">✓</span>`;
+                      } else if (optIdx === answeredIdx) {
+                        btnStyle = 'bg-rose-500/20 border-rose-500 text-rose-200';
+                        statusIcon = `<span class="w-6 h-6 rounded-lg bg-rose-500 text-white font-bold text-xs flex items-center justify-center shrink-0">✕</span>`;
+                      } else {
+                        btnStyle = 'bg-[#090d16]/60 border-slate-800/70 text-slate-500';
+                      }
+                    }
+
+                    return `
+                      <button
+                        type="button"
+                        ${isAnswered ? 'disabled' : `onclick="answerQuizQuestion(${q.id}, ${optIdx})"`}
+                        class="text-left p-3.5 rounded-2xl border text-xs sm:text-sm font-semibold transition flex items-center gap-3 ${btnStyle} ${isAnswered ? 'cursor-default' : 'cursor-pointer'}"
+                      >
+                        ${statusIcon}
+                        <span>${opt}</span>
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                <!-- Caja de Retroalimentación Pedagógica Inmediata -->
+                ${isAnswered ? `
+                  <div class="rounded-2xl p-4 text-xs sm:text-sm leading-relaxed border ${answeredIdx === q.correctIdx ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-100' : 'bg-amber-500/10 border-amber-500/40 text-amber-100'}">
+                    <div class="font-bold mb-1 ${answeredIdx === q.correctIdx ? 'text-[#00ff88]' : 'text-[#ffb300]'}">
+                      ${answeredIdx === q.correctIdx ? '🎉 ¡Respuesta Correcta!' : '💡 Revisa la explicación paso a paso:'}
+                    </div>
+                    <div>${q.explanation}</div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      updateQuizScoreUI();
+
+      // Dibujar los canvas de las preguntas 1, 2 y 3 si la sección está visible
+      if (activeSection === 'exercises') {
+        requestAnimationFrame(drawAllQuizCanvases);
+      }
+    }
+
+    function drawAllQuizCanvases() {
+      quizQuestions.forEach(q => {
+        if (q.type !== 'canvas') return;
+        const canvas = document.getElementById(`quiz-canvas-${q.id}`);
+        const setup = setupHighDPICanvas(canvas);
+        if (!setup) return;
+
+        const { ctx, width, height } = setup;
+        const cellW = width / 10;
+        const cellH = height / 8;
+        const centerY = height / 2;
+
+        drawGraticule(ctx, width, height);
+
+        const { type, vertDivsAmp, horizDivsCycle } = q.waveConfig;
+        ctx.save();
+        ctx.strokeStyle = '#00ff88';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = 'rgba(0, 255, 136, 0.55)';
+        ctx.shadowBlur = 7;
+        ctx.beginPath();
+
+        for (let i = 0; i <= width; i++) {
+          const divX = (i / width) * 10;
+          const cycles = divX / horizDivsCycle;
+          const val = evaluateNormalizedWave(type, cycles);
+          const y = centerY - val * (vertDivsAmp * cellH);
+          if (i === 0) ctx.moveTo(i, y);
+          else ctx.lineTo(i, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      });
+    }
+
+    function answerQuizQuestion(questionId, selectedIdx) {
+      if (quizAnswers[questionId] !== undefined) return;
+      quizAnswers[questionId] = selectedIdx;
+      renderQuiz();
+    }
+
+    function updateQuizScoreUI() {
+      const total = quizQuestions.length;
+      const answeredCount = Object.keys(quizAnswers).length;
+      let correctCount = 0;
+
+      quizQuestions.forEach(q => {
+        if (quizAnswers[q.id] === q.correctIdx) {
+          correctCount++;
+        }
+      });
+
+      const pct = Math.round((answeredCount / total) * 100);
+      document.getElementById('quiz-score-display').textContent = `${correctCount} / ${total}`;
+      document.getElementById('mobile-score-badge').textContent = `Quiz: ${correctCount}/${total}`;
+      document.getElementById('quiz-progress-text').textContent = `Respondidas: ${answeredCount} de ${total}`;
+      document.getElementById('quiz-progress-pct').textContent = `${pct}%`;
+      document.getElementById('quiz-progress-bar').style.width = `${pct}%`;
+
+      // Mostrar resumen final si ya respondió todas las preguntas
+      const summaryBox = document.getElementById('quiz-final-summary');
+      if (answeredCount === total) {
+        summaryBox.classList.remove('hidden');
+        const scorePct = Math.round((correctCount / total) * 100);
+        document.getElementById('final-score-num').textContent = `${correctCount} / ${total}`;
+        document.getElementById('final-score-pct').textContent = `${scorePct}%`;
+
+        if (correctCount === total) {
+          document.getElementById('final-badge-icon').textContent = '🏆';
+          document.getElementById('final-title').textContent = '¡Dominio Total del Osciloscopio!';
+          document.getElementById('final-message').textContent = '¡Felicidades! Has leído cada pantalla y comprendido todos los controles bilingües a la perfección. Estás listo para entrar a cualquier laboratorio de electrónica.';
+        } else if (correctCount >= 4) {
+          document.getElementById('final-badge-icon').textContent = '⚡';
+          document.getElementById('final-title').textContent = '¡Muy buen desempeño!';
+          document.getElementById('final-message').textContent = 'Ya sabes medir voltajes, períodos y frecuencias en pantalla. Revisa las explicaciones de las preguntas que fallaste para perfeccionar tu técnica.';
+        } else {
+          document.getElementById('final-badge-icon').textContent = '🔬';
+          document.getElementById('final-title').textContent = '¡Buen comienzo en el laboratorio!';
+          document.getElementById('final-message').textContent = 'Aprender a usar un osciloscopio requiere práctica. Vuelve al Simulador Interactivo, juega con Volts/Div y Time Base, y luego intenta nuevamente el test.';
+        }
+      } else {
+        summaryBox.classList.add('hidden');
+      }
+    }
+
+    function resetQuiz() {
+      quizAnswers = {};
+      renderQuiz();
+      document.getElementById('section-exercises').scrollIntoView({ behavior: 'smooth' });
+    }
+
+
+    /* =========================================================================
+       7. INICIALIZACIÓN AL CARGAR LA PÁGINA
+    ========================================================================= */
+    window.addEventListener('load', () => {
+      // Inicializar Sección 1
+      selectAnatomy('screen');
+      renderGlossary();
+
+      // Inicializar Sección 2 (Simulador)
+      initSimulatorControls();
+      requestAnimationFrame(simulatorAnimationLoop);
+
+      // Inicializar Sección 4 (Ejercicios)
+      renderQuiz();
+
+      // Redibujar canvases al redimensionar la ventana
+      window.addEventListener('resize', () => {
+        redrawAllVisibleCanvases();
+      });
+    });
+  </script>
+</body>
+</html>

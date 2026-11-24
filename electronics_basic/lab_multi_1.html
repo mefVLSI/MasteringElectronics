@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MultiLab — Guía interactiva para manejo de multímetro (Multitester Guide)</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans y JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            lab: {
+              bg: '#090d16',
+              card: '#0f1624',
+              panel: '#131c2e',
+              border: '#1e293b',
+              phosphor: '#00ff88',
+              cyan: '#00e5ff',
+              amber: '#ffb300',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Estilos personalizados de Laboratorio Electrónico Oscuro ("Dark Lab UI") */
+    body {
+      background-color: #090d16;
+      color: #e2e8f0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 15% 15%, rgba(0, 229, 255, 0.06) 0%, transparent 35%),
+        radial-gradient(circle at 85% 25%, rgba(0, 255, 136, 0.05) 0%, transparent 35%);
+    }
+
+    /* Efecto cristal/panel de laboratorio */
+    .lab-card {
+      background: linear-gradient(180deg, rgba(19, 28, 46, 0.85) 0%, rgba(13, 19, 33, 0.92) 100%);
+      border: 1px solid #1e293b;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+      transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .lab-card:hover {
+      border-color: rgba(0, 229, 255, 0.35);
+    }
+
+    /* Carcasa realista de instrumento digital */
+    .meter-bezel {
+      background: linear-gradient(145deg, #161f33 0%, #0b101b 100%);
+      border: 2px solid #26344d;
+      box-shadow:
+        0 0 35px rgba(0, 255, 136, 0.08),
+        inset 0 2px 12px rgba(0, 0, 0, 0.85);
+    }
+
+    /* Pantalla LCD retroiluminada del multímetro */
+    .lcd-screen {
+      position: relative;
+      background-color: #04130c;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      box-shadow: inset 0 0 24px rgba(0, 255, 136, 0.1);
+      overflow: hidden;
+    }
+
+    .lcd-screen::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0, 0, 0, 0.14) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Tarjetas 3D Flip para el Glosario Bilingüe */
+    .flip-card {
+      perspective: 1000px;
+      height: 195px;
+      cursor: pointer;
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front,
+    .flip-card-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 1rem;
+    }
+
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Animaciones suaves de transición de pestañas */
+    .section-view {
+      animation: fadeSlideIn 0.35s ease-out;
+    }
+
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Resaltado de zona activa en diagrama de anatomía */
+    .anatomy-zone-active {
+      box-shadow: 0 0 0 2px #00e5ff, 0 0 22px rgba(0, 229, 255, 0.35) !important;
+      border-color: #00e5ff !important;
+    }
+
+    /* Ocultar barra de scroll en navegación móvil manteniendo funcionalidad */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Scrollbar discreta para el panel lateral derecho */
+    .sidebar-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .sidebar-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 999px;
+    }
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-cyan-400/20 selection:text-cyan-300">
+
+  <!-- ==================== BARRA DE NAVEGACIÓN SUPERIOR FIJA ==================== -->
+  <header class="sticky top-0 z-50 w-full bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/90">
+    <div class="w-full px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+        <!-- Logo e Identidad -->
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(255,179,0,0.2)]">
+              <!-- Ícono SVG de dial / multímetro -->
+              <svg class="w-6 h-6 text-[#ffb300]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <line x1="12" y1="12" x2="16.5" y2="7.5" />
+                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-lg tracking-tight text-white">Multi<span class="text-[#ffb300]">Lab</span></span>
+                <span class="hidden sm:inline-block text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
+                  Bilingüe ES / EN
+                </span>
+              </div>
+              <p class="text-xs text-slate-400">Guía interactiva para manejo de multímetro (Multitester Guide)</p>
+            </div>
+          </div>
+
+          <!-- Indicador rápido de progreso + botón menú lateral en móvil -->
+          <div class="flex items-center gap-2">
+            <div class="md:hidden text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg" id="mobile-score-badge">
+              Quiz: 0/6
+            </div>
+
+            <button
+              type="button"
+              onclick="toggleSidebar()"
+              aria-label="Abrir panel de navegación del sitio"
+              class="lg:hidden p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pestañas de Navegación (4 Secciones de MultiLab) -->
+        <nav aria-label="Secciones principales" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+          <button onclick="switchSection('intro')" id="tab-intro" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all bg-cyan-500/15 text-[#00e5ff] border border-cyan-400/50 shadow-[0_0_15px_rgba(0,229,255,0.15)]">
+            <span class="font-mono text-xs opacity-80">01</span>
+            <span>Inicio y Seguridad</span>
+          </button>
+          <button onclick="switchSection('simulator')" id="tab-simulator" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
+            <span class="font-mono text-xs opacity-80">02</span>
+            <span>Simulador Interactivo</span>
+          </button>
+          <button onclick="switchSection('modes')" id="tab-modes" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
+            <span class="font-mono text-xs opacity-80">03</span>
+            <span>Medir V, A y Ω</span>
+          </button>
+          <button onclick="switchSection('exercises')" id="tab-exercises" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
+            <span class="font-mono text-xs opacity-80">04</span>
+            <span>Ejercicios Prácticos</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Fondo oscuro para menú móvil -->
+  <div
+    id="sidebar-backdrop"
+    onclick="toggleSidebar()"
+    class="fixed inset-0 bg-black/65 backdrop-blur-xs z-40 hidden lg:hidden"
+  ></div>
+
+  <!-- ==================== CONTENEDOR FLEX DE ANCHO COMPLETO (CONTENIDO + PANEL DERECHO) ==================== -->
+  <div class="flex-1 flex w-full">
+
+    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+    <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8 flex flex-col justify-between gap-12">
+
+      <div>
+        <!-- =======================================================================
+             SECCIÓN 1: INICIO, SEGURIDAD Y ANATOMÍA DEL MULTÍMETRO
+        ======================================================================== -->
+        <section id="section-intro" class="section-view space-y-10">
+          <!-- Hero Motivador -->
+          <div class="lab-card rounded-3xl p-6 sm:p-10 relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-64 h-64 bg-[#ffb300]/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div class="lg:col-span-7 space-y-5">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/30 text-[#ffb300] text-xs font-semibold">
+                  <span class="w-2 h-2 rounded-full bg-[#ffb300] animate-pulse"></span>
+                  Instrumentación Esencial • Todo en Uno (V · A · Ω)
+                </div>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+                  Domina el <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ffb300] via-[#00ff88] to-[#00e5ff]">multímetro digital</span> con precisión y seguridad
+                </h1>
+                <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+                  El <strong class="text-white">Multímetro Digital (Digital Multimeter - DMM)</strong> combina tres instrumentos fundamentales en un solo equipo: <strong class="text-[#00e5ff]">Voltímetro (Voltmeter)</strong>, <strong class="text-[#ffb300]">Amperímetro (Ammeter)</strong> y <strong class="text-[#00ff88]">Óhmetro (Ohmmeter)</strong>. Aprende a conectar las puntas correctamente y evita errores que puedan dañar tu circuito o el fusible del equipo.
+                </p>
+                <div class="flex flex-wrap gap-3 pt-2">
+                  <button onclick="switchSection('simulator')" class="px-5 py-3 rounded-xl bg-[#00ff88] hover:bg-emerald-300 text-slate-950 font-bold text-sm transition shadow-[0_0_20px_rgba(0,255,136,0.3)] flex items-center gap-2">
+                    <span>Probar el Simulador Ahora</span>
+                    <span>→</span>
+                  </button>
+                  <a href="#advertencias-seguridad" class="px-5 py-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 font-semibold text-sm transition">
+                    ⚠ Reglas de Seguridad
+                  </a>
+                </div>
+              </div>
+
+              <!-- Resumen Visual de las 3 Magnitudes -->
+              <div class="lg:col-span-5 grid grid-cols-1 gap-3.5">
+                <div class="bg-[#090d16]/85 border border-cyan-500/25 rounded-2xl p-4 flex items-center gap-4">
+                  <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 font-mono font-extrabold text-[#00e5ff]">
+                    V
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-white text-sm">Voltaje (Voltage — V⎓ / V~)</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Mide la diferencia de potencial eléctrico. Se conecta siempre en <strong class="text-[#00e5ff]">paralelo</strong> con el componente.</p>
+                  </div>
+                </div>
+
+                <div class="bg-[#090d16]/85 border border-amber-500/25 rounded-2xl p-4 flex items-center gap-4">
+                  <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 font-mono font-extrabold text-[#ffb300]">
+                    A
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-white text-sm">Corriente (Current — A / mA)</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Mide el flujo de electrones. Requiere abrir el circuito y conectar el medidor en <strong class="text-[#ffb300]">serie</strong>.</p>
+                  </div>
+                </div>
+
+                <div class="bg-[#090d16]/85 border border-emerald-500/25 rounded-2xl p-4 flex items-center gap-4">
+                  <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 font-mono font-extrabold text-[#00ff88]">
+                    Ω
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-white text-sm">Resistencia (Resistance — Ω)</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Mide la oposición al paso de corriente. Se mide con el <strong class="text-[#00ff88]">circuito apagado</strong> y el componente aislado.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== BLOQUE DESTACADO: ADVERTENCIAS DE SEGURIDAD ==================== -->
+          <div id="advertencias-seguridad" class="rounded-3xl bg-gradient-to-b from-rose-950/35 to-[#0d1321] border border-rose-500/40 p-6 sm:p-8 space-y-5 shadow-[0_10px_35px_-10px_rgba(244,63,94,0.18)]">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rose-500/25 pb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-400/50 flex items-center justify-center text-rose-300 text-xl font-bold shrink-0">
+                  ⚠
+                </div>
+                <div>
+                  <span class="font-mono text-xs uppercase tracking-widest text-rose-400">Protocolo Obligatorio de Laboratorio</span>
+                  <h2 class="text-xl sm:text-2xl font-extrabold text-white">
+                    Advertencias Críticas de Seguridad <span class="text-rose-300/80 font-normal text-base">(Safety Warnings)</span>
+                  </h2>
+                </div>
+              </div>
+              <span class="text-xs font-mono text-rose-300 bg-rose-500/15 border border-rose-500/30 px-3 py-1 rounded-lg self-start sm:self-center">
+                Lee antes de medir
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <!-- Advertencia 1 -->
+              <div class="bg-[#090d16]/90 border border-rose-500/30 rounded-2xl p-4 space-y-2">
+                <div class="flex items-center gap-2 text-rose-400 font-mono text-xs font-bold">
+                  <span>01 • CONTACTO FÍSICO</span>
+                </div>
+                <h3 class="font-bold text-white text-sm">No toques las puntas metálicas al medir</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Sujeta siempre las sondas por su mango aislante detrás del protector de dedos. Tocar el metal durante una medición puede provocar <strong class="text-rose-300">descargas eléctricas</strong> y además altera las lecturas de resistencia debido a la resistencia de tu piel.
+                </p>
+              </div>
+
+              <!-- Advertencia 2 -->
+              <div class="bg-[#090d16]/90 border border-amber-500/35 rounded-2xl p-4 space-y-2">
+                <div class="flex items-center gap-2 text-[#ffb300] font-mono text-xs font-bold">
+                  <span>02 • ESCALA DE CORRIENTE</span>
+                </div>
+                <h3 class="font-bold text-white text-sm">Usa la escala más alta al medir corriente</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Si desconoces cuánta corriente circula, empieza siempre en la <strong class="text-[#ffb300]">escala máxima (10A)</strong> y con la punta roja en la borna <code class="text-amber-300">10A</code>. Usar una escala baja (mA) con corrientes altas quemará inmediatamente el fusible interno.
+                </p>
+              </div>
+
+              <!-- Advertencia 3 -->
+              <div class="bg-[#090d16]/90 border border-rose-500/30 rounded-2xl p-4 space-y-2">
+                <div class="flex items-center gap-2 text-rose-400 font-mono text-xs font-bold">
+                  <span>03 • CORTOCIRCUITO EN MODO A</span>
+                </div>
+                <h3 class="font-bold text-white text-sm">Nunca midas voltaje con la punta en 10A / mA</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  En modo amperímetro, la resistencia interna del multímetro es casi cero. Si lo conectas en paralelo a una batería o toma de corriente, crearás un <strong class="text-rose-300">cortocircuito directo</strong>. Al terminar de medir corriente, regresa la punta roja a <code class="text-cyan-300">VΩmA</code>.
+                </p>
+              </div>
+
+              <!-- Advertencia 4 -->
+              <div class="bg-[#090d16]/90 border border-emerald-500/30 rounded-2xl p-4 space-y-2">
+                <div class="flex items-center gap-2 text-[#00ff88] font-mono text-xs font-bold">
+                  <span>04 • CIRCUITO DESENERGIZADO</span>
+                </div>
+                <h3 class="font-bold text-white text-sm">Apaga la energía antes de medir resistencia (Ω)</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  El multímetro inyecta una pequeña corriente propia para calcular ohmios. Medir resistencia o continuidad en un circuito encendido arroja valores falsos y puede <strong class="text-emerald-300">dañar el circuito interno</strong> del instrumento.
+                </p>
+              </div>
+
+              <!-- Advertencia 5 -->
+              <div class="bg-[#090d16]/90 border border-cyan-500/30 rounded-2xl p-4 space-y-2">
+                <div class="flex items-center gap-2 text-[#00e5ff] font-mono text-xs font-bold">
+                  <span>05 • SELECCIÓN AC vs. DC</span>
+                </div>
+                <h3 class="font-bold text-white text-sm">Verifica corriente continua (⎓) o alterna (~)</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Las baterías y fuentes electrónicas usan <strong class="text-[#00e5ff]">DC (V⎓)</strong>, mientras que los enchufes de pared usan <strong class="text-[#00e5ff]">AC (V~)</strong>. Seleccionar el tipo equivocado mostrará lecturas cercanas a cero o erráticas.
+                </p>
+              </div>
+
+              <!-- Advertencia 6 -->
+              <div class="bg-[#090d16]/90 border border-amber-500/35 rounded-2xl p-4 space-y-2">
+                <div class="flex items-center gap-2 text-[#ffb300] font-mono text-xs font-bold">
+                  <span>06 • ESTADO DE SONDAS</span>
+                </div>
+                <h3 class="font-bold text-white text-sm">Inspecciona el aislamiento de los cables</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Antes de medir, revisa que los cables rojo y negro no tengan grietas ni cobre expuesto. Comienza siempre en un rango de voltaje superior al valor esperado.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== ANATOMÍA INTERACTIVA DEL MULTÍMETRO ==================== -->
+          <div id="anatomia-dmm" class="space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+              <div>
+                <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Explora el Instrumento</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+                  Anatomía del Multímetro <span class="text-slate-400 font-normal text-lg">(Multimeter Anatomy)</span>
+                </h2>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-400">
+                Haz clic en cualquiera de las <strong class="text-white">5 partes</strong> para ver su función.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              <!-- Esquema interactivo del DMM -->
+              <div class="lg:col-span-6 meter-bezel rounded-3xl p-5 flex flex-col justify-between gap-4">
+                <div class="flex items-center justify-between text-xs font-mono text-slate-400 border-b border-slate-800 pb-2">
+                  <span class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#ffb300] shadow-[0_0_8px_#ffb300]"></span>
+                    DMM-830 PRO • CAT III 600V
+                  </span>
+                  <span>Haz clic en un bloque</span>
+                </div>
+
+                <!-- 1. Pantalla LCD -->
+                <button type="button" onclick="selectDmmAnatomy('display')" id="dmm-zone-display"
+                  class="dmm-zone anatomy-zone-active w-full text-left rounded-2xl bg-[#04130c] border-2 border-[#00ff88]/50 p-4 transition-all">
+                  <div class="flex items-center justify-between text-[11px] font-mono text-[#00ff88] mb-1">
+                    <span>1. Pantalla Digital (LCD Display)</span>
+                    <span>AUTO / HOLD</span>
+                  </div>
+                  <div class="font-mono text-3xl sm:text-4xl font-extrabold text-[#00ff88] tracking-wider text-right py-2 px-3 rounded-xl bg-[#020a06] border border-emerald-500/20">
+                    12.48 <span class="text-base text-emerald-300">V DC</span>
+                  </div>
+                </button>
+
+                <!-- 2. Selector Rotatorio -->
+                <button type="button" onclick="selectDmmAnatomy('dial')" id="dmm-zone-dial"
+                  class="dmm-zone w-full text-left rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 hover:border-cyan-400/60 p-4 transition-all">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <span class="text-xs font-mono font-bold text-[#00e5ff] block">2. Perilla Selectora (Rotary Function Switch)</span>
+                      <span class="text-xs text-slate-400">Permite elegir magnitud (V, A, Ω) y escala máxima</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-full border-2 border-[#00e5ff] bg-slate-950 flex items-center justify-center font-mono text-xs font-bold text-[#00e5ff] shrink-0">
+                      V / Ω / A
+                    </div>
+                  </div>
+                </button>
+
+                <!-- Bornas de conexión (3, 4 y 5) -->
+                <div class="grid grid-cols-3 gap-2.5">
+                  <button type="button" onclick="selectDmmAnatomy('jack10a')" id="dmm-zone-jack10a"
+                    class="dmm-zone text-center rounded-2xl bg-slate-900/95 border-2 border-slate-700/80 hover:border-amber-400/60 p-3 transition-all">
+                    <span class="w-8 h-8 mx-auto rounded-full border-2 border-[#ffb300] bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-[#ffb300]">10A</span>
+                    <span class="text-[11px] font-mono font-bold text-white block mt-2">3. Borna 10A</span>
+                    <span class="text-[10px] text-slate-400 block">Corriente alta</span>
+                  </button>
+
+                  <button type="button" onclick="selectDmmAnatomy('jackcom')" id="dmm-zone-jackcom"
+                    class="dmm-zone text-center rounded-2xl bg-slate-900/95 border-2 border-slate-700/80 hover:border-slate-400/60 p-3 transition-all">
+                    <span class="w-8 h-8 mx-auto rounded-full border-2 border-slate-400 bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-slate-200">COM</span>
+                    <span class="text-[11px] font-mono font-bold text-white block mt-2">4. Borna COM</span>
+                    <span class="text-[10px] text-slate-400 block">Cable Negro (-)</span>
+                  </button>
+
+                  <button type="button" onclick="selectDmmAnatomy('jackvoma')" id="dmm-zone-jackvoma"
+                    class="dmm-zone text-center rounded-2xl bg-slate-900/95 border-2 border-slate-700/80 hover:border-rose-400/60 p-3 transition-all">
+                    <span class="w-8 h-8 mx-auto rounded-full border-2 border-rose-500 bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-rose-400">VΩmA</span>
+                    <span class="text-[11px] font-mono font-bold text-white block mt-2">5. VΩmA</span>
+                    <span class="text-[10px] text-slate-400 block">Cable Rojo (+)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Panel de Explicación Detallada -->
+              <div class="lg:col-span-6 lab-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
+                <div id="dmm-anatomy-detail" class="space-y-4">
+                  <!-- Rellenado por JS -->
+                </div>
+
+                <div class="pt-6 mt-6 border-t border-slate-800 flex flex-wrap gap-2">
+                  <button onclick="selectDmmAnatomy('display')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">1. Pantalla</button>
+                  <button onclick="selectDmmAnatomy('dial')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">2. Selector</button>
+                  <button onclick="selectDmmAnatomy('jack10a')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">3. Borna 10A</button>
+                  <button onclick="selectDmmAnatomy('jackcom')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">4. COM</button>
+                  <button onclick="selectDmmAnatomy('jackvoma')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">5. VΩmA</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== GLOSARIO BILINGÜE INTERACTIVO ==================== -->
+          <div class="space-y-5 pt-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Vocabulario Técnico Esencial</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+                  Glosario Bilingüe Interactivo <span class="text-slate-400 font-normal text-lg">(Bilingual Glossary)</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                  Haz clic en cada tarjeta para voltearla y conocer los símbolos grabados en cualquier multímetro.
+                </p>
+              </div>
+
+              <div class="relative w-full md:w-80">
+                <input
+                  type="text"
+                  id="glossary-search"
+                  oninput="filterGlossary()"
+                  placeholder="Buscar término (ej. COM, Paralelo, OL)..."
+                  class="w-full bg-slate-900/90 border border-slate-700 focus:border-[#00e5ff] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
+                />
+                <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </div>
+            </div>
+
+            <div id="glossary-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- Renderizado dinámico por JS -->
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-4">
+            <button onclick="switchSection('simulator')" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg flex items-center gap-2">
+              <span>Siguiente: Ir al Simulador de Multímetro</span>
+              <span>→</span>
+            </button>
+          </div>
+        </section>
+
+
+        <!-- =======================================================================
+             SECCIÓN 2: SIMULADOR INTERACTIVO DE MULTÍMETRO DIGITAL
+        ======================================================================== -->
+        <section id="section-simulator" class="section-view hidden space-y-6">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Práctica Guiada en Pantalla</span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">
+                Simulador de Multímetro <span class="text-slate-400 font-normal text-lg">(Interactive Multimeter)</span>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                Elige un circuito de prueba, selecciona la <strong class="text-slate-200">clavija roja</strong>, ajusta el <strong class="text-slate-200">selector de escala</strong> y define la <strong class="text-slate-200">conexión</strong>.
+              </p>
+            </div>
+
+            <!-- Botones de Escenarios Rápidos -->
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs font-mono text-slate-400 mr-1">Circuitos:</span>
+              <button onclick="loadDmmScenario('dc_battery')" id="scen-btn-dc_battery" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 transition">
+                🔋 Batería 9V DC
+              </button>
+              <button onclick="loadDmmScenario('ac_outlet')" id="scen-btn-ac_outlet" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                🔌 Toma 120V AC
+              </button>
+              <button onclick="loadDmmScenario('low_current')" id="scen-btn-low_current" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                💡 Circuito 250 mA
+              </button>
+              <button onclick="loadDmmScenario('high_current')" id="scen-btn-high_current" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                ⚙️ Motor 2.4 A
+              </button>
+              <button onclick="loadDmmScenario('resistor')" id="scen-btn-resistor" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                🎚️ Resistor 4.7 kΩ
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+            <!-- COLUMNA IZQUIERDA (7 cols): MULTÍMETRO VIRTUAL + DIAGRAMA DE CONEXIÓN -->
+            <div class="xl:col-span-7 space-y-5">
+              <div class="meter-bezel rounded-3xl p-5 space-y-4">
+                <!-- Barra OSD superior -->
+                <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+                  <span class="px-2.5 py-0.5 rounded bg-amber-500/20 text-[#ffb300] border border-amber-500/40 font-bold" id="sim-scen-title">
+                    Escenario: Batería Alcalina 9.0 V DC
+                  </span>
+                  <span class="text-slate-400" id="sim-scen-hint">Objetivo: Medir Voltaje DC</span>
+                </div>
+
+                <!-- Pantalla LCD Principal del Simulador -->
+                <div class="lcd-screen rounded-2xl p-5 flex flex-col justify-between gap-3">
+                  <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+                    <span id="lcd-mode-badge" class="text-[#00e5ff] font-bold">MODO: VOLTAJE DC (V⎓)</span>
+                    <span id="lcd-jack-badge" class="text-rose-400">CLAVIJA ROJA: VΩmA</span>
+                  </div>
+
+                  <div class="flex items-baseline justify-end gap-3 py-2">
+                    <span id="lcd-main-value" class="font-mono text-4xl sm:text-6xl font-extrabold text-[#00ff88] tracking-wider">
+                      9.00
+                    </span>
+                    <span id="lcd-main-unit" class="font-mono text-xl sm:text-2xl font-bold text-emerald-300">
+                      V
+                    </span>
+                  </div>
+
+                  <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 border-t border-emerald-500/20 pt-2">
+                    <span id="lcd-range-info">Escala seleccionada: 20 V DC</span>
+                    <span id="lcd-conn-info">Conexión: Paralelo</span>
+                  </div>
+                </div>
+
+                <!-- Esquema SVG Dinámico de Conexión -->
+                <div class="rounded-2xl bg-[#070b14] border border-slate-800 p-4">
+                  <div class="text-[11px] font-mono text-slate-400 mb-2 flex items-center justify-between">
+                    <span>Esquema de Conexión en Vivo (Live Connection Diagram)</span>
+                    <span id="diagram-status-tag" class="text-[#00ff88]">Conexión Válida</span>
+                  </div>
+                  <svg id="connection-svg" viewBox="0 0 460 150" class="w-full h-36">
+                    <!-- Renderizado dinámicamente por JS -->
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Panel de Diagnóstico Pedagógico y Seguridad en Vivo -->
+              <div id="dmm-feedback-box" class="rounded-3xl p-5 border bg-emerald-500/10 border-emerald-500/40 text-emerald-200 space-y-1.5">
+                <div class="font-mono text-xs font-bold uppercase tracking-wider text-[#00ff88]" id="dmm-feedback-title">
+                  ✓ Lectura Correcta y Segura
+                </div>
+                <p class="text-xs sm:text-sm leading-relaxed" id="dmm-feedback-desc">
+                  Has conectado el multímetro en paralelo con la batería, usando la borna VΩmA y una escala de 20 V DC adecuada para medir 9 V.
+                </p>
+              </div>
+            </div>
+
+            <!-- COLUMNA DERECHA (5 cols): CONTROLES DE CONFIGURACIÓN DEL MULTÍMETRO -->
+            <div class="xl:col-span-5 space-y-4">
+              <!-- Paso 1: Clavija Roja -->
+              <div class="lab-card rounded-3xl p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                    <span>1. Borna de la Punta Roja (Red Probe Jack)</span>
+                  </h3>
+                  <span class="text-[11px] font-mono text-slate-400">Negra en COM</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                  <button type="button" onclick="setRedJack('voma')" id="btn-jack-voma"
+                    class="py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/60 transition">
+                    Borna VΩmA
+                  </button>
+                  <button type="button" onclick="setRedJack('10a')" id="btn-jack-10a"
+                    class="py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition">
+                    Borna 10A (Alta I)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Paso 2: Selector Rotatorio -->
+              <div class="lab-card rounded-3xl p-5 space-y-3">
+                <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#00e5ff]"></span>
+                  <span>2. Perilla Selectora de Función y Escala</span>
+                </h3>
+
+                <select id="ctrl-dmm-dial" onchange="updateDmmSim()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono text-white outline-none focus:border-[#00e5ff]">
+                  <option value="OFF">OFF — Apagado</option>
+                  <option value="VDC_20" selected>V⎓ 20 V — Voltaje Continuo (hasta 20 V)</option>
+                  <option value="VDC_200">V⎓ 200 V — Voltaje Continuo (hasta 200 V)</option>
+                  <option value="VAC_600">V~ 600 V — Voltaje Alterno (hasta 600 V)</option>
+                  <option value="ADC_10A">A⎓ 10 A — Corriente Alta (Escala máxima)</option>
+                  <option value="ADC_400MA">mA⎓ 400 mA — Corriente Baja (hasta 400 mA)</option>
+                  <option value="OHM_2K">Ω 2 kΩ — Resistencia (hasta 2,000 Ω)</option>
+                  <option value="OHM_20K">Ω 20 kΩ — Resistencia (hasta 20,000 Ω)</option>
+                </select>
+              </div>
+
+              <!-- Paso 3: Forma de Conexión al Circuito -->
+              <div class="lab-card rounded-3xl p-5 space-y-3">
+                <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88]"></span>
+                  <span>3. Cómo conectas las puntas al circuito</span>
+                </h3>
+
+                <div class="grid grid-cols-1 gap-2">
+                  <button type="button" onclick="setConnType('parallel')" id="btn-conn-parallel"
+                    class="text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 transition">
+                    En Paralelo (Across component) — Para Voltaje
+                  </button>
+                  <button type="button" onclick="setConnType('series')" id="btn-conn-series"
+                    class="text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition">
+                    En Serie (In-line circuit) — Para Corriente
+                  </button>
+                  <button type="button" onclick="setConnType('isolated')" id="btn-conn-isolated"
+                    class="text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition">
+                    Componente Aislado (Sin energía) — Para Resistencia
+                  </button>
+                </div>
+              </div>
+
+              <!-- Interruptor de Energía del Circuito (Relevante para Resistencia) -->
+              <div class="lab-card rounded-3xl p-5 flex items-center justify-between gap-3">
+                <div>
+                  <h4 class="font-bold text-white text-xs sm:text-sm">Energía del Circuito de Prueba</h4>
+                  <p class="text-[11px] text-slate-400">Apágala antes de medir resistencia (Ω)</p>
+                </div>
+                <button type="button" onclick="toggleCircuitPower()" id="btn-circuit-power"
+                  class="px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-emerald-500/20 text-[#00ff88] border border-emerald-500/40 transition">
+                  ENERGÍA: ON
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-between pt-4">
+            <button onclick="switchSection('intro')" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+              ← Anterior: Seguridad y Anatomía
+            </button>
+            <button onclick="switchSection('modes')" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg">
+              Siguiente: Guía V, A y Ω →
+            </button>
+          </div>
+        </section>
+
+
+        <!-- =======================================================================
+             SECCIÓN 3: PROCEDIMIENTO PASO A PASO PARA MEDIR VOLTAJE, CORRIENTE Y RESISTENCIA
+        ======================================================================== -->
+        <section id="section-modes" class="section-view hidden space-y-8">
+          <div>
+            <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Procedimientos de Banco</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+              Cómo Medir Voltaje, Corriente y Resistencia <span class="text-slate-400 font-normal text-lg">(Measurement Procedures)</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">
+              Cada magnitud exige una posición específica de las puntas y una forma distinta de conectar el multímetro al circuito.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- TARJETA 1: MEDIR VOLTAJE -->
+            <article class="lab-card rounded-3xl p-6 flex flex-col justify-between space-y-5 border-cyan-500/35">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-1 rounded-lg bg-cyan-500/15 text-[#00e5ff] border border-cyan-500/30 font-mono text-xs font-bold">
+                    1. VOLTAJE (V⎓ / V~)
+                  </span>
+                  <span class="text-xs font-mono text-slate-400">En Paralelo</span>
+                </div>
+
+                <!-- Diagrama SVG Paralelo -->
+                <svg viewBox="0 0 240 100" class="w-full h-28 rounded-xl bg-[#04110b] border border-cyan-500/20">
+                  <rect x="25" y="25" width="35" height="50" rx="6" fill="none" stroke="#94a3b8" stroke-width="2" />
+                  <text x="33" y="54" fill="#e2e8f0" font-size="10" font-family="monospace"> Fuente</text>
+                  <line x1="60" y1="35" x2="140" y2="35" stroke="#94a3b8" stroke-width="2" />
+                  <line x1="60" y1="65" x2="140" y2="65" stroke="#94a3b8" stroke-width="2" />
+                  <rect x="130" y="35" width="20" height="30" fill="#0f172a" stroke="#00ff88" stroke-width="2" />
+                  <!-- Multímetro en paralelo -->
+                  <circle cx="195" cy="50" r="16" fill="#090d16" stroke="#00e5ff" stroke-width="2" />
+                  <text x="191" y="54" fill="#00e5ff" font-size="12" font-family="monospace" font-weight="bold">V</text>
+                  <polyline points="140,35 195,35 195,34" fill="none" stroke="#f43f5e" stroke-width="2" />
+                  <polyline points="140,65 195,65 195,66" fill="none" stroke="#94a3b8" stroke-width="2" />
+                </svg>
+
+                <ol class="space-y-2 text-xs sm:text-sm text-slate-300 list-decimal list-inside leading-relaxed">
+                  <li>Conecta el cable negro en <strong class="text-white">COM</strong> y el rojo en <strong class="text-rose-300">VΩmA</strong>.</li>
+                  <li>Gira el selector a <strong class="text-[#00e5ff]">V⎓</strong> (corriente directa) o <strong class="text-[#00e5ff]">V~</strong> (alterna) en una escala mayor al voltaje esperado.</li>
+                  <li>Toca ambos extremos del componente (<strong class="text-[#00e5ff]">en paralelo</strong>) sin abrir el circuito y sin tocar las puntas metálicas.</li>
+                </ol>
+              </div>
+
+              <button onclick="loadDmmScenario('dc_battery'); switchSection('simulator');" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-[#00e5ff] border border-cyan-400/50 font-mono text-xs font-bold transition">
+                Practicar medición de Voltaje →
+              </button>
+            </article>
+
+            <!-- TARJETA 2: MEDIR CORRIENTE -->
+            <article class="lab-card rounded-3xl p-6 flex flex-col justify-between space-y-5 border-amber-500/35">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-[#ffb300] border border-amber-500/30 font-mono text-xs font-bold">
+                    2. CORRIENTE (A / mA)
+                  </span>
+                  <span class="text-xs font-mono text-slate-400">En Serie</span>
+                </div>
+
+                <!-- Diagrama SVG Serie -->
+                <svg viewBox="0 0 240 100" class="w-full h-28 rounded-xl bg-[#04110b] border border-amber-500/20">
+                  <rect x="20" y="25" width="35" height="50" rx="6" fill="none" stroke="#94a3b8" stroke-width="2" />
+                  <line x1="55" y1="35" x2="95" y2="35" stroke="#f43f5e" stroke-width="2" />
+                  <!-- Multímetro intercalado en serie -->
+                  <circle cx="115" cy="35" r="15" fill="#090d16" stroke="#ffb300" stroke-width="2" />
+                  <text x="111" y="39" fill="#ffb300" font-size="12" font-family="monospace" font-weight="bold">A</text>
+                  <line x1="130" y1="35" x2="180" y2="35" stroke="#94a3b8" stroke-width="2" />
+                  <rect x="170" y="35" width="20" height="30" fill="#0f172a" stroke="#00ff88" stroke-width="2" />
+                  <line x1="55" y1="65" x2="180" y2="65" stroke="#94a3b8" stroke-width="2" />
+                </svg>
+
+                <ol class="space-y-2 text-xs sm:text-sm text-slate-300 list-decimal list-inside leading-relaxed">
+                  <li>Coloca el selector en la <strong class="text-[#ffb300]">escala más alta (10A)</strong> y conecta la punta roja en la borna <strong class="text-[#ffb300]">10A</strong>.</li>
+                  <li>Apaga el circuito, abre el camino conductor e intercala el multímetro (<strong class="text-[#ffb300]">en serie</strong>) para que la corriente pase a través de él.</li>
+                  <li>Enciende el circuito y lee el valor. Solo baja a <code class="text-amber-300">mA</code> si la lectura es menor a 400 mA.</li>
+                </ol>
+              </div>
+
+              <button onclick="loadDmmScenario('high_current'); switchSection('simulator');" class="w-full py-2.5 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-[#ffb300] border border-amber-400/50 font-mono text-xs font-bold transition">
+                Practicar medición de Corriente →
+              </button>
+            </article>
+
+            <!-- TARJETA 3: MEDIR RESISTENCIA -->
+            <article class="lab-card rounded-3xl p-6 flex flex-col justify-between space-y-5 border-emerald-500/35">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-[#00ff88] border border-emerald-500/30 font-mono text-xs font-bold">
+                    3. RESISTENCIA (Ω)
+                  </span>
+                  <span class="text-xs font-mono text-slate-400">Sin Energía</span>
+                </div>
+
+                <!-- Diagrama SVG Resistor Aislado -->
+                <svg viewBox="0 0 240 100" class="w-full h-28 rounded-xl bg-[#04110b] border border-emerald-500/20">
+                  <rect x="55" y="40" width="60" height="20" rx="4" fill="#0f172a" stroke="#00ff88" stroke-width="2" />
+                  <line x1="30" y1="50" x2="55" y2="50" stroke="#94a3b8" stroke-width="2" />
+                  <line x1="115" y1="50" x2="140" y2="50" stroke="#94a3b8" stroke-width="2" />
+                  <circle cx="190" cy="50" r="16" fill="#090d16" stroke="#00ff88" stroke-width="2" />
+                  <text x="185" y="54" fill="#00ff88" font-size="12" font-family="monospace" font-weight="bold">Ω</text>
+                  <polyline points="35,50 35,22 190,22 190,34" fill="none" stroke="#f43f5e" stroke-width="2" />
+                  <polyline points="135,50 135,78 190,78 190,66" fill="none" stroke="#94a3b8" stroke-width="2" />
+                </svg>
+
+                <ol class="space-y-2 text-xs sm:text-sm text-slate-300 list-decimal list-inside leading-relaxed">
+                  <li><strong class="text-rose-300">Desconecta toda fuente de energía</strong> y retira al menos una pata del componente del circuito.</li>
+                  <li>Conecta el cable negro en <strong class="text-white">COM</strong> y el rojo en <strong class="text-rose-300">VΩmA</strong>, y selecciona la escala de <strong class="text-[#00ff88]">Ω</strong>.</li>
+                  <li>Sujeta solo el plástico de las sondas y toca los dos terminales del resistor. Si muestra <code class="text-amber-300">OL</code>, sube la escala.</li>
+                </ol>
+              </div>
+
+              <button onclick="loadDmmScenario('resistor'); switchSection('simulator');" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-[#00ff88] border border-emerald-400/50 font-mono text-xs font-bold transition">
+                Practicar medición de Resistencia →
+              </button>
+            </article>
+          </div>
+
+          <div class="flex justify-between pt-4">
+            <button onclick="switchSection('simulator')" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+              ← Anterior: Simulador
+            </button>
+            <button onclick="switchSection('exercises')" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg">
+              Siguiente: Ejercicios Prácticos →
+            </button>
+          </div>
+        </section>
+
+
+        <!-- =======================================================================
+             SECCIÓN 4: EJERCICIOS PRÁCTICOS (QUIZ INTERACTIVO)
+        ======================================================================== -->
+        <section id="section-exercises" class="section-view hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span class="font-mono text-xs uppercase tracking-widest text-[#ffb300]">Comprueba lo Aprendido</span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+                Ejercicios Prácticos <span class="text-slate-400 font-normal text-lg">(Multimeter Quiz)</span>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                Responde estas 6 preguntas sobre seguridad, selección de escalas y conexión de puntas.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-sm font-bold text-[#ffb300]" id="desktop-score-badge">
+                Puntuación: 0 / 6
+              </div>
+              <button onclick="resetQuiz()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300 border border-slate-700 transition">
+                Reiniciar
+              </button>
+            </div>
+          </div>
+
+          <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Renderizado dinámico por JS -->
+          </div>
+
+          <div class="flex justify-start pt-4">
+            <button onclick="switchSection('modes')" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+              ← Anterior: Guía V, A y Ω
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- =======================================================================
+           BOTÓN INFERIOR PARA VOLVER A INDEX.HTML
+      ======================================================================== -->
+      <div class="pt-6 border-t border-slate-800/90 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-xs font-mono text-slate-400">
+          ¿Deseas regresar al menú de áreas de <span class="text-slate-200">Aprendizaje electrónico interactivo</span>?
+        </p>
+        <a
+          href="../index.html"
+          class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-cyan-500/15 text-[#00e5ff] border border-cyan-500/40 hover:border-[#00e5ff] font-extrabold text-sm transition shadow-[0_0_20px_rgba(0,229,255,0.12)] flex items-center justify-center gap-2.5"
+        >
+          <span>←</span>
+          <span>Volver a la Página Principal (index.html)</span>
+        </a>
+      </div>
+
+    </main>
+
+    <!-- ==================== PANEL DE NAVEGACIÓN DERECHO ==================== -->
+    <aside
+      id="side-panel"
+      aria-label="Navegación del sitio"
+      class="fixed inset-y-0 right-0 z-40 w-72 shrink-0 bg-[#0b101d]/95 lg:bg-[#090d16]/70 backdrop-blur-md border-l border-slate-800/90 transform translate-x-full lg:translate-x-0 lg:sticky lg:top-[69px] lg:h-[calc(100vh-69px)] transition-transform duration-200 ease-out flex flex-col justify-between sidebar-scroll overflow-y-auto"
+    >
+      <div class="p-4 space-y-6">
+        <!-- Encabezado móvil del panel -->
+        <div class="flex items-center justify-between lg:hidden pb-3 border-b border-slate-800">
+          <span class="font-mono text-xs uppercase tracking-wider text-[#00e5ff]">Navegación</span>
+          <button type="button" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-1">
+            ✕
+          </button>
+        </div>
+
+        <!-- Bloque 1: Enlaces a las otras páginas del sitio (editar href con rutas reales) -->
+        <div class="space-y-2">
+          <div class="px-2.5 flex items-center justify-between">
+            <span class="font-mono text-[11px] uppercase tracking-widest text-[#00ff88] font-semibold">
+              Páginas del sitio
+            </span>
+            <a href="../index.html" class="font-mono text-[10px] text-[#00e5ff] hover:underline">
+              Inicio
+            </a>
+          </div>
+
+          <nav class="space-y-1.5">
+            <!-- Página 1 -->
+            <a
+              href="#"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                01
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
+                  Título página 1
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 1]</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
+            </a>
+
+            <!-- Página 2 -->
+            <a
+              href="#"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                02
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
+                  Título página 2
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 2]</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+            </a>
+
+            <!-- Página 3 -->
+            <a
+              href="#"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                03
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
+                  Título página 3
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 3]</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
+            </a>
+
+            <!-- Página 4 -->
+            <a
+              href="#"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-amber-500/10 border border-slate-800/90 hover:border-amber-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#ffb300] bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                04
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#ffb300] transition truncate">
+                  Título página 4
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 4]</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#ffb300] text-xs mt-0.5">↗</span>
+            </a>
+
+            <!-- Página 5 -->
+            <a
+              href="#"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                05
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
+                  Título página 5
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 5]</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Bloque 2: Secciones en index.html -->
+        <div class="space-y-2 pt-3 border-t border-slate-800/80">
+          <div class="px-2.5">
+            <span class="font-mono text-[11px] uppercase tracking-widest text-slate-400 font-semibold">
+              Secciones
+            </span>
+          </div>
+
+          <nav class="space-y-1 text-xs">
+            <a href="../index.html" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+              <span>Conocimientos electrónicos básicos</span>
+            </a>
+            <a href="../index.html#sec-analogica" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+              <span>Diseño electrónico analógico</span>
+            </a>
+            <a href="../index.html#sec-digital" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+              <span>Diseño electrónico digital</span>
+            </a>
+            <a href="../index.html#sec-potencia" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#ffb300]"></span>
+              <span>Electrónica de potencia</span>
+            </a>
+            <a href="../index.html#sec-dsp" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+              <span>Procesamiento digital de señales</span>
+            </a>
+            <a href="../index.html#autor" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              <span>Autor</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Pie del Panel Lateral -->
+      <div class="p-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-500">
+        <a href="../index.html" class="text-[#00e5ff] hover:underline">← Volver a Inicio</a>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ==================== SCRIPTS INTERACTIVOS ==================== -->
+  <script>
+    // 1. CONTROL DEL PANEL LATERAL DERECHO EN MÓVIL
+    function toggleSidebar() {
+      const sidebar = document.getElementById('side-panel');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      sidebar.classList.toggle('translate-x-full');
+      backdrop.classList.toggle('hidden');
+    }
+
+    // 2. NAVEGACIÓN ENTRE PESTAÑAS DE MULTILAB
+    function switchSection(sectionId) {
+      const sections = ['intro', 'simulator', 'modes', 'exercises'];
+      sections.forEach(id => {
+        const el = document.getElementById('section-' + id);
+        const tab = document.getElementById('tab-' + id);
+        if (id === sectionId) {
+          el.classList.remove('hidden');
+          tab.className = 'nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all bg-cyan-500/15 text-[#00e5ff] border border-cyan-400/50 shadow-[0_0_15px_rgba(0,229,255,0.15)]';
+        } else {
+          el.classList.add('hidden');
+          tab.className = 'nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent';
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 3. ANATOMÍA INTERACTIVA DEL MULTÍMETRO
+    const dmmAnatomyData = {
+      display: {
+        badge: 'PARTE 01 • PANTALLA DIGITAL',
+        title: 'Pantalla LCD (Digital Display)',
+        desc: 'Muestra el valor numérico medido junto con el signo negativo (-) si inviertes la polaridad en corriente continua, además de indicadores de unidad o sobrecarga (OL / 1.).',
+        tip: 'Si aparece "OL" (Overload) o un "1" a la izquierda, significa que el valor medido supera la escala seleccionada; gira la perilla a un rango mayor.'
+      },
+      dial: {
+        badge: 'PARTE 02 • SELECTOR ROTATORIO',
+        title: 'Perilla Selectora (Rotary Function Switch)',
+        desc: 'Permite encender el equipo y elegir exactamente qué magnitud eléctrica vas a medir: Voltaje DC (V⎓), Voltaje AC (V~), Corriente (A / mA) o Resistencia (Ω).',
+        tip: 'Coloca siempre la perilla en OFF al terminar tus prácticas para no agotar la batería interna del multímetro.'
+      },
+      jack10a: {
+        badge: 'PARTE 03 • BORNA DE ALTA CORRIENTE',
+        title: 'Entrada 10A (High Current Jack)',
+        desc: 'Conector exclusivo para medir corrientes elevadas (generalmente entre 400 mA y 10 A). Esta entrada suele tener un fusible de alta capacidad o derivación directa.',
+        tip: 'Empieza siempre aquí cuando midas corriente por primera vez y desconozcas el consumo del circuito.'
+      },
+      jackcom: {
+        badge: 'PARTE 04 • REFERENCIA COMÚN',
+        title: 'Borna COM (Common / Ground Terminal)',
+        desc: 'Es el punto de referencia negativo o tierra. El cable de prueba negro permanece conectado aquí para absolutamente todas las mediciones (voltaje, corriente y resistencia).',
+        tip: 'El cable negro nunca cambia de borna.'
+      },
+      jackvoma: {
+        badge: 'PARTE 05 • ENTRADA ESTÁNDAR',
+        title: 'Borna VΩmA (Voltage, Resistance & Low Current)',
+        desc: 'Conector donde se inserta el cable rojo para medir voltaje, resistencia, continuidad y corrientes pequeñas (miliamperios).',
+        tip: 'Nunca conectes aquí el cable rojo si vas a medir más de 400 mA, ni conectes la red eléctrica con la perilla en mA u Ω.'
+      }
+    };
+
+    function selectDmmAnatomy(key) {
+      const data = dmmAnatomyData[key];
+      if (!data) return;
+
+      document.querySelectorAll('.dmm-zone').forEach(btn => btn.classList.remove('anatomy-zone-active'));
+      const active = document.getElementById('dmm-zone-' + key);
+      if (active) active.classList.add('anatomy-zone-active');
+
+      document.getElementById('dmm-anatomy-detail').innerHTML = `
+        <span class="inline-block font-mono text-xs px-2.5 py-1 rounded-lg bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
+          ${data.badge}
+        </span>
+        <h3 class="text-xl sm:text-2xl font-extrabold text-white">${data.title}</h3>
+        <p class="text-sm text-slate-300 leading-relaxed">${data.desc}</p>
+        <div class="p-3.5 rounded-2xl bg-[#090d16]/90 border border-amber-500/30 text-xs text-amber-200 leading-relaxed">
+          <strong class="text-[#ffb300]">Nota clave:</strong> ${data.tip}
+        </div>
+      `;
+    }
+
+    // 4. GLOSARIO BILINGÜE INTERACTIVO
+    const glossaryTerms = [
+      { en: 'DC Voltage (V⎓)', es: 'Voltaje Continuo', def: 'Tensión eléctrica con polaridad fija (positivo y negativo), típica de pilas, baterías y fuentes reguladas.' },
+      { en: 'AC Voltage (V~)', es: 'Voltaje Alterno', def: 'Tensión que cambia periódicamente de polaridad, como la energía eléctrica de los tomacorrientes.' },
+      { en: 'Parallel Connection', es: 'Conexión en Paralelo', def: 'Colocar las puntas del multímetro a ambos lados de un componente sin desconectarlo. Obligatoria para medir voltaje.' },
+      { en: 'Series Connection', es: 'Conexión en Serie', def: 'Abrir el circuito e intercalar el multímetro como parte del camino de la corriente. Obligatoria para medir amperios.' },
+      { en: 'Overload (OL)', es: 'Sobrecarga / Fuera de Rango', def: 'Indica que la magnitud medida es mayor que la escala elegida o que existe un circuito abierto en resistencia.' },
+      { en: 'COM (Common)', es: 'Terminal Común', def: 'Borna de referencia negativa donde siempre se conecta la sonda de color negro.' },
+      { en: 'Test Leads / Probes', es: 'Puntas de Prueba', def: 'Cables aislados rojo (+) y negro (-) con puntas metálicas para hacer contacto con los puntos del circuito.' },
+      { en: 'Internal Fuse', es: 'Fusible Interno', def: 'Elemento de protección dentro del multímetro que se funde si se excede la corriente permitida en la borna mA o 10A.' }
+    ];
+
+    function renderGlossary(list) {
+      const grid = document.getElementById('glossary-grid');
+      grid.innerHTML = list.map(item => `
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front lab-card p-5 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono uppercase tracking-wider text-[#00e5ff] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/30">EN / ES</span>
+                <span class="text-[11px] font-mono text-slate-500">Clic para voltear ↻</span>
+              </div>
+              <div>
+                <h3 class="text-lg font-extrabold text-white">${item.en}</h3>
+                <p class="text-sm font-mono text-[#ffb300] mt-1">${item.es}</p>
+              </div>
+              <div class="text-[11px] text-slate-400">Ver definición →</div>
+            </div>
+            <div class="flip-card-back bg-[#0f1c2e] border border-cyan-400/50 p-5 flex flex-col justify-between">
+              <span class="text-xs font-mono font-bold text-[#00e5ff]">${item.es} (${item.en})</span>
+              <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">${item.def}</p>
+              <span class="text-[10px] font-mono text-slate-400">Clic para regresar ↺</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterGlossary() {
+      const q = document.getElementById('glossary-search').value.toLowerCase().trim();
+      const filtered = glossaryTerms.filter(t =>
+        t.en.toLowerCase().includes(q) ||
+        t.es.toLowerCase().includes(q) ||
+        t.def.toLowerCase().includes(q)
+      );
+      renderGlossary(filtered);
+    }
+
+    // 5. SIMULADOR INTERACTIVO DE MULTÍMETRO
+    const dmmScenarios = {
+      dc_battery: {
+        title: 'Escenario: Batería Alcalina 9.0 V DC',
+        hint: 'Objetivo: Medir Voltaje DC (Paralelo)',
+        type: 'VDC',
+        actualValue: 9.0,
+        unit: 'V',
+        defaultJack: 'voma',
+        defaultDial: 'VDC_20',
+        defaultConn: 'parallel',
+        defaultPower: true
+      },
+      ac_outlet: {
+        title: 'Escenario: Tomacorriente 120 V AC',
+        hint: 'Objetivo: Medir Voltaje AC (Paralelo)',
+        type: 'VAC',
+        actualValue: 120.0,
+        unit: 'V~',
+        defaultJack: 'voma',
+        defaultDial: 'VAC_600',
+        defaultConn: 'parallel',
+        defaultPower: true
+      },
+      low_current: {
+        title: 'Escenario: Circuito LED 250 mA (0.25 A)',
+        hint: 'Objetivo: Medir Corriente (Serie, empezar en 10A)',
+        type: 'IDC',
+        actualValue: 0.25, // Amperios
+        unit: 'A',
+        defaultJack: '10a',
+        defaultDial: 'ADC_10A',
+        defaultConn: 'series',
+        defaultPower: true
+      },
+      high_current: {
+        title: 'Escenario: Motor DC 2.40 A (Alta Corriente)',
+        hint: 'Objetivo: Medir 2.40 A usando borna 10A en Serie',
+        type: 'IDC',
+        actualValue: 2.40, // Amperios
+        unit: 'A',
+        defaultJack: '10a',
+        defaultDial: 'ADC_10A',
+        defaultConn: 'series',
+        defaultPower: true
+      },
+      resistor: {
+        title: 'Escenario: Resistor de 4.70 kΩ (4,700 Ω)',
+        hint: 'Objetivo: Medir Resistencia con Energía OFF',
+        type: 'OHM',
+        actualValue: 4700, // Ohmios
+        unit: 'kΩ',
+        defaultJack: 'voma',
+        defaultDial: 'OHM_20K',
+        defaultConn: 'isolated',
+        defaultPower: false
+      }
+    };
+
+    const dmmState = {
+      scenarioKey: 'dc_battery',
+      redJack: 'voma',
+      dial: 'VDC_20',
+      connType: 'parallel',
+      circuitPower: true
+    };
+
+    function loadDmmScenario(key) {
+      const sc = dmmScenarios[key];
+      if (!sc) return;
+      dmmState.scenarioKey = key;
+      dmmState.redJack = sc.defaultJack;
+      dmmState.dial = sc.defaultDial;
+      dmmState.connType = sc.defaultConn;
+      dmmState.circuitPower = sc.defaultPower;
+
+      document.querySelectorAll('.scen-btn').forEach(b => {
+        b.className = 'scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition';
+      });
+      const activeBtn = document.getElementById('scen-btn-' + key);
+      if (activeBtn) {
+        activeBtn.className = 'scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 transition';
+      }
+
+      document.getElementById('ctrl-dmm-dial').value = dmmState.dial;
+      syncDmmControlButtons();
+      updateDmmSim();
+    }
+
+    function setRedJack(jack) {
+      dmmState.redJack = jack;
+      syncDmmControlButtons();
+      updateDmmSim();
+    }
+
+    function setConnType(conn) {
+      dmmState.connType = conn;
+      syncDmmControlButtons();
+      updateDmmSim();
+    }
+
+    function toggleCircuitPower() {
+      dmmState.circuitPower = !dmmState.circuitPower;
+      syncDmmControlButtons();
+      updateDmmSim();
+    }
+
+    function syncDmmControlButtons() {
+      // Jacks
+      document.getElementById('btn-jack-voma').className = dmmState.redJack === 'voma'
+        ? 'py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/60 transition'
+        : 'py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition';
+      document.getElementById('btn-jack-10a').className = dmmState.redJack === '10a'
+        ? 'py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-amber-500/20 text-[#ffb300] border border-amber-400/60 transition'
+        : 'py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition';
+
+      // Connections
+      ['parallel', 'series', 'isolated'].forEach(c => {
+        const btn = document.getElementById('btn-conn-' + c);
+        btn.className = dmmState.connType === c
+          ? 'text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 transition'
+          : 'text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition';
+      });
+
+      // Power button
+      const pBtn = document.getElementById('btn-circuit-power');
+      pBtn.textContent = dmmState.circuitPower ? 'ENERGÍA: ON' : 'ENERGÍA: OFF';
+      pBtn.className = dmmState.circuitPower
+        ? 'px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-emerald-500/20 text-[#00ff88] border border-emerald-500/40 transition'
+        : 'px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700 transition';
+    }
+
+    function updateDmmSim() {
+      dmmState.dial = document.getElementById('ctrl-dmm-dial').value;
+      const sc = dmmScenarios[dmmState.scenarioKey];
+
+      document.getElementById('sim-scen-title').textContent = sc.title;
+      document.getElementById('sim-scen-hint').textContent = sc.hint;
+      document.getElementById('lcd-jack-badge').textContent = `CLAVIJA ROJA: ${dmmState.redJack === '10a' ? '10A' : 'VΩmA'}`;
+
+      const connLabels = { parallel: 'Paralelo', series: 'Serie', isolated: 'Componente Aislado' };
+      document.getElementById('lcd-conn-info').textContent = `Conexión: ${connLabels[dmmState.connType]}`;
+
+      const dialLabels = {
+        OFF: 'Apagado (OFF)',
+        VDC_20: '20 V DC',
+        VDC_200: '200 V DC',
+        VAC_600: '600 V AC',
+        ADC_10A: '10 A DC',
+        ADC_400MA: '400 mA DC',
+        OHM_2K: '2 kΩ',
+        OHM_20K: '20 kΩ'
+      };
+      document.getElementById('lcd-range-info').textContent = `Escala: ${dialLabels[dmmState.dial]}`;
+
+      let valText = '0.00';
+      let unitText = '';
+      let modeText = 'MODO: APAGADO';
+      let statusLevel = 'ok'; // ok | warn | danger
+      let fbTitle = '';
+      let fbDesc = '';
+
+      if (dmmState.dial === 'OFF') {
+        valText = '----';
+        unitText = '';
+        modeText = 'MODO: APAGADO (OFF)';
+        statusLevel = 'warn';
+        fbTitle = 'Multímetro Apagado';
+        fbDesc = 'Gira la perilla selectora hacia la magnitud que deseas medir (V⎓, V~, A⎓ u Ω).';
+      }
+      // Peligro: medir voltaje en paralelo con modo corriente
+      else if ((dmmState.dial === 'ADC_10A' || dmmState.dial === 'ADC_400MA') && dmmState.connType === 'parallel' && dmmState.circuitPower) {
+        valText = 'ERR !';
+        unitText = 'FUSE';
+        modeText = '¡PELIGRO DE CORTOCIRCUITO!';
+        statusLevel = 'danger';
+        fbTitle = '⚠ PELIGRO: Cortocircuito por conexión en paralelo en modo Corriente';
+        fbDesc = 'Nunca conectes el multímetro en paralelo cuando está configurado como amperímetro (A/mA). Su resistencia interna es casi nula y quemará el fusible o dañará la fuente.';
+      }
+      // Peligro: medir resistencia con circuito energizado
+      else if ((dmmState.dial === 'OHM_2K' || dmmState.dial === 'OHM_20K') && dmmState.circuitPower) {
+        valText = 'ERR Ω';
+        unitText = 'PWR!';
+        modeText = 'MODO: ÓHMETRO (Ω)';
+        statusLevel = 'danger';
+        fbTitle = '⚠ ADVERTENCIA: Circuito energizado al medir Resistencia';
+        fbDesc = 'Nunca midas resistencia con el circuito encendido. Apaga la energía (ENERGÍA: OFF) y aísla el componente para evitar lecturas erróneas y daños al multímetro.';
+      }
+      // Caso 1: Voltaje DC
+      else if (dmmState.dial === 'VDC_20' || dmmState.dial === 'VDC_200') {
+        modeText = 'MODO: VOLTAJE DC (V⎓)';
+        unitText = 'V';
+        if (dmmState.redJack !== 'voma') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Clavija roja en borna incorrecta';
+          fbDesc = 'Para medir voltaje debes conectar la punta roja en la borna VΩmA, no en 10A.';
+        } else if (!dmmState.circuitPower) {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Circuito sin energía';
+          fbDesc = 'El circuito está apagado; enciende la energía para medir voltaje.';
+        } else if (sc.type !== 'VDC') {
+          valText = sc.type === 'VAC' ? '0.02' : '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Tipo de señal distinto';
+          fbDesc = sc.type === 'VAC'
+            ? 'Estás midiendo una fuente de Corriente Alterna (AC) con el selector en DC. Cambia a V~ 600 V.'
+            : 'Este escenario requiere medir corriente o resistencia, no voltaje DC.';
+        } else if (dmmState.connType !== 'parallel') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Conexión incorrecta para Voltaje';
+          fbDesc = 'El voltaje se mide siempre en PARALELO (tocando ambos extremos del componente).';
+        } else {
+          const maxRange = dmmState.dial === 'VDC_20' ? 20 : 200;
+          if (sc.actualValue > maxRange) {
+            valText = 'OL';
+            statusLevel = 'warn';
+            fbTitle = 'Sobrecarga (OL) — Escala insuficiente';
+            fbDesc = 'El voltaje supera la escala elegida. Selecciona una escala superior.';
+          } else {
+            valText = sc.actualValue.toFixed(2);
+            statusLevel = 'ok';
+            fbTitle = '✓ Medición de Voltaje DC Correcta';
+            fbDesc = 'Conexión en paralelo, borna VΩmA y escala adecuada. Recuerda sujetar las puntas solo por el aislante.';
+          }
+        }
+      }
+      // Caso 2: Voltaje AC
+      else if (dmmState.dial === 'VAC_600') {
+        modeText = 'MODO: VOLTAJE AC (V~)';
+        unitText = 'V~';
+        if (dmmState.redJack !== 'voma') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Clavija roja incorrecta';
+          fbDesc = 'Conecta la punta roja en VΩmA para medir voltaje alterno.';
+        } else if (sc.type !== 'VAC' || !dmmState.circuitPower) {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Sin señal alterna detectada';
+          fbDesc = 'Selecciona el escenario Toma 120V AC y verifica que la conexión esté en paralelo con energía ON.';
+        } else if (dmmState.connType !== 'parallel') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Conecta en Paralelo';
+          fbDesc = 'El voltaje alterno debe medirse en paralelo entre fase y neutro.';
+        } else {
+          valText = sc.actualValue.toFixed(1);
+          statusLevel = 'ok';
+          fbTitle = '✓ Medición de Voltaje AC Segura';
+          fbDesc = 'Escala de 600 V~ seleccionada correctamente para medir 120 V AC en paralelo.';
+        }
+      }
+      // Caso 3: Corriente DC
+      else if (dmmState.dial === 'ADC_10A' || dmmState.dial === 'ADC_400MA') {
+        modeText = dmmState.dial === 'ADC_10A' ? 'MODO: CORRIENTE 10A (A⎓)' : 'MODO: CORRIENTE mA (mA⎓)';
+        unitText = dmmState.dial === 'ADC_10A' ? 'A' : 'mA';
+
+        if (sc.type !== 'IDC' || !dmmState.circuitPower) {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Sin flujo de corriente en este escenario';
+          fbDesc = 'Para practicar corriente, selecciona "Circuito 250 mA" o "Motor 2.4 A" con el multímetro conectado en SERIE.';
+        } else if (dmmState.connType !== 'series') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'El amperímetro debe conectarse en SERIE';
+          fbDesc = 'Para medir corriente debes abrir el circuito e intercalar el multímetro en serie con la carga.';
+        } else if (dmmState.dial === 'ADC_10A' && dmmState.redJack !== '10a') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Cambia la punta roja a la borna 10A';
+          fbDesc = 'La escala de 10 A utiliza exclusivamente la entrada física 10A.';
+        } else if (dmmState.dial === 'ADC_400MA' && dmmState.redJack !== 'voma') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Cambia la punta roja a VΩmA';
+          fbDesc = 'La escala de 400 mA utiliza la borna VΩmA.';
+        } else if (dmmState.dial === 'ADC_400MA' && sc.actualValue > 0.4) {
+          valText = 'FUSE !';
+          statusLevel = 'danger';
+          fbTitle = '⚠ FUSIBLE QUEMADO: Corriente excede 400 mA';
+          fbDesc = 'Intentaste medir 2.40 A (2,400 mA) en la escala de 400 mA. Por seguridad, empieza siempre en la escala más alta (10A).';
+        } else {
+          if (dmmState.dial === 'ADC_10A') {
+            valText = sc.actualValue.toFixed(2);
+          } else {
+            valText = (sc.actualValue * 1000).toFixed(0);
+          }
+          statusLevel = 'ok';
+          fbTitle = '✓ Medición de Corriente Correcta';
+          fbDesc = dmmState.dial === 'ADC_10A'
+            ? 'Excelente práctica: iniciaste en la escala más alta (10A) con conexión en serie.'
+            : 'Lectura precisa en miliamperios dentro del límite seguro de 400 mA.';
+        }
+      }
+      // Caso 4: Resistencia
+      else if (dmmState.dial === 'OHM_2K' || dmmState.dial === 'OHM_20K') {
+        modeText = 'MODO: RESISTENCIA (Ω)';
+        unitText = 'kΩ';
+        if (dmmState.redJack !== 'voma') {
+          valText = 'OL';
+          statusLevel = 'warn';
+          fbTitle = 'Conecta la punta roja en VΩmA';
+          fbDesc = 'Para medir ohmios la punta roja debe estar en la borna VΩmA.';
+        } else if (sc.type !== 'OHM') {
+          valText = 'OL';
+          statusLevel = 'warn';
+          fbTitle = 'Selecciona el escenario Resistor 4.7 kΩ';
+          fbDesc = 'El óhmetro mide resistencia de componentes pasivos desconectados.';
+        } else if (dmmState.connType !== 'isolated') {
+          valText = 'OL';
+          statusLevel = 'warn';
+          fbTitle = 'Aísla el componente';
+          fbDesc = 'Desconecta el resistor del resto del circuito para evitar que otras ramas alteren la lectura.';
+        } else if (dmmState.dial === 'OHM_2K') {
+          valText = 'OL';
+          statusLevel = 'warn';
+          fbTitle = 'Sobrecarga (OL): El resistor supera 2 kΩ';
+          fbDesc = 'El resistor es de 4.7 kΩ y la escala máxima elegida es 2 kΩ. Cambia la perilla a 20 kΩ.';
+        } else {
+          valText = (sc.actualValue / 1000).toFixed(2);
+          statusLevel = 'ok';
+          fbTitle = '✓ Medición de Resistencia Correcta (4.70 kΩ)';
+          fbDesc = 'Circuito sin energía, componente aislado, borna VΩmA y escala de 20 kΩ.';
+        }
+      }
+
+      document.getElementById('lcd-mode-badge').textContent = modeText;
+      document.getElementById('lcd-main-value').textContent = valText;
+      document.getElementById('lcd-main-unit').textContent = unitText;
+
+      const valEl = document.getElementById('lcd-main-value');
+      const fbBox = document.getElementById('dmm-feedback-box');
+      const fbTitleEl = document.getElementById('dmm-feedback-title');
+      const diagTag = document.getElementById('diagram-status-tag');
+
+      if (statusLevel === 'ok') {
+        valEl.className = 'font-mono text-4xl sm:text-6xl font-extrabold text-[#00ff88] tracking-wider';
+        fbBox.className = 'rounded-3xl p-5 border bg-emerald-500/10 border-emerald-500/40 text-emerald-200 space-y-1.5';
+        fbTitleEl.className = 'font-mono text-xs font-bold uppercase tracking-wider text-[#00ff88]';
+        diagTag.className = 'text-[#00ff88]';
+        diagTag.textContent = 'Conexión Válida';
+      } else if (statusLevel === 'warn') {
+        valEl.className = 'font-mono text-4xl sm:text-6xl font-extrabold text-[#ffb300] tracking-wider';
+        fbBox.className = 'rounded-3xl p-5 border bg-amber-500/10 border-amber-500/40 text-amber-200 space-y-1.5';
+        fbTitleEl.className = 'font-mono text-xs font-bold uppercase tracking-wider text-[#ffb300]';
+        diagTag.className = 'text-[#ffb300]';
+        diagTag.textContent = 'Revisar Ajuste';
+      } else {
+        valEl.className = 'font-mono text-4xl sm:text-6xl font-extrabold text-rose-400 tracking-wider';
+        fbBox.className = 'rounded-3xl p-5 border bg-rose-500/15 border-rose-500/50 text-rose-200 space-y-1.5';
+        fbTitleEl.className = 'font-mono text-xs font-bold uppercase tracking-wider text-rose-400';
+        diagTag.className = 'text-rose-400';
+        diagTag.textContent = '¡Alerta de Seguridad!';
+      }
+
+      fbTitleEl.textContent = fbTitle;
+      document.getElementById('dmm-feedback-desc').textContent = fbDesc;
+
+      renderConnectionSvg();
+    }
+
+    function renderConnectionSvg() {
+      const svg = document.getElementById('connection-svg');
+      const redColor = dmmState.redJack === '10a' ? '#ffb300' : '#f43f5e';
+
+      if (dmmState.connType === 'parallel') {
+        svg.innerHTML = `
+          <rect x="20" y="30" width="75" height="90" rx="10" fill="#0f172a" stroke="#334155" stroke-width="2" />
+          <text x="32" y="72" fill="#e2e8f0" font-size="11" font-family="monospace">CIRCUITO</text>
+          <text x="34" y="88" fill="${dmmState.circuitPower ? '#00ff88' : '#64748b'}" font-size="10" font-family="monospace">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
+          <line x1="95" y1="45" x2="215" y2="45" stroke="#94a3b8" stroke-width="2.5" />
+          <line x1="95" y1="105" x2="215" y2="105" stroke="#94a3b8" stroke-width="2.5" />
+          <rect x="200" y="45" width="30" height="60" rx="5" fill="#131c2e" stroke="#00e5ff" stroke-width="2" />
+          <text x="206" y="79" fill="#00e5ff" font-size="10" font-family="monospace">DUT</text>
+          <!-- Cables en paralelo -->
+          <polyline points="215,45 320,45 320,58" fill="none" stroke="${redColor}" stroke-width="3" />
+          <polyline points="215,105 320,105 320,92" fill="none" stroke="#94a3b8" stroke-width="3" />
+          <rect x="295" y="52" width="135" height="46" rx="10" fill="#090d16" stroke="#00e5ff" stroke-width="2" />
+          <text x="310" y="73" fill="#00e5ff" font-size="11" font-family="monospace" font-weight="bold">DMM (PARALELO)</text>
+          <text x="310" y="88" fill="${redColor}" font-size="10" font-family="monospace">Rojo: ${dmmState.redJack.toUpperCase()} | COM</text>
+        `;
+      } else if (dmmState.connType === 'series') {
+        svg.innerHTML = `
+          <rect x="20" y="30" width="75" height="90" rx="10" fill="#0f172a" stroke="#334155" stroke-width="2" />
+          <text x="32" y="72" fill="#e2e8f0" font-size="11" font-family="monospace">FUENTE</text>
+          <text x="34" y="88" fill="${dmmState.circuitPower ? '#00ff88' : '#64748b'}" font-size="10" font-family="monospace">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
+          <!-- Cable rojo entra al DMM en serie -->
+          <line x1="95" y1="45" x2="175" y2="45" stroke="${redColor}" stroke-width="3" />
+          <rect x="175" y="25" width="130" height="42" rx="10" fill="#090d16" stroke="#ffb300" stroke-width="2" />
+          <text x="192" y="44" fill="#ffb300" font-size="11" font-family="monospace" font-weight="bold">DMM (SERIE)</text>
+          <text x="192" y="58" fill="${redColor}" font-size="10" font-family="monospace">${dmmState.redJack.toUpperCase()} → COM</text>
+          <!-- Cable negro sale hacia la carga -->
+          <line x1="305" y1="45" x2="380" y2="45" stroke="#94a3b8" stroke-width="3" />
+          <rect x="365" y="45" width="30" height="60" rx="5" fill="#131c2e" stroke="#ffb300" stroke-width="2" />
+          <text x="370" y="79" fill="#ffb300" font-size="10" font-family="monospace">CARGA</text>
+          <line x1="95" y1="105" x2="380" y2="105" stroke="#94a3b8" stroke-width="2.5" />
+        `;
+      } else {
+        svg.innerHTML = `
+          <rect x="45" y="55" width="120" height="36" rx="8" fill="#131c2e" stroke="#00ff88" stroke-width="2" />
+          <text x="72" y="77" fill="#00ff88" font-size="11" font-family="monospace" font-weight="bold">4.7 kΩ (AISLADO)</text>
+          <line x1="25" y1="73" x2="45" y2="73" stroke="#94a3b8" stroke-width="2.5" />
+          <line x1="165" y1="73" x2="185" y2="73" stroke="#94a3b8" stroke-width="2.5" />
+          <polyline points="30,73 30,28 310,28 310,50" fill="none" stroke="${redColor}" stroke-width="3" />
+          <polyline points="180,73 180,118 310,118 310,96" fill="none" stroke="#94a3b8" stroke-width="3" />
+          <rect x="275" y="50" width="150" height="46" rx="10" fill="#090d16" stroke="#00ff88" stroke-width="2" />
+          <text x="292" y="70" fill="#00ff88" font-size="11" font-family="monospace" font-weight="bold">DMM (ÓHMETRO)</text>
+          <text x="292" y="85" fill="#94a3b8" font-size="10" font-family="monospace">Circuito sin energía</text>
+        `;
+      }
+    }
+
+    // 6. EJERCICIOS PRÁCTICOS (QUIZ DE 6 PREGUNTAS)
+    const quizQuestions = [
+      {
+        q: '1. ¿Por qué debes evitar tocar las puntas metálicas del multímetro mientras realizas una medición?',
+        options: [
+          'Porque puedes sufrir una descarga eléctrica y alterar la lectura (especialmente en resistencia)',
+          'Porque la pantalla LCD se apaga automáticamente',
+          'Porque descarga la batería del multímetro'
+        ],
+        answer: 0
+      },
+      {
+        q: '2. Si vas a medir una corriente continua desconocida, ¿qué escala y borna debes usar primero?',
+        options: [
+          'La escala más baja (mA) en la borna VΩmA',
+          'La escala más alta (10A) con la punta roja en la borna 10A',
+          'La escala de 20 kΩ en la borna COM'
+        ],
+        answer: 1
+      },
+      {
+        q: '3. ¿Cómo se debe conectar el multímetro para medir el voltaje de una batería o resistencia?',
+        options: [
+          'En serie, cortando uno de los cables del circuito',
+          'En paralelo, tocando ambos terminales del componente',
+          'Con la fuente de alimentación apagada'
+        ],
+        answer: 1
+      },
+      {
+        q: '4. ¿Qué ocurre si conectas el multímetro en paralelo a una batería mientras está en modo Amperímetro (10A o mA)?',
+        options: [
+          'Mide el voltaje con mayor precisión',
+          'Provocas un cortocircuito directo que puede fundir el fusible interno del equipo',
+          'El multímetro cambia automáticamente a voltímetro'
+        ],
+        answer: 1
+      },
+      {
+        q: '5. ¿Qué precaución es indispensable antes de medir el valor de una resistencia (Ω)?',
+        options: [
+          'Desconectar la energía del circuito y aislar al menos un terminal del resistor',
+          'Colocar la punta roja en la borna 10A',
+          'Seleccionar el modo de voltaje alterno (V~)'
+        ],
+        answer: 0
+      },
+      {
+        q: '6. ¿En qué borna del multímetro debe permanecer siempre conectado el cable de prueba negro?',
+        options: [
+          'VΩmA',
+          '10A',
+          'COM'
+        ],
+        answer: 2
+      }
+    ];
+
+    const userAnswers = new Array(quizQuestions.length).fill(null);
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = quizQuestions.map((item, qIdx) => `
+        <div class="lab-card rounded-3xl p-5 space-y-3">
+          <p class="font-bold text-white text-sm leading-relaxed">${item.q}</p>
+          <div class="space-y-2">
+            ${item.options.map((opt, oIdx) => {
+              let btnClass = 'w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-mono border transition ';
+              if (userAnswers[qIdx] === null) {
+                btnClass += 'bg-slate-900/90 hover:bg-slate-800 border-slate-800 text-slate-300';
+              } else if (oIdx === item.answer) {
+                btnClass += 'bg-emerald-500/20 border-emerald-400 text-[#00ff88] font-bold';
+              } else if (oIdx === userAnswers[qIdx]) {
+                btnClass += 'bg-rose-500/20 border-rose-400 text-rose-300';
+              } else {
+                btnClass += 'bg-slate-900/50 border-slate-800/60 text-slate-500';
+              }
+              return `<button type="button" onclick="answerQuiz(${qIdx}, ${oIdx})" class="${btnClass}">${opt}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      const score = userAnswers.reduce((acc, ans, idx) => acc + (ans === quizQuestions[idx].answer ? 1 : 0), 0);
+      document.getElementById('desktop-score-badge').textContent = `Puntuación: ${score} / ${quizQuestions.length}`;
+      document.getElementById('mobile-score-badge').textContent = `Quiz: ${score}/${quizQuestions.length}`;
+    }
+
+    function answerQuiz(qIdx, oIdx) {
+      userAnswers[qIdx] = oIdx;
+      renderQuiz();
+    }
+
+    function resetQuiz() {
+      userAnswers.fill(null);
+      renderQuiz();
+    }
+
+    // Inicialización al cargar la página
+    selectDmmAnatomy('display');
+    renderGlossary(glossaryTerms);
+    loadDmmScenario('dc_battery');
+    renderQuiz();
+  </script>
+</body>
+</html>

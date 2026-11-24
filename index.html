@@ -102,12 +102,34 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-cyan-400/20 selection:text-cyan-300">
 
-  <!-- ==================== BARRA SUPERIOR FIJA (SIN ACCESO DIRECTO A OSCILOLAB) ==================== -->
-  <header class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/90">
-    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+  <!-- ==================== BARRA SUPERIOR FIJA (ANCHO COMPLETO) ==================== -->
+  <header class="sticky top-0 z-50 w-full bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/90">
+    <div class="w-full px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between py-3.5 gap-4">
-        <!-- Botón de menú móvil + Título del sitio -->
-        <div class="flex items-center gap-3">
+        <!-- Título del sitio -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(0,255,136,0.2)] group-hover:border-[#00ff88] transition">
+            <svg class="w-6 h-6 text-[#00ff88]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12h4l3-7 4 14 3-7h6" />
+              <circle cx="19" cy="12" r="1.5" fill="currentColor" />
+            </svg>
+          </div>
+          <div>
+            <span class="font-extrabold text-base sm:text-lg tracking-tight text-white block">
+              Aprendizaje electrónico interactivo
+            </span>
+            <span class="text-xs font-mono text-slate-400 block">
+              [Subtítulo general]
+            </span>
+          </div>
+        </a>
+
+        <!-- Enlace a sección de autor + Botón menú móvil a la derecha -->
+        <div class="flex items-center gap-2.5">
+          <a href="#autor" class="text-xs font-mono text-slate-300 hover:text-[#00e5ff] transition px-3 py-1.5 rounded-lg border border-slate-800 hover:border-cyan-500/40">
+            Autor
+          </a>
+
           <button
             type="button"
             onclick="toggleSidebar()"
@@ -118,30 +140,6 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-
-          <a href="index.html" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(0,255,136,0.2)] group-hover:border-[#00ff88] transition">
-              <svg class="w-6 h-6 text-[#00ff88]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 12h4l3-7 4 14 3-7h6" />
-                <circle cx="19" cy="12" r="1.5" fill="currentColor" />
-              </svg>
-            </div>
-            <div>
-              <span class="font-extrabold text-base sm:text-lg tracking-tight text-white block">
-                Aprendizaje electrónico interactivo
-              </span>
-              <span class="text-xs font-mono text-slate-400 block">
-                [Subtítulo general]
-              </span>
-            </div>
-          </a>
-        </div>
-
-        <!-- Enlace a sección de autor -->
-        <div class="flex items-center gap-3">
-          <a href="#autor" class="text-xs font-mono text-slate-300 hover:text-[#00e5ff] transition px-3 py-1.5 rounded-lg border border-slate-800 hover:border-cyan-500/40">
-            Autor
-          </a>
         </div>
       </div>
     </div>
@@ -154,162 +152,8 @@
     class="fixed inset-0 bg-black/65 backdrop-blur-xs z-40 hidden lg:hidden"
   ></div>
 
-  <!-- ==================== CONTENEDOR FLEX: PANEL IZQUIERDO + CONTENIDO ==================== -->
-  <div class="flex-1 flex max-w-[1440px] w-full mx-auto">
-
-    <!-- ==================== PANEL DE NAVEGACIÓN IZQUIERDO ==================== -->
-    <aside
-      id="left-sidebar"
-      aria-label="Navegación del sitio"
-      class="fixed inset-y-0 left-0 z-40 w-72 bg-[#0b101d]/95 lg:bg-[#090d16]/70 backdrop-blur-md border-r border-slate-800/90 transform -translate-x-full lg:translate-x-0 lg:sticky lg:top-[69px] lg:h-[calc(100vh-69px)] transition-transform duration-200 ease-out flex flex-col justify-between sidebar-scroll overflow-y-auto"
-    >
-      <div class="p-4 space-y-6">
-        <!-- Encabezado móvil del panel -->
-        <div class="flex items-center justify-between lg:hidden pb-3 border-b border-slate-800">
-          <span class="font-mono text-xs uppercase tracking-wider text-[#00e5ff]">Navegación</span>
-          <button type="button" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-1">
-            ✕
-          </button>
-        </div>
-
-        <!-- Bloque 1: Enlaces a las páginas del sitio -->
-        <div class="space-y-2">
-          <div class="px-2.5">
-            <span class="font-mono text-[11px] uppercase tracking-widest text-[#00ff88] font-semibold">
-              Páginas del sitio
-            </span>
-          </div>
-
-          <nav class="space-y-1.5">
-            <!-- Enlace 1: lab_interact_osc_1.html -->
-            <a
-              href="electronics_basic/lab_interact_osc_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                01
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
-                  Título página 1
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">lab_interact_osc_1.html</p>
-              </div>
-              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
-            </a>
-
-            <!-- Enlace 2: diodo_1.html -->
-            <a
-              href="diodo_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                02
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
-                  Título página 2
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">diodo_1.html</p>
-              </div>
-              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
-            </a>
-
-            <!-- Enlace 3: binary_code_1.html -->
-            <a
-              href="binary_code_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                03
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
-                  Título página 3
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">binary_code_1.html</p>
-              </div>
-              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
-            </a>
-
-            <!-- Enlace 4: SCR_1.html -->
-            <a
-              href="SCR_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-amber-500/10 border border-slate-800/90 hover:border-amber-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#ffb300] bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                04
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#ffb300] transition truncate">
-                  Título página 4
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">SCR_1.html</p>
-              </div>
-              <span class="text-slate-500 group-hover:text-[#ffb300] text-xs mt-0.5">↗</span>
-            </a>
-
-            <!-- Enlace 5: basic_psd_1.html -->
-            <a
-              href="basic_psd_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                05
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
-                  Título página 5
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">basic_psd_1.html</p>
-              </div>
-              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
-            </a>
-          </nav>
-        </div>
-
-        <!-- Bloque 2: Secciones en esta página -->
-        <div class="space-y-2 pt-3 border-t border-slate-800/80">
-          <div class="px-2.5">
-            <span class="font-mono text-[11px] uppercase tracking-widest text-slate-400 font-semibold">
-              Secciones
-            </span>
-          </div>
-
-          <nav class="space-y-1 text-xs">
-            <a href="#sec-basica" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
-              <span>Conocimientos electrónicos básicos</span>
-            </a>
-            <a href="#sec-analogica" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
-              <span>Diseño electrónico analógico</span>
-            </a>
-            <a href="#sec-digital" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
-              <span>Diseño electrónico digital</span>
-            </a>
-            <a href="#sec-potencia" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#ffb300]"></span>
-              <span>Electrónica de potencia</span>
-            </a>
-            <a href="#sec-dsp" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
-              <span>Procesamiento digital de señales</span>
-            </a>
-            <a href="#autor" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-              <span>Autor</span>
-            </a>
-          </nav>
-        </div>
-      </div>
-
-      <!-- Pie del Panel Lateral -->
-      <div class="p-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-500">
-        <span>[Texto pie panel]</span>
-      </div>
-    </aside>
+  <!-- ==================== CONTENEDOR FLEX DE ANCHO COMPLETO (SIN MÁRGENES LATERALES) ==================== -->
+  <div class="flex-1 flex w-full">
 
     <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
     <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8 space-y-12">
@@ -350,9 +194,8 @@
 
               <!-- Ventana de visualización del carrusel -->
               <div class="scope-screen-wrap rounded-xl w-full h-56 sm:h-64 relative group">
-                <!-- Pista deslizante de 4 imágenes -->
                 <div id="carousel-track" class="flex w-full h-full transition-transform duration-500 ease-out">
-                  <!-- SLIDE 1: Cambia src="imagen1.jpg" por la ruta de tu imagen 1 -->
+                  <!-- SLIDE 1 -->
                   <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-[#06131c]">
                     <img
                       src="imagen1.jpg"
@@ -366,7 +209,7 @@
                     </div>
                   </div>
 
-                  <!-- SLIDE 2: Cambia src="imagen2.jpg" por la ruta de tu imagen 2 -->
+                  <!-- SLIDE 2 -->
                   <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-[#06131c]">
                     <img
                       src="imagen2.jpg"
@@ -380,7 +223,7 @@
                     </div>
                   </div>
 
-                  <!-- SLIDE 3: Cambia src="imagen3.jpg" por la ruta de tu imagen 3 -->
+                  <!-- SLIDE 3 -->
                   <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-[#06131c]">
                     <img
                       src="imagen3.jpg"
@@ -394,7 +237,7 @@
                     </div>
                   </div>
 
-                  <!-- SLIDE 4: Cambia src="imagen4.jpg" por la ruta de tu imagen 4 -->
+                  <!-- SLIDE 4 -->
                   <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-[#06131c]">
                     <img
                       src="imagen4.jpg"
@@ -478,7 +321,7 @@
             </div>
 
             <div class="pt-5 mt-5 border-t border-slate-800">
-              <a href="electronics_basic/lab_interact_osc_1.html" class="w-full py-3 px-4 rounded-xl bg-[#00ff88] hover:bg-emerald-300 text-slate-950 font-extrabold text-sm transition flex items-center justify-center gap-2 shadow-[0_0_18px_rgba(0,255,136,0.2)]">
+              <a href="lab_interact_osc_1.html" class="w-full py-3 px-4 rounded-xl bg-[#00ff88] hover:bg-emerald-300 text-slate-950 font-extrabold text-sm transition flex items-center justify-center gap-2 shadow-[0_0_18px_rgba(0,255,136,0.2)]">
                 <span>Botón 1.1</span>
                 <span>→</span>
               </a>
@@ -730,11 +573,166 @@
       </section>
 
     </main>
+
+    <!-- ==================== PANEL DE NAVEGACIÓN DERECHO (PEGADO AL BORDE DERECHO) ==================== -->
+    <aside
+      id="side-panel"
+      aria-label="Navegación del sitio"
+      class="fixed inset-y-0 right-0 z-40 w-72 shrink-0 bg-[#0b101d]/95 lg:bg-[#090d16]/70 backdrop-blur-md border-l border-slate-800/90 transform translate-x-full lg:translate-x-0 lg:sticky lg:top-[69px] lg:h-[calc(100vh-69px)] transition-transform duration-200 ease-out flex flex-col justify-between sidebar-scroll overflow-y-auto"
+    >
+      <div class="p-4 space-y-6">
+        <!-- Encabezado móvil del panel -->
+        <div class="flex items-center justify-between lg:hidden pb-3 border-b border-slate-800">
+          <span class="font-mono text-xs uppercase tracking-wider text-[#00e5ff]">Navegación</span>
+          <button type="button" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-1">
+            ✕
+          </button>
+        </div>
+
+        <!-- Bloque 1: Enlaces a las páginas del sitio -->
+        <div class="space-y-2">
+          <div class="px-2.5">
+            <span class="font-mono text-[11px] uppercase tracking-widest text-[#00ff88] font-semibold">
+              Páginas del sitio
+            </span>
+          </div>
+
+          <nav class="space-y-1.5">
+            <!-- Enlace 1: lab_interact_osc_1.html -->
+            <a
+              href="lab_interact_osc_1.html"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                01
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
+                  Título página 1
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">lab_interact_osc_1.html</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
+            </a>
+
+            <!-- Enlace 2: diodo_1.html -->
+            <a
+              href="diodo_1.html"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                02
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
+                  Título página 2
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">diodo_1.html</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+            </a>
+
+            <!-- Enlace 3: binary_code_1.html -->
+            <a
+              href="binary_code_1.html"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                03
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
+                  Título página 3
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">binary_code_1.html</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
+            </a>
+
+            <!-- Enlace 4: SCR_1.html -->
+            <a
+              href="SCR_1.html"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-amber-500/10 border border-slate-800/90 hover:border-amber-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#ffb300] bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                04
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#ffb300] transition truncate">
+                  Título página 4
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">SCR_1.html</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#ffb300] text-xs mt-0.5">↗</span>
+            </a>
+
+            <!-- Enlace 5: basic_psd_1.html -->
+            <a
+              href="basic_psd_1.html"
+              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
+            >
+              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
+                05
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
+                  Título página 5
+                </p>
+                <p class="text-[11px] font-mono text-slate-400 truncate">basic_psd_1.html</p>
+              </div>
+              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Bloque 2: Secciones en esta página -->
+        <div class="space-y-2 pt-3 border-t border-slate-800/80">
+          <div class="px-2.5">
+            <span class="font-mono text-[11px] uppercase tracking-widest text-slate-400 font-semibold">
+              Secciones
+            </span>
+          </div>
+
+          <nav class="space-y-1 text-xs">
+            <a href="#sec-basica" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+              <span>Conocimientos electrónicos básicos</span>
+            </a>
+            <a href="#sec-analogica" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+              <span>Diseño electrónico analógico</span>
+            </a>
+            <a href="#sec-digital" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+              <span>Diseño electrónico digital</span>
+            </a>
+            <a href="#sec-potencia" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#ffb300]"></span>
+              <span>Electrónica de potencia</span>
+            </a>
+            <a href="#sec-dsp" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+              <span>Procesamiento digital de señales</span>
+            </a>
+            <a href="#autor" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              <span>Autor</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Pie del Panel Lateral -->
+      <div class="p-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-500">
+        <span>[Texto pie panel]</span>
+      </div>
+    </aside>
+
   </div>
 
   <!-- ==================== PIE DE PÁGINA ==================== -->
-  <footer class="border-t border-slate-800/90 bg-[#090d16]/95 mt-8">
-    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+  <footer class="w-full border-t border-slate-800/90 bg-[#090d16]/95">
+    <div class="w-full px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-[#00ff88]"></span>
         <span class="font-semibold text-slate-200">Aprendizaje electrónico interactivo</span>
@@ -747,19 +745,19 @@
 
   <!-- ==================== SCRIPTS: MENÚ LATERAL Y CARRUSEL DE 4 IMÁGENES ==================== -->
   <script>
-    // Control del panel lateral en dispositivos móviles
+    // Control del panel lateral derecho en dispositivos móviles
     function toggleSidebar() {
-      const sidebar = document.getElementById('left-sidebar');
+      const sidebar = document.getElementById('side-panel');
       const backdrop = document.getElementById('sidebar-backdrop');
-      sidebar.classList.toggle('-translate-x-full');
+      sidebar.classList.toggle('translate-x-full');
       backdrop.classList.toggle('hidden');
     }
 
     function closeSidebarOnMobile() {
       if (window.innerWidth < 1024) {
-        const sidebar = document.getElementById('left-sidebar');
+        const sidebar = document.getElementById('side-panel');
         const backdrop = document.getElementById('sidebar-backdrop');
-        sidebar.classList.add('-translate-x-full');
+        sidebar.classList.add('translate-x-full');
         backdrop.classList.add('hidden');
       }
     }

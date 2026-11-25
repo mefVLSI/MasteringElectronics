@@ -1,98 +1,855 @@
 <!DOCTYPE html>
-<html lang="es" class="dark scroll-smooth">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MultiLab — Guía interactiva para manejo de multímetro (Multitester Guide)</title>
 
-  <!-- Google Fonts: Plus Jakarta Sans y JetBrains Mono -->
+  <!-- Google Fonts: DM Sans y Space Grotesk (misma tipografía que diode.html) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            lab: {
-              bg: '#090d16',
-              card: '#0f1624',
-              panel: '#131c2e',
-              border: '#1e293b',
-              phosphor: '#00ff88',
-              cyan: '#00e5ff',
-              amber: '#ffb300',
-            }
-          }
-        }
-      }
-    };
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    /* Estilos personalizados de Laboratorio Electrónico Oscuro ("Dark Lab UI") */
+    :root {
+      --navy: #102c39;
+      --navy-panel: #1d4652;
+      --teal: #087d79;
+      --teal-dark: #075e5c;
+      --mint: #e5f5f0;
+      --mint-bright: #82e3d2;
+      --cream: #f7f8f3;
+      --white: #ffffff;
+      --line: #c9d9d8;
+      --text: #17323b;
+      --muted: #465f67;
+      --orange: #b85717;
+      --pale: #fff2df;
+      --danger-bg: #fdeceb;
+      --danger-border: #b42318;
+      --danger-text: #7a1c15;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body,
+    button,
+    input,
+    select {
+      font-family: "DM Sans", sans-serif;
+    }
+
     body {
-      background-color: #090d16;
-      color: #e2e8f0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      background: var(--cream);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       overflow-x: hidden;
-      background-image:
-        radial-gradient(circle at 15% 15%, rgba(0, 229, 255, 0.06) 0%, transparent 35%),
-        radial-gradient(circle at 85% 25%, rgba(0, 255, 136, 0.05) 0%, transparent 35%);
     }
 
-    /* Efecto cristal/panel de laboratorio */
-    .lab-card {
-      background: linear-gradient(180deg, rgba(19, 28, 46, 0.85) 0%, rgba(13, 19, 33, 0.92) 100%);
-      border: 1px solid #1e293b;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
-      transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    button,
+    input,
+    select {
+      font-size: inherit;
     }
 
-    .lab-card:hover {
-      border-color: rgba(0, 229, 255, 0.35);
+    button {
+      cursor: pointer;
     }
 
-    /* Carcasa realista de instrumento digital */
-    .meter-bezel {
-      background: linear-gradient(145deg, #161f33 0%, #0b101b 100%);
-      border: 2px solid #26344d;
-      box-shadow:
-        0 0 35px rgba(0, 255, 136, 0.08),
-        inset 0 2px 12px rgba(0, 0, 0, 0.85);
+    a {
+      color: #075f64;
     }
 
-    /* Pantalla LCD retroiluminada del multímetro */
-    .lcd-screen {
-      position: relative;
-      background-color: #04130c;
-      border: 1px solid rgba(0, 255, 136, 0.3);
-      box-shadow: inset 0 0 24px rgba(0, 255, 136, 0.1);
-      overflow: hidden;
+    code {
+      font-family: "Space Grotesk", monospace;
+      font-weight: 700;
+      background: rgba(16, 44, 57, 0.08);
+      padding: 1px 6px;
+      border-radius: 5px;
     }
 
-    .lcd-screen::after {
-      content: "";
+    :focus-visible {
+      outline: 3px solid #e17622;
+      outline-offset: 3px;
+    }
+
+    .skip {
       position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 3px,
-        rgba(0, 0, 0, 0.14) 4px
-      );
+      left: -9999px;
+      top: 8px;
+      background: var(--white);
+      color: var(--navy);
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 8px;
+      z-index: 100;
+    }
+
+    .skip:focus {
+      left: 8px;
+    }
+
+    /* ==================== BARRA SUPERIOR FIJA (ESTILO DIODE.HTML) ==================== */
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      background: var(--navy);
+      color: var(--white);
+      padding: 14px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #234958;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--navy-panel);
+      border: 1px solid #44717a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--mint-bright);
+      flex-shrink: 0;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font: 700 20px/1.15 "Space Grotesk", sans-serif;
+      letter-spacing: -0.03em;
+      color: var(--white);
+    }
+
+    .brand span {
+      color: #ffd29d;
+    }
+
+    .bilingual-pill {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid #85d9cc;
+      color: #d8fff4;
+      background: rgba(29, 70, 82, 0.7);
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: #cee7e4;
+    }
+
+    .top-right-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mobile-score-badge {
+      display: none;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: var(--pale);
+      color: var(--orange);
+      border: 1px solid #f0cfa4;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 9px;
+      border: 1px solid #44717a;
+      background: var(--navy-panel);
+      color: var(--white);
+    }
+
+    .mobile-menu-btn:hover {
+      background: var(--teal);
+    }
+
+    .tab-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .nav-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid #44717a;
+      background: rgba(29, 70, 82, 0.55);
+      color: #d3e6e5;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .nav-tab:hover {
+      background: var(--navy-panel);
+      color: var(--white);
+      border-color: #85d9cc;
+    }
+
+    .nav-tab.active {
+      background: var(--teal);
+      color: var(--white);
+      border-color: var(--mint-bright);
+    }
+
+    .nav-tab-num {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11.5px;
+      opacity: 0.85;
+    }
+
+    /* ==================== CONTENEDOR PRINCIPAL + PANEL DERECHO ==================== */
+    .layout-wrapper {
+      flex: 1;
+      display: flex;
+      width: 100%;
+    }
+
+    main {
+      flex: 1;
+      min-width: 0;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 26px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 44px;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: "Space Grotesk", sans-serif;
+      line-height: 1.16;
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(32px, 4.4vw, 52px);
+      margin: 12px 0 16px;
+      color: var(--white);
+    }
+
+    h2 {
+      font-size: clamp(25px, 3.2vw, 36px);
+      margin: 4px 0 6px;
+      color: var(--navy);
+    }
+
+    h3 {
+      font-size: 20px;
+      margin: 0 0 8px;
+      color: var(--navy);
+    }
+
+    .num {
+      color: var(--teal);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 12px;
+      display: block;
+    }
+
+    .muted-sub {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.72em;
+    }
+
+    .section-view {
+      animation: fadeSlideIn 0.3s ease-out;
+    }
+
+    .section-view.hidden {
+      display: none;
+    }
+
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .space-y-lg > * + * {
+      margin-top: 34px;
+    }
+
+    .space-y-md > * + * {
+      margin-top: 20px;
+    }
+
+    /* ==================== HERO DE SECCIÓN 1 (ESTILO DIODE.HTML) ==================== */
+    .hero-box {
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 24px;
+      padding: 36px 34px;
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 28px;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(16, 44, 57, 0.14);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #ffd29d;
+      color: #ffebd2;
+      border-radius: 30px;
+      padding: 6px 13px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffd29d;
+    }
+
+    .hero-box h1 span {
+      color: var(--mint-bright);
+    }
+
+    .hero-box p {
+      color: #d3e6e5;
+      font-size: 16.5px;
+      margin: 0 0 20px;
+    }
+
+    .hero-box p strong {
+      color: var(--white);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-magnitudes {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mag-card {
+      background: var(--navy-panel);
+      border: 1px solid #44717a;
+      border-radius: 16px;
+      padding: 15px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+    }
+
+    .mag-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: rgba(16, 44, 57, 0.85);
+      border: 1px solid #85d9cc;
+      color: var(--mint-bright);
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .mag-badge.amber {
+      border-color: #ffd29d;
+      color: #ffd29d;
+    }
+
+    .mag-card h3 {
+      color: var(--white);
+      font-size: 15px;
+      margin: 0 0 3px;
+    }
+
+    .mag-card p {
+      color: #cee7e4;
+      font-size: 12.8px;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ==================== TARJETAS, BOTONES Y PANELES ==================== */
+    .card,
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 5px 24px #153b3b08;
+    }
+
+    .btn {
+      border: 1px solid var(--teal);
+      background: var(--white);
+      color: #075b59;
+      padding: 10px 16px;
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 13.5px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn:hover,
+    .btn.active {
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .btn.primary:hover {
+      background: var(--teal-dark);
+      border-color: var(--teal-dark);
+    }
+
+    .btn.dark {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: var(--white);
+    }
+
+    .btn.dark:hover {
+      background: var(--navy-panel);
+    }
+
+    .btn.danger-outline {
+      background: var(--danger-bg);
+      border-color: #e6a19b;
+      color: var(--danger-text);
+    }
+
+    .btn.danger-outline:hover {
+      background: var(--danger-border);
+      border-color: var(--danger-border);
+      color: var(--white);
+    }
+
+    .btn.small {
+      padding: 7px 12px;
+      font-size: 12.5px;
+    }
+
+    .callout {
+      background: var(--mint);
+      border-left: 5px solid var(--teal);
+      padding: 14px 18px;
+      border-radius: 0 12px 12px 0;
+      font-size: 13.5px;
+      color: var(--text);
+    }
+
+    .callout.warning {
+      background: var(--pale);
+      border-left-color: var(--orange);
+      color: #5c2d0c;
+    }
+
+    .callout.danger {
+      background: var(--danger-bg);
+      border-left-color: var(--danger-border);
+      color: var(--danger-text);
+    }
+
+    /* ==================== BLOQUE DE ADVERTENCIAS DE SEGURIDAD ==================== */
+    .safety-panel {
+      background: var(--white);
+      border: 1px solid #e6b4af;
+      border-top: 5px solid var(--danger-border);
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: 0 6px 26px rgba(180, 35, 24, 0.06);
+    }
+
+    .safety-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .safety-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .safety-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--danger-bg);
+      border: 1px solid #e6a19b;
+      color: var(--danger-border);
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .safety-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 9px;
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #e6a19b;
+    }
+
+    .safety-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .safety-item {
+      background: var(--cream);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .safety-item.critical {
+      background: #fff9f8;
+      border-color: #ecc0bc;
+    }
+
+    .safety-item.amber {
+      background: #fffcf7;
+      border-color: #f0d7b4;
+    }
+
+    .safety-item-num {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--danger-border);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .safety-item.amber .safety-item-num {
+      color: var(--orange);
+    }
+
+    .safety-item.teal .safety-item-num {
+      color: var(--teal);
+    }
+
+    .safety-item h3 {
+      font-size: 15.5px;
+      margin: 0 0 6px;
+    }
+
+    .safety-item p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ==================== ANATOMÍA INTERACTIVA DEL MULTÍMETRO ==================== */
+    .section-header-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .section-header-row p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .anatomy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .dmm-hardware-box {
+      background: var(--navy);
+      color: var(--white);
+      border: 1px solid #2c5563;
+      border-radius: 22px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .dmm-hardware-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffd29d;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #2b5260;
+    }
+
+    .dmm-zone {
+      width: 100%;
+      text-align: left;
+      border-radius: 15px;
+      background: var(--navy-panel);
+      border: 2px solid #44717a;
+      color: var(--white);
+      padding: 14px;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dmm-zone:hover {
+      border-color: var(--mint-bright);
+    }
+
+    .anatomy-zone-active {
+      border-color: var(--mint-bright) !important;
+      background: #143844 !important;
+      box-shadow: 0 0 0 3px rgba(130, 227, 210, 0.28) !important;
+    }
+
+    .lcd-preview-box {
+      background: #091d26;
+      border: 1px solid #44717a;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-top: 8px;
+      text-align: right;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--mint-bright);
+    }
+
+    .lcd-preview-box span {
+      font-size: 14px;
+      color: #d8fff4;
+    }
+
+    .dial-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .dial-circle {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 2px solid var(--mint-bright);
+      background: var(--navy);
+      color: var(--mint-bright);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .jacks-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .jack-zone {
+      text-align: center;
+      padding: 12px 8px;
+    }
+
+    .jack-ring {
+      width: 34px;
+      height: 34px;
+      margin: 0 auto 7px;
+      border-radius: 50%;
+      background: var(--navy);
+      border: 2px solid #85d9cc;
+      color: var(--white);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .jack-ring.amber {
+      border-color: #ffd29d;
+      color: #ffd29d;
+    }
+
+    .jack-ring.red {
+      border-color: #ff9c94;
+      color: #ff9c94;
+    }
+
+    .anatomy-detail-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .anatomy-tag {
+      display: inline-block;
+      background: var(--mint);
+      color: #075f5d;
+      border: 1px solid #b5dfd5;
+      border-radius: 30px;
+      padding: 4px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .anatomy-tabs-footer {
+      padding-top: 16px;
+      margin-top: 18px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    /* ==================== GLOSARIO BILINGÜE INTERACTIVO ==================== */
+    .glossary-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .search-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 330px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--white);
+      border: 1px solid #718f91;
+      border-radius: 10px;
+      padding: 10px 14px 10px 36px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
       pointer-events: none;
     }
 
-    /* Tarjetas 3D Flip para el Glosario Bilingüe */
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
     .flip-card {
       perspective: 1000px;
       height: 195px;
@@ -117,291 +874,943 @@
       inset: 0;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      border-radius: 1rem;
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .flip-card-front {
+      background: var(--white);
+      border: 1px solid var(--line);
+      box-shadow: 0 5px 20px #153b3b08;
+    }
+
+    .flip-card-front:hover {
+      border-color: var(--teal);
     }
 
     .flip-card-back {
       transform: rotateY(180deg);
+      background: var(--mint);
+      border: 2px solid var(--teal);
+      color: var(--text);
     }
 
-    /* Animaciones suaves de transición de pestañas */
-    .section-view {
-      animation: fadeSlideIn 0.35s ease-out;
+    .flip-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
     }
 
-    @keyframes fadeSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .flip-lang-badge {
+      background: var(--mint);
+      color: #075f5d;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
     }
 
-    /* Resaltado de zona activa en diagrama de anatomía */
-    .anatomy-zone-active {
-      box-shadow: 0 0 0 2px #00e5ff, 0 0 22px rgba(0, 229, 255, 0.35) !important;
-      border-color: #00e5ff !important;
+    .flip-hint {
+      color: var(--muted);
     }
 
-    /* Ocultar barra de scroll en navegación móvil manteniendo funcionalidad */
-    .no-scrollbar::-webkit-scrollbar {
+    .flip-en {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0;
+    }
+
+    .flip-es {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--orange);
+      margin: 3px 0 0;
+    }
+
+    .flip-back-title {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .flip-back-def {
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* ==================== SIMULADOR INTERACTIVO DE MULTÍMETRO ==================== */
+    .presets-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .sim-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .sim-left-col,
+    .sim-right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .meter-screen-card {
+      background: var(--navy);
+      color: var(--white);
+      border: 1px solid #2c5563;
+      border-radius: 22px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 10px 28px rgba(16, 44, 57, 0.14);
+    }
+
+    .osd-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .osd-scen-pill {
+      background: var(--pale);
+      color: var(--orange);
+      padding: 4px 10px;
+      border-radius: 7px;
+    }
+
+    .lcd-display-box {
+      background: #091d26;
+      border: 2px solid #44717a;
+      border-radius: 16px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .lcd-top-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .lcd-readout-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 6px 0;
+    }
+
+    .lcd-value {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(40px, 5vw, 62px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.03em;
+      color: var(--mint-bright);
+    }
+
+    .lcd-value.warn {
+      color: #ffd29d;
+    }
+
+    .lcd-value.danger {
+      color: #ff9c94;
+    }
+
+    .lcd-unit {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #d8fff4;
+    }
+
+    .lcd-bottom-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid #234958;
+      font-size: 12px;
+      color: #cee7e4;
+    }
+
+    .diagram-box {
+      background: #0c242e;
+      border: 1px solid #35606e;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .diagram-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #cee7e4;
+      margin-bottom: 8px;
+    }
+
+    #diagram-status-tag {
+      font-weight: 700;
+      color: var(--mint-bright);
+    }
+
+    #diagram-status-tag.warn {
+      color: #ffd29d;
+    }
+
+    #diagram-status-tag.danger {
+      color: #ff9c94;
+    }
+
+    #connection-svg {
+      width: 100%;
+      height: 145px;
+      display: block;
+    }
+
+    .ctrl-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ctrl-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15.5px;
+      margin: 0;
+    }
+
+    .dot-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--teal);
+      flex-shrink: 0;
+    }
+
+    .dot-indicator.red {
+      background: var(--danger-border);
+    }
+
+    .dot-indicator.orange {
+      background: var(--orange);
+    }
+
+    .two-col-btns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .stack-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .choice-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 13px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      background: var(--cream);
+      color: var(--text);
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .choice-btn.center {
+      text-align: center;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--teal);
+    }
+
+    .choice-btn.active {
+      background: var(--mint);
+      border-color: var(--teal);
+      color: #075f5d;
+    }
+
+    .choice-btn.active-red {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger-text);
+    }
+
+    .choice-btn.active-amber {
+      background: var(--pale);
+      border-color: var(--orange);
+      color: var(--orange);
+    }
+
+    .lab-select {
+      width: 100%;
+      background: var(--cream);
+      border: 1px solid #718f91;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 13.5px;
+      color: var(--navy);
+    }
+
+    .power-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* ==================== PROCEDIMIENTOS V, A Y Ω (SECCIÓN 3) ==================== */
+    .modes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .mode-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .mode-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .mode-pill {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 30px;
+      background: var(--mint);
+      color: #075f5d;
+    }
+
+    .mode-pill.amber {
+      background: var(--pale);
+      color: var(--orange);
+    }
+
+    .mode-svg {
+      width: 100%;
+      height: 108px;
+      border-radius: 12px;
+      background: var(--navy);
+      border: 1px solid #35606e;
+      display: block;
+    }
+
+    .mode-steps {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ==================== EJERCICIOS PRÁCTICOS / QUIZ (SECCIÓN 4) ==================== */
+    .quiz-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .score-pill {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 8px 15px;
+      border-radius: 10px;
+      background: var(--pale);
+      color: var(--orange);
+      border: 1px solid #f0cfa4;
+    }
+
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .quiz-item-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 5px 24px #153b3b08;
+    }
+
+    .quiz-q-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--navy);
+      margin: 0 0 12px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: var(--cream);
+      color: var(--text);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .quiz-opt-btn:hover {
+      border-color: var(--teal);
+      background: #edf6f3;
+    }
+
+    .quiz-opt-btn.correct {
+      background: var(--mint);
+      border-color: var(--teal);
+      color: #075f5d;
+      font-weight: 700;
+    }
+
+    .quiz-opt-btn.wrong {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger-text);
+    }
+
+    .quiz-opt-btn.dimmed {
+      opacity: 0.6;
+    }
+
+    .section-nav-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 10px;
+    }
+
+    /* ==================== BARRA INFERIOR PARA VOLVER A INDEX.HTML ==================== */
+    .back-home-bar {
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .back-home-bar p {
+      margin: 0;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+
+    /* ==================== PANEL LATERAL DERECHO (MISMO ESTILO QUE INDEX.HTML) ==================== */
+    .side-panel {
+      width: 290px;
+      flex-shrink: 0;
+      background: var(--white);
+      border-left: 1px solid var(--line);
+      position: sticky;
+      top: 71px;
+      height: calc(100vh - 71px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .side-panel-inner {
+      padding: 20px 16px;
+    }
+
+    .side-mobile-head {
       display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+      color: var(--navy);
     }
 
-    /* Scrollbar discreta para el panel lateral derecho */
-    .sidebar-scroll::-webkit-scrollbar {
-      width: 5px;
+    .side-group {
+      margin-bottom: 22px;
     }
-    .sidebar-scroll::-webkit-scrollbar-track {
-      background: transparent;
+
+    .side-group-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px 8px;
     }
-    .sidebar-scroll::-webkit-scrollbar-thumb {
-      background: #1e293b;
-      border-radius: 999px;
+
+    .side-group-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--teal);
     }
-    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-      background: #334155;
+
+    .side-home-link {
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #075f64;
+    }
+
+    .side-home-link:hover {
+      text-decoration: underline;
+    }
+
+    .side-page-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .side-page-link {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: var(--cream);
+      border: 1px solid var(--line);
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .side-page-link:hover {
+      background: var(--mint);
+      border-color: var(--teal);
+    }
+
+    .side-num {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--navy);
+      color: var(--mint-bright);
+      padding: 2px 6px;
+      border-radius: 6px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .side-page-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .side-page-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .side-page-file {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 1px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .side-arrow {
+      font-size: 12px;
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    .side-sec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .side-sec-link {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: 9px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .side-sec-link:hover {
+      background: var(--mint);
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .side-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      flex-shrink: 0;
+    }
+
+    .side-dot.amber {
+      background: var(--orange);
+    }
+
+    .side-dot.navy {
+      background: var(--navy);
+    }
+
+    .side-panel-footer {
+      padding: 14px 18px;
+      border-top: 1px solid var(--line);
+      font-size: 12.5px;
+      font-weight: 700;
+      background: var(--cream);
+    }
+
+    .side-panel-footer a {
+      text-decoration: none;
+      color: #075f64;
+    }
+
+    .side-panel-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 44, 57, 0.55);
+      z-index: 40;
+    }
+
+    .sidebar-backdrop.open {
+      display: block;
+    }
+
+    /* ==================== RESPONSIVO ==================== */
+    @media (max-width: 1024px) {
+      .mobile-menu-btn {
+        display: inline-flex;
+      }
+
+      .side-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        height: 100vh;
+        z-index: 60;
+        transform: translateX(100%);
+        transition: transform 0.25s ease-out;
+        box-shadow: -10px 0 30px rgba(16, 44, 57, 0.2);
+      }
+
+      .side-panel.open {
+        transform: translateX(0);
+      }
+
+      .side-mobile-head {
+        display: flex;
+      }
+
+      .sim-layout,
+      .modes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .safety-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .glossary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .mobile-score-badge {
+        display: inline-block;
+      }
+
+      .hero-box,
+      .anatomy-grid,
+      .safety-grid,
+      .quiz-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-box {
+        padding: 26px 20px;
+      }
+
+      main {
+        padding: 20px 18px 48px;
+      }
+
+      .glossary-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-cyan-400/20 selection:text-cyan-300">
+<body>
+  <a class="skip" href="#main">Saltar al laboratorio</a>
 
   <!-- ==================== BARRA DE NAVEGACIÓN SUPERIOR FIJA ==================== -->
-  <header class="sticky top-0 z-50 w-full bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/90">
-    <div class="w-full px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
-        <!-- Logo e Identidad -->
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(255,179,0,0.2)]">
-              <!-- Ícono SVG de dial / multímetro -->
-              <svg class="w-6 h-6 text-[#ffb300]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="9" />
-                <line x1="12" y1="12" x2="16.5" y2="7.5" />
-                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-              </svg>
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="font-extrabold text-lg tracking-tight text-white">Multi<span class="text-[#ffb300]">Lab</span></span>
-                <span class="hidden sm:inline-block text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
-                  Bilingüe ES / EN
-                </span>
-              </div>
-              <p class="text-xs text-slate-400">Guía interactiva para manejo de multímetro (Multitester Guide)</p>
-            </div>
-          </div>
-
-          <!-- Indicador rápido de progreso + botón menú lateral en móvil -->
-          <div class="flex items-center gap-2">
-            <div class="md:hidden text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg" id="mobile-score-badge">
-              Quiz: 0/6
-            </div>
-
-            <button
-              type="button"
-              onclick="toggleSidebar()"
-              aria-label="Abrir panel de navegación del sitio"
-              class="lg:hidden p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
+  <header class="top">
+    <div class="top-left">
+      <div class="brand-wrap">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <line x1="12" y1="12" x2="16.5" y2="7.5" />
+            <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+          </svg>
         </div>
-
-        <!-- Pestañas de Navegación (4 Secciones de MultiLab) -->
-        <nav aria-label="Secciones principales" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
-          <button onclick="switchSection('intro')" id="tab-intro" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all bg-cyan-500/15 text-[#00e5ff] border border-cyan-400/50 shadow-[0_0_15px_rgba(0,229,255,0.15)]">
-            <span class="font-mono text-xs opacity-80">01</span>
-            <span>Inicio y Seguridad</span>
-          </button>
-          <button onclick="switchSection('simulator')" id="tab-simulator" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
-            <span class="font-mono text-xs opacity-80">02</span>
-            <span>Simulador Interactivo</span>
-          </button>
-          <button onclick="switchSection('modes')" id="tab-modes" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
-            <span class="font-mono text-xs opacity-80">03</span>
-            <span>Medir V, A y Ω</span>
-          </button>
-          <button onclick="switchSection('exercises')" id="tab-exercises" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
-            <span class="font-mono text-xs opacity-80">04</span>
-            <span>Ejercicios Prácticos</span>
-          </button>
-        </nav>
+        <div>
+          <div class="brand-title-row">
+            <span class="brand">Multi<span>Lab</span></span>
+            <span class="bilingual-pill">Bilingüe ES / EN</span>
+          </div>
+          <p class="brand-sub">Guía interactiva para manejo de multímetro (Multitester Guide)</p>
+        </div>
       </div>
+    </div>
+
+    <div class="top-right-controls">
+      <div class="mobile-score-badge" id="mobile-score-badge">Quiz: 0/6</div>
+
+      <nav aria-label="Secciones principales" class="tab-nav">
+        <button type="button" onclick="switchSection('intro')" id="tab-intro" class="nav-tab active">
+          <span class="nav-tab-num">01</span>
+          <span>Inicio y Seguridad</span>
+        </button>
+        <button type="button" onclick="switchSection('simulator')" id="tab-simulator" class="nav-tab">
+          <span class="nav-tab-num">02</span>
+          <span>Simulador Interactivo</span>
+        </button>
+        <button type="button" onclick="switchSection('modes')" id="tab-modes" class="nav-tab">
+          <span class="nav-tab-num">03</span>
+          <span>Medir V, A y Ω</span>
+        </button>
+        <button type="button" onclick="switchSection('exercises')" id="tab-exercises" class="nav-tab">
+          <span class="nav-tab-num">04</span>
+          <span>Ejercicios Prácticos</span>
+        </button>
+      </nav>
+
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        onclick="toggleSidebar()"
+        aria-label="Abrir panel de navegación del sitio"
+      >
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
     </div>
   </header>
 
   <!-- Fondo oscuro para menú móvil -->
-  <div
-    id="sidebar-backdrop"
-    onclick="toggleSidebar()"
-    class="fixed inset-0 bg-black/65 backdrop-blur-xs z-40 hidden lg:hidden"
-  ></div>
+  <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
 
-  <!-- ==================== CONTENEDOR FLEX DE ANCHO COMPLETO (CONTENIDO + PANEL DERECHO) ==================== -->
-  <div class="flex-1 flex w-full">
+  <!-- ==================== CONTENEDOR PRINCIPAL + PANEL DERECHO ==================== -->
+  <div class="layout-wrapper">
 
-    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
-    <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8 flex flex-col justify-between gap-12">
-
+    <main id="main">
       <div>
+
         <!-- =======================================================================
              SECCIÓN 1: INICIO, SEGURIDAD Y ANATOMÍA DEL MULTÍMETRO
         ======================================================================== -->
-        <section id="section-intro" class="section-view space-y-10">
+        <section id="section-intro" class="section-view space-y-lg">
           <!-- Hero Motivador -->
-          <div class="lab-card rounded-3xl p-6 sm:p-10 relative overflow-hidden">
-            <div class="absolute -right-16 -top-16 w-64 h-64 bg-[#ffb300]/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div class="lg:col-span-7 space-y-5">
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/30 text-[#ffb300] text-xs font-semibold">
-                  <span class="w-2 h-2 rounded-full bg-[#ffb300] animate-pulse"></span>
-                  Instrumentación Esencial • Todo en Uno (V · A · Ω)
-                </div>
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-                  Domina el <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ffb300] via-[#00ff88] to-[#00e5ff]">multímetro digital</span> con precisión y seguridad
-                </h1>
-                <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
-                  El <strong class="text-white">Multímetro Digital (Digital Multimeter - DMM)</strong> combina tres instrumentos fundamentales en un solo equipo: <strong class="text-[#00e5ff]">Voltímetro (Voltmeter)</strong>, <strong class="text-[#ffb300]">Amperímetro (Ammeter)</strong> y <strong class="text-[#00ff88]">Óhmetro (Ohmmeter)</strong>. Aprende a conectar las puntas correctamente y evita errores que puedan dañar tu circuito o el fusible del equipo.
-                </p>
-                <div class="flex flex-wrap gap-3 pt-2">
-                  <button onclick="switchSection('simulator')" class="px-5 py-3 rounded-xl bg-[#00ff88] hover:bg-emerald-300 text-slate-950 font-bold text-sm transition shadow-[0_0_20px_rgba(0,255,136,0.3)] flex items-center gap-2">
-                    <span>Probar el Simulador Ahora</span>
-                    <span>→</span>
-                  </button>
-                  <a href="#advertencias-seguridad" class="px-5 py-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 font-semibold text-sm transition">
-                    ⚠ Reglas de Seguridad
-                  </a>
+          <div class="hero-box">
+            <div>
+              <span class="pill">
+                <span class="pill-dot"></span>
+                Instrumentación Esencial • Todo en Uno (V · A · Ω)
+              </span>
+              <h1>
+                Domina el <span>multímetro digital</span> con precisión y seguridad
+              </h1>
+              <p>
+                El <strong>Multímetro Digital (Digital Multimeter - DMM)</strong> combina tres instrumentos fundamentales en un solo equipo: <strong>Voltímetro (Voltmeter)</strong>, <strong>Amperímetro (Ammeter)</strong> y <strong>Óhmetro (Ohmmeter)</strong>. Aprende a conectar las puntas correctamente y evita errores que puedan dañar tu circuito o el fusible del equipo.
+              </p>
+              <div class="hero-actions">
+                <button type="button" onclick="switchSection('simulator')" class="btn primary">
+                  <span>Probar el Simulador Ahora</span>
+                  <span>→</span>
+                </button>
+                <a href="#advertencias-seguridad" class="btn danger-outline">
+                  ⚠ Reglas de Seguridad
+                </a>
+              </div>
+            </div>
+
+            <!-- Resumen Visual de las 3 Magnitudes -->
+            <div class="hero-magnitudes">
+              <div class="mag-card">
+                <div class="mag-badge">V</div>
+                <div>
+                  <h3>Voltaje (Voltage — V⎓ / V~)</h3>
+                  <p>Mide la diferencia de potencial eléctrico. Se conecta siempre en <strong>paralelo</strong> con el componente.</p>
                 </div>
               </div>
 
-              <!-- Resumen Visual de las 3 Magnitudes -->
-              <div class="lg:col-span-5 grid grid-cols-1 gap-3.5">
-                <div class="bg-[#090d16]/85 border border-cyan-500/25 rounded-2xl p-4 flex items-center gap-4">
-                  <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 font-mono font-extrabold text-[#00e5ff]">
-                    V
-                  </div>
-                  <div>
-                    <h3 class="font-bold text-white text-sm">Voltaje (Voltage — V⎓ / V~)</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Mide la diferencia de potencial eléctrico. Se conecta siempre en <strong class="text-[#00e5ff]">paralelo</strong> con el componente.</p>
-                  </div>
+              <div class="mag-card">
+                <div class="mag-badge amber">A</div>
+                <div>
+                  <h3>Corriente (Current — A / mA)</h3>
+                  <p>Mide el flujo de electrones. Requiere abrir el circuito y conectar el medidor en <strong>serie</strong>.</p>
                 </div>
+              </div>
 
-                <div class="bg-[#090d16]/85 border border-amber-500/25 rounded-2xl p-4 flex items-center gap-4">
-                  <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 font-mono font-extrabold text-[#ffb300]">
-                    A
-                  </div>
-                  <div>
-                    <h3 class="font-bold text-white text-sm">Corriente (Current — A / mA)</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Mide el flujo de electrones. Requiere abrir el circuito y conectar el medidor en <strong class="text-[#ffb300]">serie</strong>.</p>
-                  </div>
-                </div>
-
-                <div class="bg-[#090d16]/85 border border-emerald-500/25 rounded-2xl p-4 flex items-center gap-4">
-                  <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 font-mono font-extrabold text-[#00ff88]">
-                    Ω
-                  </div>
-                  <div>
-                    <h3 class="font-bold text-white text-sm">Resistencia (Resistance — Ω)</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Mide la oposición al paso de corriente. Se mide con el <strong class="text-[#00ff88]">circuito apagado</strong> y el componente aislado.</p>
-                  </div>
+              <div class="mag-card">
+                <div class="mag-badge">Ω</div>
+                <div>
+                  <h3>Resistencia (Resistance — Ω)</h3>
+                  <p>Mide la oposición al paso de corriente. Se mide con el <strong>circuito apagado</strong> y el componente aislado.</p>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- ==================== BLOQUE DESTACADO: ADVERTENCIAS DE SEGURIDAD ==================== -->
-          <div id="advertencias-seguridad" class="rounded-3xl bg-gradient-to-b from-rose-950/35 to-[#0d1321] border border-rose-500/40 p-6 sm:p-8 space-y-5 shadow-[0_10px_35px_-10px_rgba(244,63,94,0.18)]">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rose-500/25 pb-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-400/50 flex items-center justify-center text-rose-300 text-xl font-bold shrink-0">
-                  ⚠
-                </div>
+          <div id="advertencias-seguridad" class="safety-panel">
+            <div class="safety-header">
+              <div class="safety-title-group">
+                <div class="safety-icon">⚠</div>
                 <div>
-                  <span class="font-mono text-xs uppercase tracking-widest text-rose-400">Protocolo Obligatorio de Laboratorio</span>
-                  <h2 class="text-xl sm:text-2xl font-extrabold text-white">
-                    Advertencias Críticas de Seguridad <span class="text-rose-300/80 font-normal text-base">(Safety Warnings)</span>
+                  <span class="num" style="color:var(--danger-border)">Protocolo Obligatorio de Laboratorio</span>
+                  <h2 style="margin:2px 0 0">
+                    Advertencias Críticas de Seguridad <span class="muted-sub">(Safety Warnings)</span>
                   </h2>
                 </div>
               </div>
-              <span class="text-xs font-mono text-rose-300 bg-rose-500/15 border border-rose-500/30 px-3 py-1 rounded-lg self-start sm:self-center">
-                Lee antes de medir
-              </span>
+              <span class="safety-badge">Lee antes de medir</span>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="safety-grid">
               <!-- Advertencia 1 -->
-              <div class="bg-[#090d16]/90 border border-rose-500/30 rounded-2xl p-4 space-y-2">
-                <div class="flex items-center gap-2 text-rose-400 font-mono text-xs font-bold">
-                  <span>01 • CONTACTO FÍSICO</span>
-                </div>
-                <h3 class="font-bold text-white text-sm">No toques las puntas metálicas al medir</h3>
-                <p class="text-xs text-slate-300 leading-relaxed">
-                  Sujeta siempre las sondas por su mango aislante detrás del protector de dedos. Tocar el metal durante una medición puede provocar <strong class="text-rose-300">descargas eléctricas</strong> y además altera las lecturas de resistencia debido a la resistencia de tu piel.
+              <div class="safety-item critical">
+                <span class="safety-item-num">01 • CONTACTO FÍSICO</span>
+                <h3>No toques las puntas metálicas al medir</h3>
+                <p>
+                  Sujeta siempre las sondas por su mango aislante detrás del protector de dedos. Tocar el metal durante una medición puede provocar <strong>descargas eléctricas</strong> y además altera las lecturas de resistencia debido a la resistencia de tu piel.
                 </p>
               </div>
 
               <!-- Advertencia 2 -->
-              <div class="bg-[#090d16]/90 border border-amber-500/35 rounded-2xl p-4 space-y-2">
-                <div class="flex items-center gap-2 text-[#ffb300] font-mono text-xs font-bold">
-                  <span>02 • ESCALA DE CORRIENTE</span>
-                </div>
-                <h3 class="font-bold text-white text-sm">Usa la escala más alta al medir corriente</h3>
-                <p class="text-xs text-slate-300 leading-relaxed">
-                  Si desconoces cuánta corriente circula, empieza siempre en la <strong class="text-[#ffb300]">escala máxima (10A)</strong> y con la punta roja en la borna <code class="text-amber-300">10A</code>. Usar una escala baja (mA) con corrientes altas quemará inmediatamente el fusible interno.
+              <div class="safety-item amber">
+                <span class="safety-item-num">02 • ESCALA DE CORRIENTE</span>
+                <h3>Usa la escala más alta al medir corriente</h3>
+                <p>
+                  Si desconoces cuánta corriente circula, empieza siempre en la <strong>escala máxima (10A)</strong> y con la punta roja en la borna <code>10A</code>. Usar una escala baja (mA) con corrientes altas quemará inmediatamente el fusible interno.
                 </p>
               </div>
 
               <!-- Advertencia 3 -->
-              <div class="bg-[#090d16]/90 border border-rose-500/30 rounded-2xl p-4 space-y-2">
-                <div class="flex items-center gap-2 text-rose-400 font-mono text-xs font-bold">
-                  <span>03 • CORTOCIRCUITO EN MODO A</span>
-                </div>
-                <h3 class="font-bold text-white text-sm">Nunca midas voltaje con la punta en 10A / mA</h3>
-                <p class="text-xs text-slate-300 leading-relaxed">
-                  En modo amperímetro, la resistencia interna del multímetro es casi cero. Si lo conectas en paralelo a una batería o toma de corriente, crearás un <strong class="text-rose-300">cortocircuito directo</strong>. Al terminar de medir corriente, regresa la punta roja a <code class="text-cyan-300">VΩmA</code>.
+              <div class="safety-item critical">
+                <span class="safety-item-num">03 • CORTOCIRCUITO EN MODO A</span>
+                <h3>Nunca midas voltaje con la punta en 10A / mA</h3>
+                <p>
+                  En modo amperímetro, la resistencia interna del multímetro es casi cero. Si lo conectas en paralelo a una batería o toma de corriente, crearás un <strong>cortocircuito directo</strong>. Al terminar de medir corriente, regresa la punta roja a <code>VΩmA</code>.
                 </p>
               </div>
 
               <!-- Advertencia 4 -->
-              <div class="bg-[#090d16]/90 border border-emerald-500/30 rounded-2xl p-4 space-y-2">
-                <div class="flex items-center gap-2 text-[#00ff88] font-mono text-xs font-bold">
-                  <span>04 • CIRCUITO DESENERGIZADO</span>
-                </div>
-                <h3 class="font-bold text-white text-sm">Apaga la energía antes de medir resistencia (Ω)</h3>
-                <p class="text-xs text-slate-300 leading-relaxed">
-                  El multímetro inyecta una pequeña corriente propia para calcular ohmios. Medir resistencia o continuidad en un circuito encendido arroja valores falsos y puede <strong class="text-emerald-300">dañar el circuito interno</strong> del instrumento.
+              <div class="safety-item teal">
+                <span class="safety-item-num">04 • CIRCUITO DESENERGIZADO</span>
+                <h3>Apaga la energía antes de medir resistencia (Ω)</h3>
+                <p>
+                  El multímetro inyecta una pequeña corriente propia para calcular ohmios. Medir resistencia o continuidad en un circuito encendido arroja valores falsos y puede <strong>dañar el circuito interno</strong> del instrumento.
                 </p>
               </div>
 
               <!-- Advertencia 5 -->
-              <div class="bg-[#090d16]/90 border border-cyan-500/30 rounded-2xl p-4 space-y-2">
-                <div class="flex items-center gap-2 text-[#00e5ff] font-mono text-xs font-bold">
-                  <span>05 • SELECCIÓN AC vs. DC</span>
-                </div>
-                <h3 class="font-bold text-white text-sm">Verifica corriente continua (⎓) o alterna (~)</h3>
-                <p class="text-xs text-slate-300 leading-relaxed">
-                  Las baterías y fuentes electrónicas usan <strong class="text-[#00e5ff]">DC (V⎓)</strong>, mientras que los enchufes de pared usan <strong class="text-[#00e5ff]">AC (V~)</strong>. Seleccionar el tipo equivocado mostrará lecturas cercanas a cero o erráticas.
+              <div class="safety-item teal">
+                <span class="safety-item-num">05 • SELECCIÓN AC vs. DC</span>
+                <h3>Verifica corriente continua (⎓) o alterna (~)</h3>
+                <p>
+                  Las baterías y fuentes electrónicas usan <strong>DC (V⎓)</strong>, mientras que los enchufes de pared usan <strong>AC (V~)</strong>. Seleccionar el tipo equivocado mostrará lecturas cercanas a cero o erráticas.
                 </p>
               </div>
 
               <!-- Advertencia 6 -->
-              <div class="bg-[#090d16]/90 border border-amber-500/35 rounded-2xl p-4 space-y-2">
-                <div class="flex items-center gap-2 text-[#ffb300] font-mono text-xs font-bold">
-                  <span>06 • ESTADO DE SONDAS</span>
-                </div>
-                <h3 class="font-bold text-white text-sm">Inspecciona el aislamiento de los cables</h3>
-                <p class="text-xs text-slate-300 leading-relaxed">
+              <div class="safety-item amber">
+                <span class="safety-item-num">06 • ESTADO DE SONDAS</span>
+                <h3>Inspecciona el aislamiento de los cables</h3>
+                <p>
                   Antes de medir, revisa que los cables rojo y negro no tengan grietas ni cobre expuesto. Comienza siempre en un rango de voltaje superior al valor esperado.
                 </p>
               </div>
@@ -409,132 +1818,122 @@
           </div>
 
           <!-- ==================== ANATOMÍA INTERACTIVA DEL MULTÍMETRO ==================== -->
-          <div id="anatomia-dmm" class="space-y-5">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div id="anatomia-dmm">
+            <div class="section-header-row">
               <div>
-                <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Explora el Instrumento</span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-                  Anatomía del Multímetro <span class="text-slate-400 font-normal text-lg">(Multimeter Anatomy)</span>
+                <span class="num">Explora el Instrumento</span>
+                <h2>
+                  Anatomía del Multímetro <span class="muted-sub">(Multimeter Anatomy)</span>
                 </h2>
               </div>
-              <p class="text-xs sm:text-sm text-slate-400">
-                Haz clic en cualquiera de las <strong class="text-white">5 partes</strong> para ver su función.
+              <p>
+                Haz clic en cualquiera de las <strong>5 partes</strong> para ver su función.
               </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <div class="anatomy-grid">
               <!-- Esquema interactivo del DMM -->
-              <div class="lg:col-span-6 meter-bezel rounded-3xl p-5 flex flex-col justify-between gap-4">
-                <div class="flex items-center justify-between text-xs font-mono text-slate-400 border-b border-slate-800 pb-2">
-                  <span class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#ffb300] shadow-[0_0_8px_#ffb300]"></span>
-                    DMM-830 PRO • CAT III 600V
-                  </span>
+              <div class="dmm-hardware-box">
+                <div class="dmm-hardware-top">
+                  <span>● DMM-830 PRO • CAT III 600V</span>
                   <span>Haz clic en un bloque</span>
                 </div>
 
                 <!-- 1. Pantalla LCD -->
-                <button type="button" onclick="selectDmmAnatomy('display')" id="dmm-zone-display"
-                  class="dmm-zone anatomy-zone-active w-full text-left rounded-2xl bg-[#04130c] border-2 border-[#00ff88]/50 p-4 transition-all">
-                  <div class="flex items-center justify-between text-[11px] font-mono text-[#00ff88] mb-1">
+                <button type="button" onclick="selectDmmAnatomy('display')" id="dmm-zone-display" class="dmm-zone anatomy-zone-active">
+                  <div style="display:flex;align-items:center;justify-content:space-between;font-size:11.5px;font-weight:700;color:#91e5d7">
                     <span>1. Pantalla Digital (LCD Display)</span>
                     <span>AUTO / HOLD</span>
                   </div>
-                  <div class="font-mono text-3xl sm:text-4xl font-extrabold text-[#00ff88] tracking-wider text-right py-2 px-3 rounded-xl bg-[#020a06] border border-emerald-500/20">
-                    12.48 <span class="text-base text-emerald-300">V DC</span>
+                  <div class="lcd-preview-box">
+                    12.48 <span>V DC</span>
                   </div>
                 </button>
 
                 <!-- 2. Selector Rotatorio -->
-                <button type="button" onclick="selectDmmAnatomy('dial')" id="dmm-zone-dial"
-                  class="dmm-zone w-full text-left rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 hover:border-cyan-400/60 p-4 transition-all">
-                  <div class="flex items-center justify-between">
+                <button type="button" onclick="selectDmmAnatomy('dial')" id="dmm-zone-dial" class="dmm-zone">
+                  <div class="dial-row">
                     <div>
-                      <span class="text-xs font-mono font-bold text-[#00e5ff] block">2. Perilla Selectora (Rotary Function Switch)</span>
-                      <span class="text-xs text-slate-400">Permite elegir magnitud (V, A, Ω) y escala máxima</span>
+                      <span style="font-size:13px;font-weight:700;color:#d8fff4;display:block">2. Perilla Selectora (Rotary Function Switch)</span>
+                      <span style="font-size:12px;color:#cee7e4">Permite elegir magnitud (V, A, Ω) y escala máxima</span>
                     </div>
-                    <div class="w-12 h-12 rounded-full border-2 border-[#00e5ff] bg-slate-950 flex items-center justify-center font-mono text-xs font-bold text-[#00e5ff] shrink-0">
-                      V / Ω / A
-                    </div>
+                    <div class="dial-circle">V / Ω / A</div>
                   </div>
                 </button>
 
                 <!-- Bornas de conexión (3, 4 y 5) -->
-                <div class="grid grid-cols-3 gap-2.5">
-                  <button type="button" onclick="selectDmmAnatomy('jack10a')" id="dmm-zone-jack10a"
-                    class="dmm-zone text-center rounded-2xl bg-slate-900/95 border-2 border-slate-700/80 hover:border-amber-400/60 p-3 transition-all">
-                    <span class="w-8 h-8 mx-auto rounded-full border-2 border-[#ffb300] bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-[#ffb300]">10A</span>
-                    <span class="text-[11px] font-mono font-bold text-white block mt-2">3. Borna 10A</span>
-                    <span class="text-[10px] text-slate-400 block">Corriente alta</span>
+                <div class="jacks-grid">
+                  <button type="button" onclick="selectDmmAnatomy('jack10a')" id="dmm-zone-jack10a" class="dmm-zone jack-zone">
+                    <span class="jack-ring amber">10A</span>
+                    <span style="font-size:12px;font-weight:700;display:block">3. Borna 10A</span>
+                    <span style="font-size:11px;color:#cee7e4;display:block">Corriente alta</span>
                   </button>
 
-                  <button type="button" onclick="selectDmmAnatomy('jackcom')" id="dmm-zone-jackcom"
-                    class="dmm-zone text-center rounded-2xl bg-slate-900/95 border-2 border-slate-700/80 hover:border-slate-400/60 p-3 transition-all">
-                    <span class="w-8 h-8 mx-auto rounded-full border-2 border-slate-400 bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-slate-200">COM</span>
-                    <span class="text-[11px] font-mono font-bold text-white block mt-2">4. Borna COM</span>
-                    <span class="text-[10px] text-slate-400 block">Cable Negro (-)</span>
+                  <button type="button" onclick="selectDmmAnatomy('jackcom')" id="dmm-zone-jackcom" class="dmm-zone jack-zone">
+                    <span class="jack-ring">COM</span>
+                    <span style="font-size:12px;font-weight:700;display:block">4. Borna COM</span>
+                    <span style="font-size:11px;color:#cee7e4;display:block">Cable Negro (-)</span>
                   </button>
 
-                  <button type="button" onclick="selectDmmAnatomy('jackvoma')" id="dmm-zone-jackvoma"
-                    class="dmm-zone text-center rounded-2xl bg-slate-900/95 border-2 border-slate-700/80 hover:border-rose-400/60 p-3 transition-all">
-                    <span class="w-8 h-8 mx-auto rounded-full border-2 border-rose-500 bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-rose-400">VΩmA</span>
-                    <span class="text-[11px] font-mono font-bold text-white block mt-2">5. VΩmA</span>
-                    <span class="text-[10px] text-slate-400 block">Cable Rojo (+)</span>
+                  <button type="button" onclick="selectDmmAnatomy('jackvoma')" id="dmm-zone-jackvoma" class="dmm-zone jack-zone">
+                    <span class="jack-ring red">VΩmA</span>
+                    <span style="font-size:12px;font-weight:700;display:block">5. VΩmA</span>
+                    <span style="font-size:11px;color:#cee7e4;display:block">Cable Rojo (+)</span>
                   </button>
                 </div>
               </div>
 
               <!-- Panel de Explicación Detallada -->
-              <div class="lg:col-span-6 lab-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
-                <div id="dmm-anatomy-detail" class="space-y-4">
+              <div class="card anatomy-detail-card">
+                <div id="dmm-anatomy-detail">
                   <!-- Rellenado por JS -->
                 </div>
 
-                <div class="pt-6 mt-6 border-t border-slate-800 flex flex-wrap gap-2">
-                  <button onclick="selectDmmAnatomy('display')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">1. Pantalla</button>
-                  <button onclick="selectDmmAnatomy('dial')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">2. Selector</button>
-                  <button onclick="selectDmmAnatomy('jack10a')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">3. Borna 10A</button>
-                  <button onclick="selectDmmAnatomy('jackcom')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">4. COM</button>
-                  <button onclick="selectDmmAnatomy('jackvoma')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">5. VΩmA</button>
+                <div class="anatomy-tabs-footer">
+                  <button type="button" onclick="selectDmmAnatomy('display')" class="btn small">1. Pantalla</button>
+                  <button type="button" onclick="selectDmmAnatomy('dial')" class="btn small">2. Selector</button>
+                  <button type="button" onclick="selectDmmAnatomy('jack10a')" class="btn small">3. Borna 10A</button>
+                  <button type="button" onclick="selectDmmAnatomy('jackcom')" class="btn small">4. COM</button>
+                  <button type="button" onclick="selectDmmAnatomy('jackvoma')" class="btn small">5. VΩmA</button>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- ==================== GLOSARIO BILINGÜE INTERACTIVO ==================== -->
-          <div class="space-y-5 pt-4">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="glossary-header">
               <div>
-                <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Vocabulario Técnico Esencial</span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-                  Glosario Bilingüe Interactivo <span class="text-slate-400 font-normal text-lg">(Bilingual Glossary)</span>
+                <span class="num">Vocabulario Técnico Esencial</span>
+                <h2>
+                  Glosario Bilingüe Interactivo <span class="muted-sub">(Bilingual Glossary)</span>
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                <p style="margin:4px 0 0;color:var(--muted);font-size:14px">
                   Haz clic en cada tarjeta para voltearla y conocer los símbolos grabados en cualquier multímetro.
                 </p>
               </div>
 
-              <div class="relative w-full md:w-80">
+              <div class="search-wrap">
+                <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
                 <input
                   type="text"
                   id="glossary-search"
+                  class="search-input"
                   oninput="filterGlossary()"
                   placeholder="Buscar término (ej. COM, Paralelo, OL)..."
-                  class="w-full bg-slate-900/90 border border-slate-700 focus:border-[#00e5ff] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
                 />
-                <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
               </div>
             </div>
 
-            <div id="glossary-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div id="glossary-grid" class="glossary-grid">
               <!-- Renderizado dinámico por JS -->
             </div>
           </div>
 
-          <div class="flex justify-end pt-4">
-            <button onclick="switchSection('simulator')" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg flex items-center gap-2">
+          <div class="section-nav-footer" style="justify-content:flex-end">
+            <button type="button" onclick="switchSection('simulator')" class="btn primary">
               <span>Siguiente: Ir al Simulador de Multímetro</span>
               <span>→</span>
             </button>
@@ -545,128 +1944,123 @@
         <!-- =======================================================================
              SECCIÓN 2: SIMULADOR INTERACTIVO DE MULTÍMETRO DIGITAL
         ======================================================================== -->
-        <section id="section-simulator" class="section-view hidden space-y-6">
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <section id="section-simulator" class="section-view hidden space-y-md">
+          <div class="section-header-row">
             <div>
-              <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Práctica Guiada en Pantalla</span>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">
-                Simulador de Multímetro <span class="text-slate-400 font-normal text-lg">(Interactive Multimeter)</span>
+              <span class="num">Práctica Guiada en Pantalla</span>
+              <h2>
+                Simulador de Multímetro <span class="muted-sub">(Interactive Multimeter)</span>
               </h2>
-              <p class="text-xs sm:text-sm text-slate-400 mt-1">
-                Elige un circuito de prueba, selecciona la <strong class="text-slate-200">clavija roja</strong>, ajusta el <strong class="text-slate-200">selector de escala</strong> y define la <strong class="text-slate-200">conexión</strong>.
+              <p>
+                Elige un circuito de prueba, selecciona la <strong>clavija roja</strong>, ajusta el <strong>selector de escala</strong> y define la <strong>conexión</strong>.
               </p>
             </div>
 
             <!-- Botones de Escenarios Rápidos -->
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="text-xs font-mono text-slate-400 mr-1">Circuitos:</span>
-              <button onclick="loadDmmScenario('dc_battery')" id="scen-btn-dc_battery" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 transition">
+            <div class="presets-bar">
+              <span style="font-size:12.5px;font-weight:700;color:var(--muted)">Circuitos:</span>
+              <button type="button" onclick="loadDmmScenario('dc_battery')" id="scen-btn-dc_battery" class="btn small active">
                 🔋 Batería 9V DC
               </button>
-              <button onclick="loadDmmScenario('ac_outlet')" id="scen-btn-ac_outlet" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+              <button type="button" onclick="loadDmmScenario('ac_outlet')" id="scen-btn-ac_outlet" class="btn small">
                 🔌 Toma 120V AC
               </button>
-              <button onclick="loadDmmScenario('low_current')" id="scen-btn-low_current" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+              <button type="button" onclick="loadDmmScenario('low_current')" id="scen-btn-low_current" class="btn small">
                 💡 Circuito 250 mA
               </button>
-              <button onclick="loadDmmScenario('high_current')" id="scen-btn-high_current" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+              <button type="button" onclick="loadDmmScenario('high_current')" id="scen-btn-high_current" class="btn small">
                 ⚙️ Motor 2.4 A
               </button>
-              <button onclick="loadDmmScenario('resistor')" id="scen-btn-resistor" class="scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+              <button type="button" onclick="loadDmmScenario('resistor')" id="scen-btn-resistor" class="btn small">
                 🎚️ Resistor 4.7 kΩ
               </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-            <!-- COLUMNA IZQUIERDA (7 cols): MULTÍMETRO VIRTUAL + DIAGRAMA DE CONEXIÓN -->
-            <div class="xl:col-span-7 space-y-5">
-              <div class="meter-bezel rounded-3xl p-5 space-y-4">
-                <!-- Barra OSD superior -->
-                <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
-                  <span class="px-2.5 py-0.5 rounded bg-amber-500/20 text-[#ffb300] border border-amber-500/40 font-bold" id="sim-scen-title">
+          <div class="sim-layout">
+            <!-- COLUMNA IZQUIERDA: MULTÍMETRO VIRTUAL + DIAGRAMA DE CONEXIÓN -->
+            <div class="sim-left-col">
+              <div class="meter-screen-card">
+                <div class="osd-bar">
+                  <span class="osd-scen-pill" id="sim-scen-title">
                     Escenario: Batería Alcalina 9.0 V DC
                   </span>
-                  <span class="text-slate-400" id="sim-scen-hint">Objetivo: Medir Voltaje DC</span>
+                  <span style="color:#cee7e4" id="sim-scen-hint">Objetivo: Medir Voltaje DC</span>
                 </div>
 
                 <!-- Pantalla LCD Principal del Simulador -->
-                <div class="lcd-screen rounded-2xl p-5 flex flex-col justify-between gap-3">
-                  <div class="flex items-center justify-between text-xs font-mono text-slate-400">
-                    <span id="lcd-mode-badge" class="text-[#00e5ff] font-bold">MODO: VOLTAJE DC (V⎓)</span>
-                    <span id="lcd-jack-badge" class="text-rose-400">CLAVIJA ROJA: VΩmA</span>
+                <div class="lcd-display-box">
+                  <div class="lcd-top-meta">
+                    <span id="lcd-mode-badge" style="color:var(--mint-bright)">MODO: VOLTAJE DC (V⎓)</span>
+                    <span id="lcd-jack-badge" style="color:#ff9c94">CLAVIJA ROJA: VΩmA</span>
                   </div>
 
-                  <div class="flex items-baseline justify-end gap-3 py-2">
-                    <span id="lcd-main-value" class="font-mono text-4xl sm:text-6xl font-extrabold text-[#00ff88] tracking-wider">
-                      9.00
-                    </span>
-                    <span id="lcd-main-unit" class="font-mono text-xl sm:text-2xl font-bold text-emerald-300">
-                      V
-                    </span>
+                  <div class="lcd-readout-row">
+                    <span id="lcd-main-value" class="lcd-value">9.00</span>
+                    <span id="lcd-main-unit" class="lcd-unit">V</span>
                   </div>
 
-                  <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 border-t border-emerald-500/20 pt-2">
+                  <div class="lcd-bottom-meta">
                     <span id="lcd-range-info">Escala seleccionada: 20 V DC</span>
                     <span id="lcd-conn-info">Conexión: Paralelo</span>
                   </div>
                 </div>
 
                 <!-- Esquema SVG Dinámico de Conexión -->
-                <div class="rounded-2xl bg-[#070b14] border border-slate-800 p-4">
-                  <div class="text-[11px] font-mono text-slate-400 mb-2 flex items-center justify-between">
+                <div class="diagram-box">
+                  <div class="diagram-head">
                     <span>Esquema de Conexión en Vivo (Live Connection Diagram)</span>
-                    <span id="diagram-status-tag" class="text-[#00ff88]">Conexión Válida</span>
+                    <span id="diagram-status-tag">Conexión Válida</span>
                   </div>
-                  <svg id="connection-svg" viewBox="0 0 460 150" class="w-full h-36">
+                  <svg id="connection-svg" viewBox="0 0 460 150">
                     <!-- Renderizado dinámicamente por JS -->
                   </svg>
                 </div>
               </div>
 
               <!-- Panel de Diagnóstico Pedagógico y Seguridad en Vivo -->
-              <div id="dmm-feedback-box" class="rounded-3xl p-5 border bg-emerald-500/10 border-emerald-500/40 text-emerald-200 space-y-1.5">
-                <div class="font-mono text-xs font-bold uppercase tracking-wider text-[#00ff88]" id="dmm-feedback-title">
+              <div id="dmm-feedback-box" class="callout">
+                <strong style="display:block;margin-bottom:4px" id="dmm-feedback-title">
                   ✓ Lectura Correcta y Segura
-                </div>
-                <p class="text-xs sm:text-sm leading-relaxed" id="dmm-feedback-desc">
+                </strong>
+                <span id="dmm-feedback-desc">
                   Has conectado el multímetro en paralelo con la batería, usando la borna VΩmA y una escala de 20 V DC adecuada para medir 9 V.
-                </p>
+                </span>
               </div>
             </div>
 
-            <!-- COLUMNA DERECHA (5 cols): CONTROLES DE CONFIGURACIÓN DEL MULTÍMETRO -->
-            <div class="xl:col-span-5 space-y-4">
+            <!-- COLUMNA DERECHA: CONTROLES DE CONFIGURACIÓN DEL MULTÍMETRO -->
+            <div class="sim-right-col">
               <!-- Paso 1: Clavija Roja -->
-              <div class="lab-card rounded-3xl p-5 space-y-3">
-                <div class="flex items-center justify-between">
-                  <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <div class="card">
+                <div class="ctrl-head">
+                  <h3 class="ctrl-title">
+                    <span class="dot-indicator red"></span>
                     <span>1. Borna de la Punta Roja (Red Probe Jack)</span>
                   </h3>
-                  <span class="text-[11px] font-mono text-slate-400">Negra en COM</span>
+                  <span style="font-size:12px;color:var(--muted);font-weight:700">Negra en COM</span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2.5">
-                  <button type="button" onclick="setRedJack('voma')" id="btn-jack-voma"
-                    class="py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/60 transition">
+                <div class="two-col-btns">
+                  <button type="button" onclick="setRedJack('voma')" id="btn-jack-voma" class="choice-btn center active-red">
                     Borna VΩmA
                   </button>
-                  <button type="button" onclick="setRedJack('10a')" id="btn-jack-10a"
-                    class="py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition">
+                  <button type="button" onclick="setRedJack('10a')" id="btn-jack-10a" class="choice-btn center">
                     Borna 10A (Alta I)
                   </button>
                 </div>
               </div>
 
               <!-- Paso 2: Selector Rotatorio -->
-              <div class="lab-card rounded-3xl p-5 space-y-3">
-                <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-[#00e5ff]"></span>
-                  <span>2. Perilla Selectora de Función y Escala</span>
-                </h3>
+              <div class="card">
+                <div class="ctrl-head">
+                  <h3 class="ctrl-title">
+                    <span class="dot-indicator"></span>
+                    <span>2. Perilla Selectora de Función y Escala</span>
+                  </h3>
+                </div>
 
-                <select id="ctrl-dmm-dial" onchange="updateDmmSim()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono text-white outline-none focus:border-[#00e5ff]">
+                <select id="ctrl-dmm-dial" onchange="updateDmmSim()" class="lab-select">
                   <option value="OFF">OFF — Apagado</option>
                   <option value="VDC_20" selected>V⎓ 20 V — Voltaje Continuo (hasta 20 V)</option>
                   <option value="VDC_200">V⎓ 200 V — Voltaje Continuo (hasta 200 V)</option>
@@ -679,47 +2073,47 @@
               </div>
 
               <!-- Paso 3: Forma de Conexión al Circuito -->
-              <div class="lab-card rounded-3xl p-5 space-y-3">
-                <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88]"></span>
-                  <span>3. Cómo conectas las puntas al circuito</span>
-                </h3>
+              <div class="card">
+                <div class="ctrl-head">
+                  <h3 class="ctrl-title">
+                    <span class="dot-indicator"></span>
+                    <span>3. Cómo conectas las puntas al circuito</span>
+                  </h3>
+                </div>
 
-                <div class="grid grid-cols-1 gap-2">
-                  <button type="button" onclick="setConnType('parallel')" id="btn-conn-parallel"
-                    class="text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 transition">
+                <div class="stack-btns">
+                  <button type="button" onclick="setConnType('parallel')" id="btn-conn-parallel" class="choice-btn active">
                     En Paralelo (Across component) — Para Voltaje
                   </button>
-                  <button type="button" onclick="setConnType('series')" id="btn-conn-series"
-                    class="text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition">
+                  <button type="button" onclick="setConnType('series')" id="btn-conn-series" class="choice-btn">
                     En Serie (In-line circuit) — Para Corriente
                   </button>
-                  <button type="button" onclick="setConnType('isolated')" id="btn-conn-isolated"
-                    class="text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition">
+                  <button type="button" onclick="setConnType('isolated')" id="btn-conn-isolated" class="choice-btn">
                     Componente Aislado (Sin energía) — Para Resistencia
                   </button>
                 </div>
               </div>
 
-              <!-- Interruptor de Energía del Circuito (Relevante para Resistencia) -->
-              <div class="lab-card rounded-3xl p-5 flex items-center justify-between gap-3">
-                <div>
-                  <h4 class="font-bold text-white text-xs sm:text-sm">Energía del Circuito de Prueba</h4>
-                  <p class="text-[11px] text-slate-400">Apágala antes de medir resistencia (Ω)</p>
+              <!-- Interruptor de Energía del Circuito -->
+              <div class="card">
+                <div class="power-row">
+                  <div>
+                    <h4 style="margin:0 0 2px;font-size:15px">Energía del Circuito de Prueba</h4>
+                    <p style="margin:0;font-size:12.5px;color:var(--muted)">Apágala antes de medir resistencia (Ω)</p>
+                  </div>
+                  <button type="button" onclick="toggleCircuitPower()" id="btn-circuit-power" class="btn small active">
+                    ENERGÍA: ON
+                  </button>
                 </div>
-                <button type="button" onclick="toggleCircuitPower()" id="btn-circuit-power"
-                  class="px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-emerald-500/20 text-[#00ff88] border border-emerald-500/40 transition">
-                  ENERGÍA: ON
-                </button>
               </div>
             </div>
           </div>
 
-          <div class="flex justify-between pt-4">
-            <button onclick="switchSection('intro')" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+          <div class="section-nav-footer">
+            <button type="button" onclick="switchSection('intro')" class="btn">
               ← Anterior: Seguridad y Anatomía
             </button>
-            <button onclick="switchSection('modes')" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg">
+            <button type="button" onclick="switchSection('modes')" class="btn primary">
               Siguiente: Guía V, A y Ω →
             </button>
           </div>
@@ -729,127 +2123,119 @@
         <!-- =======================================================================
              SECCIÓN 3: PROCEDIMIENTO PASO A PASO PARA MEDIR VOLTAJE, CORRIENTE Y RESISTENCIA
         ======================================================================== -->
-        <section id="section-modes" class="section-view hidden space-y-8">
+        <section id="section-modes" class="section-view hidden space-y-md">
           <div>
-            <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Procedimientos de Banco</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Cómo Medir Voltaje, Corriente y Resistencia <span class="text-slate-400 font-normal text-lg">(Measurement Procedures)</span>
+            <span class="num">Procedimientos de Banco</span>
+            <h2>
+              Cómo Medir Voltaje, Corriente y Resistencia <span class="muted-sub">(Measurement Procedures)</span>
             </h2>
-            <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            <p style="margin:4px 0 0;color:var(--muted);font-size:14px">
               Cada magnitud exige una posición específica de las puntas y una forma distinta de conectar el multímetro al circuito.
             </p>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="modes-grid">
             <!-- TARJETA 1: MEDIR VOLTAJE -->
-            <article class="lab-card rounded-3xl p-6 flex flex-col justify-between space-y-5 border-cyan-500/35">
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <span class="px-2.5 py-1 rounded-lg bg-cyan-500/15 text-[#00e5ff] border border-cyan-500/30 font-mono text-xs font-bold">
-                    1. VOLTAJE (V⎓ / V~)
-                  </span>
-                  <span class="text-xs font-mono text-slate-400">En Paralelo</span>
+            <article class="card mode-card">
+              <div class="space-y-md">
+                <div class="mode-card-top">
+                  <span class="mode-pill">1. VOLTAJE (V⎓ / V~)</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--muted)">En Paralelo</span>
                 </div>
 
                 <!-- Diagrama SVG Paralelo -->
-                <svg viewBox="0 0 240 100" class="w-full h-28 rounded-xl bg-[#04110b] border border-cyan-500/20">
-                  <rect x="25" y="25" width="35" height="50" rx="6" fill="none" stroke="#94a3b8" stroke-width="2" />
-                  <text x="33" y="54" fill="#e2e8f0" font-size="10" font-family="monospace"> Fuente</text>
-                  <line x1="60" y1="35" x2="140" y2="35" stroke="#94a3b8" stroke-width="2" />
-                  <line x1="60" y1="65" x2="140" y2="65" stroke="#94a3b8" stroke-width="2" />
-                  <rect x="130" y="35" width="20" height="30" fill="#0f172a" stroke="#00ff88" stroke-width="2" />
-                  <!-- Multímetro en paralelo -->
-                  <circle cx="195" cy="50" r="16" fill="#090d16" stroke="#00e5ff" stroke-width="2" />
-                  <text x="191" y="54" fill="#00e5ff" font-size="12" font-family="monospace" font-weight="bold">V</text>
-                  <polyline points="140,35 195,35 195,34" fill="none" stroke="#f43f5e" stroke-width="2" />
-                  <polyline points="140,65 195,65 195,66" fill="none" stroke="#94a3b8" stroke-width="2" />
+                <svg viewBox="0 0 240 100" class="mode-svg">
+                  <rect x="25" y="25" width="38" height="50" rx="6" fill="none" stroke="#cee7e4" stroke-width="2" />
+                  <text x="30" y="54" fill="#ffffff" font-size="9" font-family="sans-serif">Fuente</text>
+                  <line x1="63" y1="35" x2="140" y2="35" stroke="#cee7e4" stroke-width="2" />
+                  <line x1="63" y1="65" x2="140" y2="65" stroke="#cee7e4" stroke-width="2" />
+                  <rect x="130" y="35" width="20" height="30" fill="#1d4652" stroke="#82e3d2" stroke-width="2" />
+                  <circle cx="195" cy="50" r="16" fill="#091d26" stroke="#82e3d2" stroke-width="2" />
+                  <text x="190" y="54" fill="#82e3d2" font-size="12" font-family="sans-serif" font-weight="bold">V</text>
+                  <polyline points="140,35 195,35 195,34" fill="none" stroke="#ff9c94" stroke-width="2" />
+                  <polyline points="140,65 195,65 195,66" fill="none" stroke="#cee7e4" stroke-width="2" />
                 </svg>
 
-                <ol class="space-y-2 text-xs sm:text-sm text-slate-300 list-decimal list-inside leading-relaxed">
-                  <li>Conecta el cable negro en <strong class="text-white">COM</strong> y el rojo en <strong class="text-rose-300">VΩmA</strong>.</li>
-                  <li>Gira el selector a <strong class="text-[#00e5ff]">V⎓</strong> (corriente directa) o <strong class="text-[#00e5ff]">V~</strong> (alterna) en una escala mayor al voltaje esperado.</li>
-                  <li>Toca ambos extremos del componente (<strong class="text-[#00e5ff]">en paralelo</strong>) sin abrir el circuito y sin tocar las puntas metálicas.</li>
+                <ol class="mode-steps">
+                  <li>Conecta el cable negro en <strong>COM</strong> y el rojo en <strong>VΩmA</strong>.</li>
+                  <li>Gira el selector a <strong>V⎓</strong> (corriente directa) o <strong>V~</strong> (alterna) en una escala mayor al voltaje esperado.</li>
+                  <li>Toca ambos extremos del componente (<strong>en paralelo</strong>) sin abrir el circuito y sin tocar las puntas metálicas.</li>
                 </ol>
               </div>
 
-              <button onclick="loadDmmScenario('dc_battery'); switchSection('simulator');" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-[#00e5ff] border border-cyan-400/50 font-mono text-xs font-bold transition">
+              <button type="button" onclick="loadDmmScenario('dc_battery'); switchSection('simulator');" class="btn small">
                 Practicar medición de Voltaje →
               </button>
             </article>
 
             <!-- TARJETA 2: MEDIR CORRIENTE -->
-            <article class="lab-card rounded-3xl p-6 flex flex-col justify-between space-y-5 border-amber-500/35">
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-[#ffb300] border border-amber-500/30 font-mono text-xs font-bold">
-                    2. CORRIENTE (A / mA)
-                  </span>
-                  <span class="text-xs font-mono text-slate-400">En Serie</span>
+            <article class="card mode-card">
+              <div class="space-y-md">
+                <div class="mode-card-top">
+                  <span class="mode-pill amber">2. CORRIENTE (A / mA)</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--muted)">En Serie</span>
                 </div>
 
                 <!-- Diagrama SVG Serie -->
-                <svg viewBox="0 0 240 100" class="w-full h-28 rounded-xl bg-[#04110b] border border-amber-500/20">
-                  <rect x="20" y="25" width="35" height="50" rx="6" fill="none" stroke="#94a3b8" stroke-width="2" />
-                  <line x1="55" y1="35" x2="95" y2="35" stroke="#f43f5e" stroke-width="2" />
-                  <!-- Multímetro intercalado en serie -->
-                  <circle cx="115" cy="35" r="15" fill="#090d16" stroke="#ffb300" stroke-width="2" />
-                  <text x="111" y="39" fill="#ffb300" font-size="12" font-family="monospace" font-weight="bold">A</text>
-                  <line x1="130" y1="35" x2="180" y2="35" stroke="#94a3b8" stroke-width="2" />
-                  <rect x="170" y="35" width="20" height="30" fill="#0f172a" stroke="#00ff88" stroke-width="2" />
-                  <line x1="55" y1="65" x2="180" y2="65" stroke="#94a3b8" stroke-width="2" />
+                <svg viewBox="0 0 240 100" class="mode-svg">
+                  <rect x="20" y="25" width="35" height="50" rx="6" fill="none" stroke="#cee7e4" stroke-width="2" />
+                  <line x1="55" y1="35" x2="95" y2="35" stroke="#ff9c94" stroke-width="2" />
+                  <circle cx="115" cy="35" r="15" fill="#091d26" stroke="#ffd29d" stroke-width="2" />
+                  <text x="110" y="39" fill="#ffd29d" font-size="12" font-family="sans-serif" font-weight="bold">A</text>
+                  <line x1="130" y1="35" x2="180" y2="35" stroke="#cee7e4" stroke-width="2" />
+                  <rect x="170" y="35" width="20" height="30" fill="#1d4652" stroke="#82e3d2" stroke-width="2" />
+                  <line x1="55" y1="65" x2="180" y2="65" stroke="#cee7e4" stroke-width="2" />
                 </svg>
 
-                <ol class="space-y-2 text-xs sm:text-sm text-slate-300 list-decimal list-inside leading-relaxed">
-                  <li>Coloca el selector en la <strong class="text-[#ffb300]">escala más alta (10A)</strong> y conecta la punta roja en la borna <strong class="text-[#ffb300]">10A</strong>.</li>
-                  <li>Apaga el circuito, abre el camino conductor e intercala el multímetro (<strong class="text-[#ffb300]">en serie</strong>) para que la corriente pase a través de él.</li>
-                  <li>Enciende el circuito y lee el valor. Solo baja a <code class="text-amber-300">mA</code> si la lectura es menor a 400 mA.</li>
+                <ol class="mode-steps">
+                  <li>Coloca el selector en la <strong>escala más alta (10A)</strong> y conecta la punta roja en la borna <strong>10A</strong>.</li>
+                  <li>Apaga el circuito, abre el camino conductor e intercala el multímetro (<strong>en serie</strong>) para que la corriente pase a través de él.</li>
+                  <li>Enciende el circuito y lee el valor. Solo baja a <code>mA</code> si la lectura es menor a 400 mA.</li>
                 </ol>
               </div>
 
-              <button onclick="loadDmmScenario('high_current'); switchSection('simulator');" class="w-full py-2.5 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-[#ffb300] border border-amber-400/50 font-mono text-xs font-bold transition">
+              <button type="button" onclick="loadDmmScenario('high_current'); switchSection('simulator');" class="btn small">
                 Practicar medición de Corriente →
               </button>
             </article>
 
             <!-- TARJETA 3: MEDIR RESISTENCIA -->
-            <article class="lab-card rounded-3xl p-6 flex flex-col justify-between space-y-5 border-emerald-500/35">
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-[#00ff88] border border-emerald-500/30 font-mono text-xs font-bold">
-                    3. RESISTENCIA (Ω)
-                  </span>
-                  <span class="text-xs font-mono text-slate-400">Sin Energía</span>
+            <article class="card mode-card">
+              <div class="space-y-md">
+                <div class="mode-card-top">
+                  <span class="mode-pill">3. RESISTENCIA (Ω)</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--muted)">Sin Energía</span>
                 </div>
 
                 <!-- Diagrama SVG Resistor Aislado -->
-                <svg viewBox="0 0 240 100" class="w-full h-28 rounded-xl bg-[#04110b] border border-emerald-500/20">
-                  <rect x="55" y="40" width="60" height="20" rx="4" fill="#0f172a" stroke="#00ff88" stroke-width="2" />
-                  <line x1="30" y1="50" x2="55" y2="50" stroke="#94a3b8" stroke-width="2" />
-                  <line x1="115" y1="50" x2="140" y2="50" stroke="#94a3b8" stroke-width="2" />
-                  <circle cx="190" cy="50" r="16" fill="#090d16" stroke="#00ff88" stroke-width="2" />
-                  <text x="185" y="54" fill="#00ff88" font-size="12" font-family="monospace" font-weight="bold">Ω</text>
-                  <polyline points="35,50 35,22 190,22 190,34" fill="none" stroke="#f43f5e" stroke-width="2" />
-                  <polyline points="135,50 135,78 190,78 190,66" fill="none" stroke="#94a3b8" stroke-width="2" />
+                <svg viewBox="0 0 240 100" class="mode-svg">
+                  <rect x="55" y="40" width="60" height="20" rx="4" fill="#1d4652" stroke="#82e3d2" stroke-width="2" />
+                  <line x1="30" y1="50" x2="55" y2="50" stroke="#cee7e4" stroke-width="2" />
+                  <line x1="115" y1="50" x2="140" y2="50" stroke="#cee7e4" stroke-width="2" />
+                  <circle cx="190" cy="50" r="16" fill="#091d26" stroke="#82e3d2" stroke-width="2" />
+                  <text x="184" y="54" fill="#82e3d2" font-size="12" font-family="sans-serif" font-weight="bold">Ω</text>
+                  <polyline points="35,50 35,22 190,22 190,34" fill="none" stroke="#ff9c94" stroke-width="2" />
+                  <polyline points="135,50 135,78 190,78 190,66" fill="none" stroke="#cee7e4" stroke-width="2" />
                 </svg>
 
-                <ol class="space-y-2 text-xs sm:text-sm text-slate-300 list-decimal list-inside leading-relaxed">
-                  <li><strong class="text-rose-300">Desconecta toda fuente de energía</strong> y retira al menos una pata del componente del circuito.</li>
-                  <li>Conecta el cable negro en <strong class="text-white">COM</strong> y el rojo en <strong class="text-rose-300">VΩmA</strong>, y selecciona la escala de <strong class="text-[#00ff88]">Ω</strong>.</li>
-                  <li>Sujeta solo el plástico de las sondas y toca los dos terminales del resistor. Si muestra <code class="text-amber-300">OL</code>, sube la escala.</li>
+                <ol class="mode-steps">
+                  <li><strong>Desconecta toda fuente de energía</strong> y retira al menos una pata del componente del circuito.</li>
+                  <li>Conecta el cable negro en <strong>COM</strong> y el rojo en <strong>VΩmA</strong>, y selecciona la escala de <strong>Ω</strong>.</li>
+                  <li>Sujeta solo el plástico de las sondas y toca los dos terminales del resistor. Si muestra <code>OL</code>, sube la escala.</li>
                 </ol>
               </div>
 
-              <button onclick="loadDmmScenario('resistor'); switchSection('simulator');" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-[#00ff88] border border-emerald-400/50 font-mono text-xs font-bold transition">
+              <button type="button" onclick="loadDmmScenario('resistor'); switchSection('simulator');" class="btn small">
                 Practicar medición de Resistencia →
               </button>
             </article>
           </div>
 
-          <div class="flex justify-between pt-4">
-            <button onclick="switchSection('simulator')" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+          <div class="section-nav-footer">
+            <button type="button" onclick="switchSection('simulator')" class="btn">
               ← Anterior: Simulador
             </button>
-            <button onclick="switchSection('exercises')" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg">
+            <button type="button" onclick="switchSection('exercises')" class="btn primary">
               Siguiente: Ejercicios Prácticos →
             </button>
           </div>
@@ -859,203 +2245,153 @@
         <!-- =======================================================================
              SECCIÓN 4: EJERCICIOS PRÁCTICOS (QUIZ INTERACTIVO)
         ======================================================================== -->
-        <section id="section-exercises" class="section-view hidden space-y-6">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <section id="section-exercises" class="section-view hidden space-y-md">
+          <div class="quiz-topbar">
             <div>
-              <span class="font-mono text-xs uppercase tracking-widest text-[#ffb300]">Comprueba lo Aprendido</span>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-                Ejercicios Prácticos <span class="text-slate-400 font-normal text-lg">(Multimeter Quiz)</span>
+              <span class="num">Comprueba lo Aprendido</span>
+              <h2>
+                Ejercicios Prácticos <span class="muted-sub">(Multimeter Quiz)</span>
               </h2>
-              <p class="text-xs sm:text-sm text-slate-400 mt-1">
+              <p style="margin:4px 0 0;color:var(--muted);font-size:14px">
                 Responde estas 6 preguntas sobre seguridad, selección de escalas y conexión de puntas.
               </p>
             </div>
 
-            <div class="flex items-center gap-3">
-              <div class="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-sm font-bold text-[#ffb300]" id="desktop-score-badge">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <div class="score-pill" id="desktop-score-badge">
                 Puntuación: 0 / 6
               </div>
-              <button onclick="resetQuiz()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300 border border-slate-700 transition">
+              <button type="button" onclick="resetQuiz()" class="btn small">
                 Reiniciar
               </button>
             </div>
           </div>
 
-          <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div id="quiz-container" class="quiz-grid">
             <!-- Renderizado dinámico por JS -->
           </div>
 
-          <div class="flex justify-start pt-4">
-            <button onclick="switchSection('modes')" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+          <div class="section-nav-footer">
+            <button type="button" onclick="switchSection('modes')" class="btn">
               ← Anterior: Guía V, A y Ω
             </button>
           </div>
         </section>
+
       </div>
 
       <!-- =======================================================================
            BOTÓN INFERIOR PARA VOLVER A INDEX.HTML
       ======================================================================== -->
-      <div class="pt-6 border-t border-slate-800/90 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-xs font-mono text-slate-400">
-          ¿Deseas regresar al menú de áreas de <span class="text-slate-200">Aprendizaje electrónico interactivo</span>?
+      <div class="back-home-bar">
+        <p>
+          ¿Deseas regresar al menú de áreas de <strong>Aprendizaje electrónico interactivo</strong>?
         </p>
-        <a
-          href="../index.html"
-          class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-cyan-500/15 text-[#00e5ff] border border-cyan-500/40 hover:border-[#00e5ff] font-extrabold text-sm transition shadow-[0_0_20px_rgba(0,229,255,0.12)] flex items-center justify-center gap-2.5"
-        >
+        <a href="../index.html" class="btn dark">
           <span>←</span>
           <span>Volver a la Página Principal (index.html)</span>
         </a>
       </div>
-
     </main>
 
     <!-- ==================== PANEL DE NAVEGACIÓN DERECHO ==================== -->
-    <aside
-      id="side-panel"
-      aria-label="Navegación del sitio"
-      class="fixed inset-y-0 right-0 z-40 w-72 shrink-0 bg-[#0b101d]/95 lg:bg-[#090d16]/70 backdrop-blur-md border-l border-slate-800/90 transform translate-x-full lg:translate-x-0 lg:sticky lg:top-[69px] lg:h-[calc(100vh-69px)] transition-transform duration-200 ease-out flex flex-col justify-between sidebar-scroll overflow-y-auto"
-    >
-      <div class="p-4 space-y-6">
+    <aside id="side-panel" class="side-panel" aria-label="Navegación del sitio">
+      <div class="side-panel-inner">
         <!-- Encabezado móvil del panel -->
-        <div class="flex items-center justify-between lg:hidden pb-3 border-b border-slate-800">
-          <span class="font-mono text-xs uppercase tracking-wider text-[#00e5ff]">Navegación</span>
-          <button type="button" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-1">
-            ✕
-          </button>
+        <div class="side-mobile-head">
+          <span>Navegación</span>
+          <button type="button" onclick="toggleSidebar()" aria-label="Cerrar navegación" style="background:none;border:0;font-size:18px;color:var(--navy)">✕</button>
         </div>
 
         <!-- Bloque 1: Enlaces a las otras páginas del sitio (editar href con rutas reales) -->
-        <div class="space-y-2">
-          <div class="px-2.5 flex items-center justify-between">
-            <span class="font-mono text-[11px] uppercase tracking-widest text-[#00ff88] font-semibold">
-              Páginas del sitio
-            </span>
-            <a href="../index.html" class="font-mono text-[10px] text-[#00e5ff] hover:underline">
-              Inicio
-            </a>
+        <div class="side-group">
+          <div class="side-group-head">
+            <span class="side-group-title">Páginas del sitio</span>
+            <a href="../index.html" class="side-home-link">Inicio</a>
           </div>
 
-          <nav class="space-y-1.5">
+          <nav class="side-page-list">
             <!-- Página 1 -->
-            <a
-              href="#"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                01
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
-                  Título página 1
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 1]</p>
+            <a href="#" class="side-page-link">
+              <span class="side-num">01</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 1</p>
+                <p class="side-page-file">[Colocar enlace 1]</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
             <!-- Página 2 -->
-            <a
-              href="#"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                02
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
-                  Título página 2
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 2]</p>
+            <a href="#" class="side-page-link">
+              <span class="side-num">02</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 2</p>
+                <p class="side-page-file">[Colocar enlace 2]</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
             <!-- Página 3 -->
-            <a
-              href="#"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                03
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
-                  Título página 3
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 3]</p>
+            <a href="#" class="side-page-link">
+              <span class="side-num">03</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 3</p>
+                <p class="side-page-file">[Colocar enlace 3]</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
             <!-- Página 4 -->
-            <a
-              href="#"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-amber-500/10 border border-slate-800/90 hover:border-amber-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#ffb300] bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                04
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#ffb300] transition truncate">
-                  Título página 4
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 4]</p>
+            <a href="#" class="side-page-link">
+              <span class="side-num">04</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 4</p>
+                <p class="side-page-file">[Colocar enlace 4]</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#ffb300] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
             <!-- Página 5 -->
-            <a
-              href="#"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                05
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
-                  Título página 5
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">[Colocar enlace 5]</p>
+            <a href="#" class="side-page-link">
+              <span class="side-num">05</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 5</p>
+                <p class="side-page-file">[Colocar enlace 5]</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
           </nav>
         </div>
 
         <!-- Bloque 2: Secciones en index.html -->
-        <div class="space-y-2 pt-3 border-t border-slate-800/80">
-          <div class="px-2.5">
-            <span class="font-mono text-[11px] uppercase tracking-widest text-slate-400 font-semibold">
-              Secciones
-            </span>
+        <div class="side-group">
+          <div class="side-group-head">
+            <span class="side-group-title">Secciones</span>
           </div>
 
-          <nav class="space-y-1 text-xs">
-            <a href="../index.html" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+          <nav class="side-sec-list">
+            <a href="../index.html" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Conocimientos electrónicos básicos</span>
             </a>
-            <a href="../index.html#sec-analogica" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+            <a href="../index.html#sec-analogica" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Diseño electrónico analógico</span>
             </a>
-            <a href="../index.html#sec-digital" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+            <a href="../index.html#sec-digital" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Diseño electrónico digital</span>
             </a>
-            <a href="../index.html#sec-potencia" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#ffb300]"></span>
+            <a href="../index.html#sec-potencia" class="side-sec-link">
+              <span class="side-dot amber"></span>
               <span>Electrónica de potencia</span>
             </a>
-            <a href="../index.html#sec-dsp" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+            <a href="../index.html#sec-dsp" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Procesamiento digital de señales</span>
             </a>
-            <a href="../index.html#autor" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            <a href="../index.html#autor" class="side-sec-link">
+              <span class="side-dot navy"></span>
               <span>Autor</span>
             </a>
           </nav>
@@ -1063,8 +2399,8 @@
       </div>
 
       <!-- Pie del Panel Lateral -->
-      <div class="p-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-500">
-        <a href="../index.html" class="text-[#00e5ff] hover:underline">← Volver a Inicio</a>
+      <div class="side-panel-footer">
+        <a href="../index.html">← Volver a Inicio</a>
       </div>
     </aside>
 
@@ -1076,8 +2412,8 @@
     function toggleSidebar() {
       const sidebar = document.getElementById('side-panel');
       const backdrop = document.getElementById('sidebar-backdrop');
-      sidebar.classList.toggle('translate-x-full');
-      backdrop.classList.toggle('hidden');
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('open');
     }
 
     // 2. NAVEGACIÓN ENTRE PESTAÑAS DE MULTILAB
@@ -1088,10 +2424,10 @@
         const tab = document.getElementById('tab-' + id);
         if (id === sectionId) {
           el.classList.remove('hidden');
-          tab.className = 'nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all bg-cyan-500/15 text-[#00e5ff] border border-cyan-400/50 shadow-[0_0_15px_rgba(0,229,255,0.15)]';
+          tab.classList.add('active');
         } else {
           el.classList.add('hidden');
-          tab.className = 'nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent';
+          tab.classList.remove('active');
         }
       });
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1140,13 +2476,11 @@
       if (active) active.classList.add('anatomy-zone-active');
 
       document.getElementById('dmm-anatomy-detail').innerHTML = `
-        <span class="inline-block font-mono text-xs px-2.5 py-1 rounded-lg bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
-          ${data.badge}
-        </span>
-        <h3 class="text-xl sm:text-2xl font-extrabold text-white">${data.title}</h3>
-        <p class="text-sm text-slate-300 leading-relaxed">${data.desc}</p>
-        <div class="p-3.5 rounded-2xl bg-[#090d16]/90 border border-amber-500/30 text-xs text-amber-200 leading-relaxed">
-          <strong class="text-[#ffb300]">Nota clave:</strong> ${data.tip}
+        <span class="anatomy-tag">${data.badge}</span>
+        <h3>${data.title}</h3>
+        <p style="margin:0 0 14px;font-size:14.5px">${data.desc}</p>
+        <div class="callout warning">
+          <strong>Nota clave:</strong> ${data.tip}
         </div>
       `;
     }
@@ -1168,21 +2502,21 @@
       grid.innerHTML = list.map(item => `
         <div class="flip-card" onclick="this.classList.toggle('flipped')">
           <div class="flip-card-inner">
-            <div class="flip-card-front lab-card p-5 flex flex-col justify-between">
-              <div class="flex items-center justify-between">
-                <span class="text-[10px] font-mono uppercase tracking-wider text-[#00e5ff] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/30">EN / ES</span>
-                <span class="text-[11px] font-mono text-slate-500">Clic para voltear ↻</span>
+            <div class="flip-card-front">
+              <div class="flip-top">
+                <span class="flip-lang-badge">EN / ES</span>
+                <span class="flip-hint">Clic para voltear ↻</span>
               </div>
               <div>
-                <h3 class="text-lg font-extrabold text-white">${item.en}</h3>
-                <p class="text-sm font-mono text-[#ffb300] mt-1">${item.es}</p>
+                <h3 class="flip-en">${item.en}</h3>
+                <p class="flip-es">${item.es}</p>
               </div>
-              <div class="text-[11px] text-slate-400">Ver definición →</div>
+              <div style="font-size:12px;color:var(--muted);font-weight:600">Ver definición →</div>
             </div>
-            <div class="flip-card-back bg-[#0f1c2e] border border-cyan-400/50 p-5 flex flex-col justify-between">
-              <span class="text-xs font-mono font-bold text-[#00e5ff]">${item.es} (${item.en})</span>
-              <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">${item.def}</p>
-              <span class="text-[10px] font-mono text-slate-400">Clic para regresar ↺</span>
+            <div class="flip-card-back">
+              <span class="flip-back-title">${item.es} (${item.en})</span>
+              <p class="flip-back-def">${item.def}</p>
+              <span style="font-size:11.5px;color:#075f5d;font-weight:700">Clic para regresar ↺</span>
             </div>
           </div>
         </div>
@@ -1227,7 +2561,7 @@
         title: 'Escenario: Circuito LED 250 mA (0.25 A)',
         hint: 'Objetivo: Medir Corriente (Serie, empezar en 10A)',
         type: 'IDC',
-        actualValue: 0.25, // Amperios
+        actualValue: 0.25,
         unit: 'A',
         defaultJack: '10a',
         defaultDial: 'ADC_10A',
@@ -1238,7 +2572,7 @@
         title: 'Escenario: Motor DC 2.40 A (Alta Corriente)',
         hint: 'Objetivo: Medir 2.40 A usando borna 10A en Serie',
         type: 'IDC',
-        actualValue: 2.40, // Amperios
+        actualValue: 2.40,
         unit: 'A',
         defaultJack: '10a',
         defaultDial: 'ADC_10A',
@@ -1249,7 +2583,7 @@
         title: 'Escenario: Resistor de 4.70 kΩ (4,700 Ω)',
         hint: 'Objetivo: Medir Resistencia con Energía OFF',
         type: 'OHM',
-        actualValue: 4700, // Ohmios
+        actualValue: 4700,
         unit: 'kΩ',
         defaultJack: 'voma',
         defaultDial: 'OHM_20K',
@@ -1275,13 +2609,10 @@
       dmmState.connType = sc.defaultConn;
       dmmState.circuitPower = sc.defaultPower;
 
-      document.querySelectorAll('.scen-btn').forEach(b => {
-        b.className = 'scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition';
+      Object.keys(dmmScenarios).forEach(k => {
+        const btn = document.getElementById('scen-btn-' + k);
+        if (btn) btn.classList.toggle('active', k === key);
       });
-      const activeBtn = document.getElementById('scen-btn-' + key);
-      if (activeBtn) {
-        activeBtn.className = 'scen-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 transition';
-      }
 
       document.getElementById('ctrl-dmm-dial').value = dmmState.dial;
       syncDmmControlButtons();
@@ -1307,28 +2638,20 @@
     }
 
     function syncDmmControlButtons() {
-      // Jacks
-      document.getElementById('btn-jack-voma').className = dmmState.redJack === 'voma'
-        ? 'py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/60 transition'
-        : 'py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition';
-      document.getElementById('btn-jack-10a').className = dmmState.redJack === '10a'
-        ? 'py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-amber-500/20 text-[#ffb300] border border-amber-400/60 transition'
-        : 'py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition';
+      const vomaBtn = document.getElementById('btn-jack-voma');
+      const jack10aBtn = document.getElementById('btn-jack-10a');
 
-      // Connections
+      vomaBtn.className = 'choice-btn center' + (dmmState.redJack === 'voma' ? ' active-red' : '');
+      jack10aBtn.className = 'choice-btn center' + (dmmState.redJack === '10a' ? ' active-amber' : '');
+
       ['parallel', 'series', 'isolated'].forEach(c => {
         const btn = document.getElementById('btn-conn-' + c);
-        btn.className = dmmState.connType === c
-          ? 'text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 transition'
-          : 'text-left px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition';
+        btn.className = 'choice-btn' + (dmmState.connType === c ? ' active' : '');
       });
 
-      // Power button
       const pBtn = document.getElementById('btn-circuit-power');
       pBtn.textContent = dmmState.circuitPower ? 'ENERGÍA: ON' : 'ENERGÍA: OFF';
-      pBtn.className = dmmState.circuitPower
-        ? 'px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-emerald-500/20 text-[#00ff88] border border-emerald-500/40 transition'
-        : 'px-3.5 py-2 rounded-xl font-mono text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700 transition';
+      pBtn.classList.toggle('active', dmmState.circuitPower);
     }
 
     function updateDmmSim() {
@@ -1357,7 +2680,7 @@
       let valText = '0.00';
       let unitText = '';
       let modeText = 'MODO: APAGADO';
-      let statusLevel = 'ok'; // ok | warn | danger
+      let statusLevel = 'ok';
       let fbTitle = '';
       let fbDesc = '';
 
@@ -1369,7 +2692,6 @@
         fbTitle = 'Multímetro Apagado';
         fbDesc = 'Gira la perilla selectora hacia la magnitud que deseas medir (V⎓, V~, A⎓ u Ω).';
       }
-      // Peligro: medir voltaje en paralelo con modo corriente
       else if ((dmmState.dial === 'ADC_10A' || dmmState.dial === 'ADC_400MA') && dmmState.connType === 'parallel' && dmmState.circuitPower) {
         valText = 'ERR !';
         unitText = 'FUSE';
@@ -1378,7 +2700,6 @@
         fbTitle = '⚠ PELIGRO: Cortocircuito por conexión en paralelo en modo Corriente';
         fbDesc = 'Nunca conectes el multímetro en paralelo cuando está configurado como amperímetro (A/mA). Su resistencia interna es casi nula y quemará el fusible o dañará la fuente.';
       }
-      // Peligro: medir resistencia con circuito energizado
       else if ((dmmState.dial === 'OHM_2K' || dmmState.dial === 'OHM_20K') && dmmState.circuitPower) {
         valText = 'ERR Ω';
         unitText = 'PWR!';
@@ -1387,7 +2708,6 @@
         fbTitle = '⚠ ADVERTENCIA: Circuito energizado al medir Resistencia';
         fbDesc = 'Nunca midas resistencia con el circuito encendido. Apaga la energía (ENERGÍA: OFF) y aísla el componente para evitar lecturas erróneas y daños al multímetro.';
       }
-      // Caso 1: Voltaje DC
       else if (dmmState.dial === 'VDC_20' || dmmState.dial === 'VDC_200') {
         modeText = 'MODO: VOLTAJE DC (V⎓)';
         unitText = 'V';
@@ -1428,7 +2748,6 @@
           }
         }
       }
-      // Caso 2: Voltaje AC
       else if (dmmState.dial === 'VAC_600') {
         modeText = 'MODO: VOLTAJE AC (V~)';
         unitText = 'V~';
@@ -1454,7 +2773,6 @@
           fbDesc = 'Escala de 600 V~ seleccionada correctamente para medir 120 V AC en paralelo.';
         }
       }
-      // Caso 3: Corriente DC
       else if (dmmState.dial === 'ADC_10A' || dmmState.dial === 'ADC_400MA') {
         modeText = dmmState.dial === 'ADC_10A' ? 'MODO: CORRIENTE 10A (A⎓)' : 'MODO: CORRIENTE mA (mA⎓)';
         unitText = dmmState.dial === 'ADC_10A' ? 'A' : 'mA';
@@ -1485,11 +2803,9 @@
           fbTitle = '⚠ FUSIBLE QUEMADO: Corriente excede 400 mA';
           fbDesc = 'Intentaste medir 2.40 A (2,400 mA) en la escala de 400 mA. Por seguridad, empieza siempre en la escala más alta (10A).';
         } else {
-          if (dmmState.dial === 'ADC_10A') {
-            valText = sc.actualValue.toFixed(2);
-          } else {
-            valText = (sc.actualValue * 1000).toFixed(0);
-          }
+          valText = dmmState.dial === 'ADC_10A'
+            ? sc.actualValue.toFixed(2)
+            : (sc.actualValue * 1000).toFixed(0);
           statusLevel = 'ok';
           fbTitle = '✓ Medición de Corriente Correcta';
           fbDesc = dmmState.dial === 'ADC_10A'
@@ -1497,7 +2813,6 @@
             : 'Lectura precisa en miliamperios dentro del límite seguro de 400 mA.';
         }
       }
-      // Caso 4: Resistencia
       else if (dmmState.dial === 'OHM_2K' || dmmState.dial === 'OHM_20K') {
         modeText = 'MODO: RESISTENCIA (Ω)';
         unitText = 'kΩ';
@@ -1538,23 +2853,21 @@
       const fbTitleEl = document.getElementById('dmm-feedback-title');
       const diagTag = document.getElementById('diagram-status-tag');
 
+      valEl.className = 'lcd-value';
+      fbBox.className = 'callout';
+      diagTag.className = '';
+
       if (statusLevel === 'ok') {
-        valEl.className = 'font-mono text-4xl sm:text-6xl font-extrabold text-[#00ff88] tracking-wider';
-        fbBox.className = 'rounded-3xl p-5 border bg-emerald-500/10 border-emerald-500/40 text-emerald-200 space-y-1.5';
-        fbTitleEl.className = 'font-mono text-xs font-bold uppercase tracking-wider text-[#00ff88]';
-        diagTag.className = 'text-[#00ff88]';
         diagTag.textContent = 'Conexión Válida';
       } else if (statusLevel === 'warn') {
-        valEl.className = 'font-mono text-4xl sm:text-6xl font-extrabold text-[#ffb300] tracking-wider';
-        fbBox.className = 'rounded-3xl p-5 border bg-amber-500/10 border-amber-500/40 text-amber-200 space-y-1.5';
-        fbTitleEl.className = 'font-mono text-xs font-bold uppercase tracking-wider text-[#ffb300]';
-        diagTag.className = 'text-[#ffb300]';
+        valEl.classList.add('warn');
+        fbBox.classList.add('warning');
+        diagTag.classList.add('warn');
         diagTag.textContent = 'Revisar Ajuste';
       } else {
-        valEl.className = 'font-mono text-4xl sm:text-6xl font-extrabold text-rose-400 tracking-wider';
-        fbBox.className = 'rounded-3xl p-5 border bg-rose-500/15 border-rose-500/50 text-rose-200 space-y-1.5';
-        fbTitleEl.className = 'font-mono text-xs font-bold uppercase tracking-wider text-rose-400';
-        diagTag.className = 'text-rose-400';
+        valEl.classList.add('danger');
+        fbBox.classList.add('danger');
+        diagTag.classList.add('danger');
         diagTag.textContent = '¡Alerta de Seguridad!';
       }
 
@@ -1566,51 +2879,48 @@
 
     function renderConnectionSvg() {
       const svg = document.getElementById('connection-svg');
-      const redColor = dmmState.redJack === '10a' ? '#ffb300' : '#f43f5e';
+      const redColor = dmmState.redJack === '10a' ? '#ffd29d' : '#ff9c94';
 
       if (dmmState.connType === 'parallel') {
         svg.innerHTML = `
-          <rect x="20" y="30" width="75" height="90" rx="10" fill="#0f172a" stroke="#334155" stroke-width="2" />
-          <text x="32" y="72" fill="#e2e8f0" font-size="11" font-family="monospace">CIRCUITO</text>
-          <text x="34" y="88" fill="${dmmState.circuitPower ? '#00ff88' : '#64748b'}" font-size="10" font-family="monospace">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
-          <line x1="95" y1="45" x2="215" y2="45" stroke="#94a3b8" stroke-width="2.5" />
-          <line x1="95" y1="105" x2="215" y2="105" stroke="#94a3b8" stroke-width="2.5" />
-          <rect x="200" y="45" width="30" height="60" rx="5" fill="#131c2e" stroke="#00e5ff" stroke-width="2" />
-          <text x="206" y="79" fill="#00e5ff" font-size="10" font-family="monospace">DUT</text>
-          <!-- Cables en paralelo -->
+          <rect x="20" y="30" width="75" height="90" rx="10" fill="#1d4652" stroke="#85d9cc" stroke-width="2" />
+          <text x="30" y="72" fill="#ffffff" font-size="11" font-family="sans-serif" font-weight="bold">CIRCUITO</text>
+          <text x="33" y="88" fill="${dmmState.circuitPower ? '#82e3d2' : '#cee7e4'}" font-size="10" font-family="sans-serif">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
+          <line x1="95" y1="45" x2="215" y2="45" stroke="#cee7e4" stroke-width="2.5" />
+          <line x1="95" y1="105" x2="215" y2="105" stroke="#cee7e4" stroke-width="2.5" />
+          <rect x="200" y="45" width="30" height="60" rx="5" fill="#102c39" stroke="#82e3d2" stroke-width="2" />
+          <text x="205" y="79" fill="#82e3d2" font-size="10" font-family="sans-serif" font-weight="bold">DUT</text>
           <polyline points="215,45 320,45 320,58" fill="none" stroke="${redColor}" stroke-width="3" />
-          <polyline points="215,105 320,105 320,92" fill="none" stroke="#94a3b8" stroke-width="3" />
-          <rect x="295" y="52" width="135" height="46" rx="10" fill="#090d16" stroke="#00e5ff" stroke-width="2" />
-          <text x="310" y="73" fill="#00e5ff" font-size="11" font-family="monospace" font-weight="bold">DMM (PARALELO)</text>
-          <text x="310" y="88" fill="${redColor}" font-size="10" font-family="monospace">Rojo: ${dmmState.redJack.toUpperCase()} | COM</text>
+          <polyline points="215,105 320,105 320,92" fill="none" stroke="#cee7e4" stroke-width="3" />
+          <rect x="295" y="52" width="135" height="46" rx="10" fill="#102c39" stroke="#82e3d2" stroke-width="2" />
+          <text x="308" y="73" fill="#82e3d2" font-size="11" font-family="sans-serif" font-weight="bold">DMM (PARALELO)</text>
+          <text x="308" y="88" fill="${redColor}" font-size="10" font-family="sans-serif">Rojo: ${dmmState.redJack.toUpperCase()} | COM</text>
         `;
       } else if (dmmState.connType === 'series') {
         svg.innerHTML = `
-          <rect x="20" y="30" width="75" height="90" rx="10" fill="#0f172a" stroke="#334155" stroke-width="2" />
-          <text x="32" y="72" fill="#e2e8f0" font-size="11" font-family="monospace">FUENTE</text>
-          <text x="34" y="88" fill="${dmmState.circuitPower ? '#00ff88' : '#64748b'}" font-size="10" font-family="monospace">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
-          <!-- Cable rojo entra al DMM en serie -->
+          <rect x="20" y="30" width="75" height="90" rx="10" fill="#1d4652" stroke="#85d9cc" stroke-width="2" />
+          <text x="33" y="72" fill="#ffffff" font-size="11" font-family="sans-serif" font-weight="bold">FUENTE</text>
+          <text x="33" y="88" fill="${dmmState.circuitPower ? '#82e3d2' : '#cee7e4'}" font-size="10" font-family="sans-serif">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
           <line x1="95" y1="45" x2="175" y2="45" stroke="${redColor}" stroke-width="3" />
-          <rect x="175" y="25" width="130" height="42" rx="10" fill="#090d16" stroke="#ffb300" stroke-width="2" />
-          <text x="192" y="44" fill="#ffb300" font-size="11" font-family="monospace" font-weight="bold">DMM (SERIE)</text>
-          <text x="192" y="58" fill="${redColor}" font-size="10" font-family="monospace">${dmmState.redJack.toUpperCase()} → COM</text>
-          <!-- Cable negro sale hacia la carga -->
-          <line x1="305" y1="45" x2="380" y2="45" stroke="#94a3b8" stroke-width="3" />
-          <rect x="365" y="45" width="30" height="60" rx="5" fill="#131c2e" stroke="#ffb300" stroke-width="2" />
-          <text x="370" y="79" fill="#ffb300" font-size="10" font-family="monospace">CARGA</text>
-          <line x1="95" y1="105" x2="380" y2="105" stroke="#94a3b8" stroke-width="2.5" />
+          <rect x="175" y="25" width="130" height="42" rx="10" fill="#102c39" stroke="#ffd29d" stroke-width="2" />
+          <text x="192" y="44" fill="#ffd29d" font-size="11" font-family="sans-serif" font-weight="bold">DMM (SERIE)</text>
+          <text x="192" y="58" fill="${redColor}" font-size="10" font-family="sans-serif">${dmmState.redJack.toUpperCase()} → COM</text>
+          <line x1="305" y1="45" x2="380" y2="45" stroke="#cee7e4" stroke-width="3" />
+          <rect x="365" y="45" width="32" height="60" rx="5" fill="#102c39" stroke="#ffd29d" stroke-width="2" />
+          <text x="368" y="79" fill="#ffd29d" font-size="9" font-family="sans-serif" font-weight="bold">CARGA</text>
+          <line x1="95" y1="105" x2="380" y2="105" stroke="#cee7e4" stroke-width="2.5" />
         `;
       } else {
         svg.innerHTML = `
-          <rect x="45" y="55" width="120" height="36" rx="8" fill="#131c2e" stroke="#00ff88" stroke-width="2" />
-          <text x="72" y="77" fill="#00ff88" font-size="11" font-family="monospace" font-weight="bold">4.7 kΩ (AISLADO)</text>
-          <line x1="25" y1="73" x2="45" y2="73" stroke="#94a3b8" stroke-width="2.5" />
-          <line x1="165" y1="73" x2="185" y2="73" stroke="#94a3b8" stroke-width="2.5" />
+          <rect x="45" y="55" width="120" height="36" rx="8" fill="#1d4652" stroke="#82e3d2" stroke-width="2" />
+          <text x="65" y="77" fill="#82e3d2" font-size="11" font-family="sans-serif" font-weight="bold">4.7 kΩ (AISLADO)</text>
+          <line x1="25" y1="73" x2="45" y2="73" stroke="#cee7e4" stroke-width="2.5" />
+          <line x1="165" y1="73" x2="185" y2="73" stroke="#cee7e4" stroke-width="2.5" />
           <polyline points="30,73 30,28 310,28 310,50" fill="none" stroke="${redColor}" stroke-width="3" />
-          <polyline points="180,73 180,118 310,118 310,96" fill="none" stroke="#94a3b8" stroke-width="3" />
-          <rect x="275" y="50" width="150" height="46" rx="10" fill="#090d16" stroke="#00ff88" stroke-width="2" />
-          <text x="292" y="70" fill="#00ff88" font-size="11" font-family="monospace" font-weight="bold">DMM (ÓHMETRO)</text>
-          <text x="292" y="85" fill="#94a3b8" font-size="10" font-family="monospace">Circuito sin energía</text>
+          <polyline points="180,73 180,118 310,118 310,96" fill="none" stroke="#cee7e4" stroke-width="3" />
+          <rect x="275" y="50" width="150" height="46" rx="10" fill="#102c39" stroke="#82e3d2" stroke-width="2" />
+          <text x="292" y="70" fill="#82e3d2" font-size="11" font-family="sans-serif" font-weight="bold">DMM (ÓHMETRO)</text>
+          <text x="292" y="85" fill="#cee7e4" font-size="10" font-family="sans-serif">Circuito sin energía</text>
         `;
       }
     }
@@ -1678,19 +2988,19 @@
     function renderQuiz() {
       const container = document.getElementById('quiz-container');
       container.innerHTML = quizQuestions.map((item, qIdx) => `
-        <div class="lab-card rounded-3xl p-5 space-y-3">
-          <p class="font-bold text-white text-sm leading-relaxed">${item.q}</p>
-          <div class="space-y-2">
+        <div class="quiz-item-card">
+          <p class="quiz-q-title">${item.q}</p>
+          <div class="quiz-options">
             ${item.options.map((opt, oIdx) => {
-              let btnClass = 'w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-mono border transition ';
-              if (userAnswers[qIdx] === null) {
-                btnClass += 'bg-slate-900/90 hover:bg-slate-800 border-slate-800 text-slate-300';
-              } else if (oIdx === item.answer) {
-                btnClass += 'bg-emerald-500/20 border-emerald-400 text-[#00ff88] font-bold';
-              } else if (oIdx === userAnswers[qIdx]) {
-                btnClass += 'bg-rose-500/20 border-rose-400 text-rose-300';
-              } else {
-                btnClass += 'bg-slate-900/50 border-slate-800/60 text-slate-500';
+              let btnClass = 'quiz-opt-btn';
+              if (userAnswers[qIdx] !== null) {
+                if (oIdx === item.answer) {
+                  btnClass += ' correct';
+                } else if (oIdx === userAnswers[qIdx]) {
+                  btnClass += ' wrong';
+                } else {
+                  btnClass += ' dimmed';
+                }
               }
               return `<button type="button" onclick="answerQuiz(${qIdx}, ${oIdx})" class="${btnClass}">${opt}</button>`;
             }).join('')}

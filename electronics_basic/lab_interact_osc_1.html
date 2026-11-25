@@ -1,137 +1,738 @@
 <!DOCTYPE html>
-<html lang="es" class="dark scroll-smooth">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>OsciloLab — Aprende a Usar el Osciloscopio desde Cero</title>
 
-  <!-- Google Fonts: Plus Jakarta Sans para lectura clara y JetBrains Mono para pantallas técnicas -->
+  <!-- Google Fonts: DM Sans y Space Grotesk (misma tipografía que diode.html) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            lab: {
-              bg: '#090d16',
-              card: '#0f1624',
-              panel: '#131c2e',
-              border: '#1e293b',
-              phosphor: '#00ff88',
-              cyan: '#00e5ff',
-              amber: '#ffb300',
-            }
-          }
-        }
-      }
-    };
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    /* Estilos personalizados de Laboratorio Electrónico Oscuro ("Dark Lab UI") */
+    :root {
+      --navy: #102c39;
+      --navy-panel: #1d4652;
+      --teal: #087d79;
+      --teal-dark: #075e5c;
+      --mint: #e5f5f0;
+      --mint-bright: #82e3d2;
+      --cream: #f7f8f3;
+      --white: #ffffff;
+      --line: #c9d9d8;
+      --text: #17323b;
+      --muted: #465f67;
+      --orange: #b85717;
+      --pale: #fff2df;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body,
+    button,
+    input,
+    select {
+      font-family: "DM Sans", sans-serif;
+    }
+
     body {
-      background-color: #090d16;
-      color: #e2e8f0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      background: var(--cream);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       overflow-x: hidden;
-      background-image:
-        radial-gradient(circle at 15% 15%, rgba(0, 229, 255, 0.06) 0%, transparent 35%),
-        radial-gradient(circle at 85% 25%, rgba(0, 255, 136, 0.05) 0%, transparent 35%);
     }
 
-    /* Efecto cristal/panel de laboratorio */
-    .lab-card {
-      background: linear-gradient(180deg, rgba(19, 28, 46, 0.85) 0%, rgba(13, 19, 33, 0.92) 100%);
-      border: 1px solid #1e293b;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
-      transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    button,
+    input,
+    select {
+      font-size: inherit;
     }
 
-    .lab-card:hover {
-      border-color: rgba(0, 229, 255, 0.35);
+    button {
+      cursor: pointer;
     }
 
-    /* Marco realista de pantalla CRT / Digital de osciloscopio */
-    .scope-bezel {
-      background: linear-gradient(145deg, #161f33 0%, #0b101b 100%);
-      border: 2px solid #26344d;
-      box-shadow:
-        0 0 35px rgba(0, 255, 136, 0.08),
-        inset 0 2px 12px rgba(0, 0, 0, 0.85);
+    a {
+      color: #075f64;
     }
 
-    .scope-screen-wrap {
-      position: relative;
-      background-color: #04110b;
-      border: 1px solid rgba(0, 255, 136, 0.25);
-      box-shadow: inset 0 0 28px rgba(0, 255, 136, 0.08);
-      overflow: hidden;
+    :focus-visible {
+      outline: 3px solid #e17622;
+      outline-offset: 3px;
     }
 
-    /* Sutil textura de líneas de barrido en pantalla */
-    .scope-screen-wrap::after {
-      content: "";
+    .skip {
       position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 3px,
-        rgba(0, 0, 0, 0.14) 4px
-      );
+      left: -9999px;
+      top: 8px;
+      background: var(--white);
+      color: var(--navy);
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 8px;
+      z-index: 100;
+    }
+
+    .skip:focus {
+      left: 8px;
+    }
+
+    /* ==================== BARRA SUPERIOR FIJA (ESTILO DIODE.HTML) ==================== */
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      background: var(--navy);
+      color: var(--white);
+      padding: 14px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #234958;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--navy-panel);
+      border: 1px solid #44717a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--mint-bright);
+      flex-shrink: 0;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font: 700 20px/1.15 "Space Grotesk", sans-serif;
+      letter-spacing: -0.03em;
+      color: var(--white);
+    }
+
+    .brand span {
+      color: var(--mint-bright);
+    }
+
+    .bilingual-pill {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid #85d9cc;
+      color: #d8fff4;
+      background: rgba(29, 70, 82, 0.7);
+    }
+
+    .brand-sub {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: #cee7e4;
+    }
+
+    .top-right-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mobile-score-badge {
+      display: none;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: var(--pale);
+      color: var(--orange);
+      border: 1px solid #f0cfa4;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 9px;
+      border: 1px solid #44717a;
+      background: var(--navy-panel);
+      color: var(--white);
+    }
+
+    .mobile-menu-btn:hover {
+      background: var(--teal);
+    }
+
+    /* Pestañas de navegación de OsciloLab */
+    .tab-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .nav-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid #44717a;
+      background: rgba(29, 70, 82, 0.55);
+      color: #d3e6e5;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .nav-tab:hover {
+      background: var(--navy-panel);
+      color: var(--white);
+      border-color: #85d9cc;
+    }
+
+    .nav-tab.active {
+      background: var(--teal);
+      color: var(--white);
+      border-color: var(--mint-bright);
+    }
+
+    .nav-tab-num {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11.5px;
+      opacity: 0.85;
+    }
+
+    /* ==================== CONTENEDOR PRINCIPAL + PANEL DERECHO ==================== */
+    .layout-wrapper {
+      flex: 1;
+      display: flex;
+      width: 100%;
+    }
+
+    main {
+      flex: 1;
+      min-width: 0;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 26px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 44px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: "Space Grotesk", sans-serif;
+      line-height: 1.16;
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(32px, 4.4vw, 52px);
+      margin: 12px 0 16px;
+      color: var(--white);
+    }
+
+    h2 {
+      font-size: clamp(25px, 3.2vw, 36px);
+      margin: 4px 0 6px;
+      color: var(--navy);
+    }
+
+    h3 {
+      font-size: 20px;
+      margin: 0 0 8px;
+      color: var(--navy);
+    }
+
+    .num {
+      color: var(--teal);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 12px;
+      display: block;
+    }
+
+    .muted-sub {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.72em;
+    }
+
+    .section-view {
+      animation: fadeSlideIn 0.3s ease-out;
+    }
+
+    .section-view.hidden {
+      display: none;
+    }
+
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .space-y-lg > * + * {
+      margin-top: 34px;
+    }
+
+    .space-y-md > * + * {
+      margin-top: 20px;
+    }
+
+    /* ==================== HERO DE SECCIÓN 1 (ESTILO DIODE.HTML) ==================== */
+    .hero-box {
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 24px;
+      padding: 36px 34px;
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 28px;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(16, 44, 57, 0.14);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #85d9cc;
+      color: #d8fff4;
+      border-radius: 30px;
+      padding: 6px 13px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--mint-bright);
+    }
+
+    .hero-box h1 span {
+      color: var(--mint-bright);
+    }
+
+    .hero-box p {
+      color: #d3e6e5;
+      font-size: 16.5px;
+      margin: 0 0 20px;
+    }
+
+    .hero-box p strong {
+      color: var(--white);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-analogies {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .analogy-card {
+      background: var(--navy-panel);
+      border: 1px solid #44717a;
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .analogy-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(16, 44, 57, 0.75);
+      border: 1px solid #85d9cc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .analogy-card h3 {
+      color: var(--white);
+      font-size: 15.5px;
+      margin: 0 0 4px;
+    }
+
+    .analogy-card p {
+      color: #cee7e4;
+      font-size: 13px;
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* ==================== TARJETAS, BOTONES Y PANELES (ESTILO DIODE.HTML) ==================== */
+    .card,
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 5px 24px #153b3b08;
+    }
+
+    .btn {
+      border: 1px solid var(--teal);
+      background: var(--white);
+      color: #075b59;
+      padding: 10px 16px;
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 13.5px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn:hover,
+    .btn.active {
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .btn.primary:hover {
+      background: var(--teal-dark);
+      border-color: var(--teal-dark);
+    }
+
+    .btn.dark {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: var(--white);
+    }
+
+    .btn.dark:hover {
+      background: var(--navy-panel);
+    }
+
+    .btn.small {
+      padding: 7px 12px;
+      font-size: 12.5px;
+    }
+
+    .callout {
+      background: var(--mint);
+      border-left: 5px solid var(--teal);
+      padding: 14px 18px;
+      border-radius: 0 12px 12px 0;
+      font-size: 13.5px;
+      color: var(--text);
+    }
+
+    .callout.warning {
+      background: var(--pale);
+      border-left-color: var(--orange);
+      color: #5c2d0c;
+    }
+
+    .callout.danger {
+      background: #fdeceb;
+      border-left-color: #b42318;
+      color: #7a1c15;
+    }
+
+    /* ==================== ANATOMÍA INTERACTIVA DEL OSCILOSCOPIO ==================== */
+    .section-header-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .section-header-row p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .anatomy-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.85fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .scope-hardware-box {
+      background: var(--navy);
+      color: var(--white);
+      border: 1px solid #2c5563;
+      border-radius: 22px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .scope-hardware-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      color: #91e5d7;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #2b5260;
+    }
+
+    .scope-hardware-mid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.85fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .anatomy-zone {
+      text-align: left;
+      border-radius: 16px;
+      background: var(--navy-panel);
+      border: 2px solid #44717a;
+      color: var(--white);
+      padding: 13px;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .anatomy-zone:hover {
+      border-color: var(--mint-bright);
+    }
+
+    .anatomy-zone-active {
+      border-color: var(--mint-bright) !important;
+      background: #143844 !important;
+      box-shadow: 0 0 0 3px rgba(130, 227, 210, 0.28) !important;
+    }
+
+    .zone-screen-box {
+      background: #0b222b;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .zone-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .zone-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--teal);
+      color: var(--white);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .zone-sub {
+      font-size: 11px;
+      color: #91e5d7;
+    }
+
+    .zone-knobs-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .zone-knob-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #d8fff4;
+    }
+
+    .zone-knob-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--mint-bright);
+      background: var(--navy);
+      color: var(--mint-bright);
+      font-size: 10px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .zone-knob-desc {
+      margin: 4px 0 0;
+      font-size: 11.5px;
+      color: #cee7e4;
+    }
+
+    .zone-probe-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .bnc-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bnc-chip {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--navy);
+      border: 2px solid #85d9cc;
+      color: var(--white);
+      font-size: 10px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .anatomy-detail-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .anatomy-tag {
+      display: inline-block;
+      background: var(--mint);
+      color: #075f5d;
+      border: 1px solid #b5dfd5;
+      border-radius: 30px;
+      padding: 4px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .anatomy-tabs-footer {
+      padding-top: 16px;
+      margin-top: 18px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    /* ==================== GLOSARIO BILINGÜE INTERACTIVO ==================== */
+    .glossary-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .search-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 330px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--white);
+      border: 1px solid #718f91;
+      border-radius: 10px;
+      padding: 10px 14px 10px 36px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
       pointer-events: none;
     }
 
-    /* Sliders personalizados estilo instrumento */
-    input[type="range"].lab-slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 999px;
-      background: #1e293b;
-      outline: none;
-      cursor: pointer;
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
     }
 
-    input[type="range"].lab-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #00e5ff;
-      border: 2px solid #090d16;
-      box-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
-      cursor: pointer;
-      transition: transform 0.15s ease;
-    }
-
-    input[type="range"].lab-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
-    }
-
-    input[type="range"].lab-slider.amber-slider::-webkit-slider-thumb {
-      background: #ffb300;
-      box-shadow: 0 0 10px rgba(255, 179, 0, 0.7);
-    }
-
-    input[type="range"].lab-slider.green-slider::-webkit-slider-thumb {
-      background: #00ff88;
-      box-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
-    }
-
-    /* Tarjetas 3D Flip para el Glosario Bilingüe */
     .flip-card {
       perspective: 1000px;
       height: 195px;
@@ -156,238 +757,956 @@
       inset: 0;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      border-radius: 1rem;
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .flip-card-front {
+      background: var(--white);
+      border: 1px solid var(--line);
+      box-shadow: 0 5px 20px #153b3b08;
+    }
+
+    .flip-card-front:hover {
+      border-color: var(--teal);
     }
 
     .flip-card-back {
       transform: rotateY(180deg);
+      background: var(--mint);
+      border: 2px solid var(--teal);
+      color: var(--text);
     }
 
-    /* Animaciones suaves de transición de pestañas */
-    .section-view {
-      animation: fadeSlideIn 0.35s ease-out;
+    .flip-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
     }
 
-    @keyframes fadeSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .flip-lang-badge {
+      background: var(--mint);
+      color: #075f5d;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
     }
 
-    /* Resaltado de zona activa en diagrama de anatomía */
-    .anatomy-zone-active {
-      box-shadow: 0 0 0 2px #00e5ff, 0 0 22px rgba(0, 229, 255, 0.35) !important;
-      border-color: #00e5ff !important;
+    .flip-hint {
+      color: var(--muted);
     }
 
-    /* Ocultar barra de scroll en navegación móvil manteniendo funcionalidad */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .flip-en {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0;
     }
 
-    /* Scrollbar discreta para el panel lateral derecho */
-    .sidebar-scroll::-webkit-scrollbar {
-      width: 5px;
+    .flip-es {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--teal);
+      margin: 3px 0 0;
     }
-    .sidebar-scroll::-webkit-scrollbar-track {
-      background: transparent;
+
+    .flip-back-title {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
     }
-    .sidebar-scroll::-webkit-scrollbar-thumb {
-      background: #1e293b;
+
+    .flip-back-def {
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* ==================== SIMULADOR INTERACTIVO ==================== */
+    .presets-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .sim-layout {
+      display: grid;
+      grid-template-columns: 1.25fr 0.85fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .sim-left-col,
+    .sim-right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Pantalla del osciloscopio con marco navy/teal estilo diode.html */
+    .scope-screen-card {
+      background: var(--navy);
+      color: var(--white);
+      border: 1px solid #2c5563;
+      border-radius: 22px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 10px 28px rgba(16, 44, 57, 0.14);
+    }
+
+    .osd-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .osd-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .osd-ch1 {
+      background: var(--teal);
+      color: var(--white);
+      padding: 3px 9px;
+      border-radius: 6px;
+    }
+
+    .osd-trig {
+      background: var(--pale);
+      color: var(--orange);
+      padding: 3px 9px;
+      border-radius: 6px;
+    }
+
+    .osd-btn {
+      background: var(--navy-panel);
+      color: #d8fff4;
+      border: 1px solid #85d9cc;
+      padding: 4px 10px;
+      border-radius: 7px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .osd-btn:hover {
+      background: var(--teal);
+    }
+
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 10 / 8;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #091d26;
+      border: 2px solid #44717a;
+    }
+
+    #sim-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    .cursor-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      color: #cee7e4;
+    }
+
+    #cursor-readout {
+      color: var(--mint-bright);
+      font-weight: 700;
+    }
+
+    /* Cálculos en vivo */
+    .math-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+
+    .fx-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--mint);
+      border: 1px solid #9fd6c9;
+      color: var(--teal);
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .math-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .math-box {
+      background: #edf6f3;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 13px;
+    }
+
+    .math-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .math-formula {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .math-result {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--teal);
+      margin-top: 4px;
+    }
+
+    .math-result.orange {
+      color: var(--orange);
+    }
+
+    /* Controles de la derecha */
+    .ctrl-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .ctrl-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15.5px;
+      margin: 0;
+    }
+
+    .dot-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--teal);
+      flex-shrink: 0;
+    }
+
+    .dot-indicator.orange {
+      background: var(--orange);
+    }
+
+    .wave-selector {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .wave-btn {
+      padding: 8px 6px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      background: var(--cream);
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .wave-btn:hover {
+      border-color: var(--teal);
+    }
+
+    .wave-btn.active {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: var(--white);
+    }
+
+    .slider-block {
+      margin-bottom: 14px;
+    }
+
+    .slider-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .slider-val {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      color: var(--teal);
+    }
+
+    .slider-val.orange {
+      color: var(--orange);
+    }
+
+    input[type="range"].lab-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
       border-radius: 999px;
+      background: #d5e4e2;
+      outline: none;
+      cursor: pointer;
     }
-    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-      background: #334155;
+
+    input[type="range"].lab-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      background: var(--teal);
+      border: 2px solid var(--white);
+      box-shadow: 0 2px 6px rgba(16, 44, 57, 0.35);
+      cursor: pointer;
+    }
+
+    input[type="range"].lab-slider.amber-slider::-webkit-slider-thumb {
+      background: var(--orange);
+    }
+
+    .scales-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .lab-select {
+      width: 100%;
+      background: var(--cream);
+      border: 1px solid #718f91;
+      border-radius: 9px;
+      padding: 8px 10px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--navy);
+    }
+
+    /* ==================== FORMAS DE ONDA (SECCIÓN 3) ==================== */
+    .waves-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .wave-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .wave-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .wave-tag {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 30px;
+      background: var(--mint);
+      color: #075f5d;
+    }
+
+    .wave-tag.amber {
+      background: var(--pale);
+      color: var(--orange);
+    }
+
+    .wave-svg-preview {
+      width: 100%;
+      height: 92px;
+      border-radius: 12px;
+      background: var(--navy);
+      border: 1px solid #35606e;
+      display: block;
+    }
+
+    /* ==================== EJERCICIOS PRÁCTICOS / QUIZ (SECCIÓN 4) ==================== */
+    .quiz-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .score-pill {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 8px 15px;
+      border-radius: 10px;
+      background: var(--pale);
+      color: var(--orange);
+      border: 1px solid #f0cfa4;
+    }
+
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .quiz-item-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 5px 24px #153b3b08;
+    }
+
+    .quiz-q-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--navy);
+      margin: 0 0 12px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: var(--cream);
+      color: var(--text);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .quiz-opt-btn:hover {
+      border-color: var(--teal);
+      background: #edf6f3;
+    }
+
+    .quiz-opt-btn.correct {
+      background: var(--mint);
+      border-color: var(--teal);
+      color: #075f5d;
+      font-weight: 700;
+    }
+
+    .quiz-opt-btn.wrong {
+      background: #fdeceb;
+      border-color: #b42318;
+      color: #7a1c15;
+    }
+
+    .quiz-opt-btn.dimmed {
+      opacity: 0.6;
+    }
+
+    .section-nav-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 10px;
+    }
+
+    /* ==================== BARRA INFERIOR PARA VOLVER A INDEX.HTML ==================== */
+    .back-home-bar {
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .back-home-bar p {
+      margin: 0;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+
+    /* ==================== PANEL LATERAL DERECHO (MISMO ESTILO QUE INDEX.HTML) ==================== */
+    .side-panel {
+      width: 290px;
+      flex-shrink: 0;
+      background: var(--white);
+      border-left: 1px solid var(--line);
+      position: sticky;
+      top: 71px;
+      height: calc(100vh - 71px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .side-panel-inner {
+      padding: 20px 16px;
+    }
+
+    .side-mobile-head {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .side-group {
+      margin-bottom: 22px;
+    }
+
+    .side-group-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px 8px;
+    }
+
+    .side-group-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--teal);
+    }
+
+    .side-home-link {
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #075f64;
+    }
+
+    .side-home-link:hover {
+      text-decoration: underline;
+    }
+
+    .side-page-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .side-page-link {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: var(--cream);
+      border: 1px solid var(--line);
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .side-page-link:hover {
+      background: var(--mint);
+      border-color: var(--teal);
+    }
+
+    .side-page-link.current {
+      background: var(--mint);
+      border-color: var(--teal);
+    }
+
+    .side-num {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--navy);
+      color: var(--mint-bright);
+      padding: 2px 6px;
+      border-radius: 6px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .side-page-link.current .side-num {
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .side-page-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .side-page-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .side-page-file {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 1px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .side-arrow {
+      font-size: 12px;
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    .side-sec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .side-sec-link {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: 9px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .side-sec-link:hover {
+      background: var(--mint);
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .side-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      flex-shrink: 0;
+    }
+
+    .side-dot.amber {
+      background: var(--orange);
+    }
+
+    .side-dot.navy {
+      background: var(--navy);
+    }
+
+    .side-panel-footer {
+      padding: 14px 18px;
+      border-top: 1px solid var(--line);
+      font-size: 12.5px;
+      font-weight: 700;
+      background: var(--cream);
+    }
+
+    .side-panel-footer a {
+      text-decoration: none;
+      color: #075f64;
+    }
+
+    .side-panel-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 44, 57, 0.55);
+      z-index: 40;
+    }
+
+    .sidebar-backdrop.open {
+      display: block;
+    }
+
+    /* ==================== RESPONSIVO ==================== */
+    @media (max-width: 1024px) {
+      .mobile-menu-btn {
+        display: inline-flex;
+      }
+
+      .side-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        height: 100vh;
+        z-index: 60;
+        transform: translateX(100%);
+        transition: transform 0.25s ease-out;
+        box-shadow: -10px 0 30px rgba(16, 44, 57, 0.2);
+      }
+
+      .side-panel.open {
+        transform: translateX(0);
+      }
+
+      .side-mobile-head {
+        display: flex;
+      }
+
+      .sim-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .glossary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .mobile-score-badge {
+        display: inline-block;
+      }
+
+      .hero-box,
+      .anatomy-grid,
+      .scope-hardware-mid,
+      .waves-grid,
+      .quiz-grid,
+      .math-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-box {
+        padding: 26px 20px;
+      }
+
+      main {
+        padding: 20px 18px 48px;
+      }
+
+      .glossary-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-cyan-400/20 selection:text-cyan-300">
+<body>
+  <a class="skip" href="#main">Saltar al laboratorio</a>
 
-  <!-- ==================== BARRA DE NAVEGACIÓN SUPERIOR FIJA (ANCHO COMPLETO) ==================== -->
-  <header class="sticky top-0 z-50 w-full bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/90">
-    <div class="w-full px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
-        <!-- Logo e Identidad -->
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(0,255,136,0.2)]">
-              <svg class="w-6 h-6 text-[#00ff88]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0 3.5-4 5 0" />
-                <line x1="2" y1="12" x2="22" y2="12" stroke-opacity="0.3" stroke-dasharray="2 2" />
-              </svg>
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="font-extrabold text-lg tracking-tight text-white">Oscilo<span class="text-[#00ff88]">Lab</span></span>
-                <span class="hidden sm:inline-block text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
-                  Bilingüe ES / EN
-                </span>
-              </div>
-              <p class="text-xs text-slate-400">Guía Interactiva de Osciloscopio (Oscilloscope Guide)</p>
-            </div>
-          </div>
-
-          <!-- Indicador rápido de progreso + botón menú lateral en móvil -->
-          <div class="flex items-center gap-2">
-            <div class="md:hidden text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg" id="mobile-score-badge">
-              Quiz: 0/6
-            </div>
-
-            <button
-              type="button"
-              onclick="toggleSidebar()"
-              aria-label="Abrir panel de navegación del sitio"
-              class="lg:hidden p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
+  <!-- ==================== BARRA DE NAVEGACIÓN SUPERIOR FIJA ==================== -->
+  <header class="top">
+    <div class="top-left">
+      <div class="brand-wrap">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0 3.5-4 5 0" />
+            <line x1="2" y1="12" x2="22" y2="12" stroke-opacity="0.35" stroke-dasharray="2 2" />
+          </svg>
         </div>
-
-        <!-- Pestañas de Navegación (4 Secciones de OsciloLab) -->
-        <nav aria-label="Secciones principales" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
-          <button onclick="switchSection('intro')" id="tab-intro" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all bg-cyan-500/15 text-[#00e5ff] border border-cyan-400/50 shadow-[0_0_15px_rgba(0,229,255,0.15)]">
-            <span class="font-mono text-xs opacity-80">01</span>
-            <span>Inicio y Conceptos</span>
-          </button>
-          <button onclick="switchSection('simulator')" id="tab-simulator" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
-            <span class="font-mono text-xs opacity-80">02</span>
-            <span>Simulador Interactivo</span>
-          </button>
-          <button onclick="switchSection('waveforms')" id="tab-waveforms" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
-            <span class="font-mono text-xs opacity-80">03</span>
-            <span>Formas de Onda y Ejemplos</span>
-          </button>
-          <button onclick="switchSection('exercises')" id="tab-exercises" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent">
-            <span class="font-mono text-xs opacity-80">04</span>
-            <span>Ejercicios Prácticos</span>
-          </button>
-        </nav>
+        <div>
+          <div class="brand-title-row">
+            <span class="brand">Oscilo<span>Lab</span></span>
+            <span class="bilingual-pill">Bilingüe ES / EN</span>
+          </div>
+          <p class="brand-sub">Guía Interactiva de Osciloscopio (Oscilloscope Guide)</p>
+        </div>
       </div>
+    </div>
+
+    <div class="top-right-controls">
+      <div class="mobile-score-badge" id="mobile-score-badge">Quiz: 0/6</div>
+
+      <nav aria-label="Secciones principales" class="tab-nav">
+        <button type="button" onclick="switchSection('intro')" id="tab-intro" class="nav-tab active">
+          <span class="nav-tab-num">01</span>
+          <span>Inicio y Conceptos</span>
+        </button>
+        <button type="button" onclick="switchSection('simulator')" id="tab-simulator" class="nav-tab">
+          <span class="nav-tab-num">02</span>
+          <span>Simulador Interactivo</span>
+        </button>
+        <button type="button" onclick="switchSection('waveforms')" id="tab-waveforms" class="nav-tab">
+          <span class="nav-tab-num">03</span>
+          <span>Formas de Onda y Ejemplos</span>
+        </button>
+        <button type="button" onclick="switchSection('exercises')" id="tab-exercises" class="nav-tab">
+          <span class="nav-tab-num">04</span>
+          <span>Ejercicios Prácticos</span>
+        </button>
+      </nav>
+
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        onclick="toggleSidebar()"
+        aria-label="Abrir panel de navegación del sitio"
+      >
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
     </div>
   </header>
 
   <!-- Fondo oscuro para menú móvil -->
-  <div
-    id="sidebar-backdrop"
-    onclick="toggleSidebar()"
-    class="fixed inset-0 bg-black/65 backdrop-blur-xs z-40 hidden lg:hidden"
-  ></div>
+  <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
 
-  <!-- ==================== CONTENEDOR FLEX DE ANCHO COMPLETO (CONTENIDO + PANEL DERECHO) ==================== -->
-  <div class="flex-1 flex w-full">
+  <!-- ==================== CONTENEDOR PRINCIPAL + PANEL DERECHO ==================== -->
+  <div class="layout-wrapper">
 
-    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
-    <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8 flex flex-col justify-between gap-12">
-
+    <main id="main">
       <div>
+
         <!-- =======================================================================
              SECCIÓN 1: INICIO, CONCEPTOS Y ANATOMÍA DEL OSCILOSCOPIO
         ======================================================================== -->
-        <section id="section-intro" class="section-view space-y-10">
+        <section id="section-intro" class="section-view space-y-lg">
           <!-- Hero Motivador -->
-          <div class="lab-card rounded-3xl p-6 sm:p-10 relative overflow-hidden">
-            <div class="absolute -right-16 -top-16 w-64 h-64 bg-[#00ff88]/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div class="lg:col-span-7 space-y-5">
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-[#00ff88] text-xs font-semibold">
-                  <span class="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse"></span>
-                  Nivel Inicial • Ideal para recién graduados de bachillerato
-                </div>
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-                  Aprende a ver la <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff88] to-[#00e5ff]">electricidad en movimiento</span>
-                </h1>
-                <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
-                  ¿Alguna vez quisiste ver cómo viaja una señal dentro de un circuito electrónico? El <strong class="text-white">Osciloscopio (Oscilloscope)</strong> es el instrumento estrella de todo laboratorio de electrónica, ingeniería y robótica. Aquí aprenderás a dominarlo paso a paso, sin conocimientos previos y dominando su vocabulario en <span class="text-[#00e5ff] font-semibold">español e inglés</span>.
-                </p>
-                <div class="flex flex-wrap gap-3 pt-2">
-                  <button onclick="switchSection('simulator')" class="px-5 py-3 rounded-xl bg-[#00ff88] hover:bg-emerald-300 text-slate-950 font-bold text-sm transition shadow-[0_0_20px_rgba(0,255,136,0.3)] flex items-center gap-2">
-                    <span>Probar el Simulador Ahora</span>
-                    <span>→</span>
-                  </button>
-                  <a href="#anatomia-interactiva" class="px-5 py-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white border border-slate-700 font-semibold text-sm transition">
-                    Explorar Partes del Equipo
-                  </a>
+          <div class="hero-box">
+            <div>
+              <span class="pill">
+                <span class="pill-dot"></span>
+                Nivel Inicial • Ideal para recién graduados de bachillerato
+              </span>
+              <h1>
+                Aprende a ver la <span>electricidad en movimiento</span>
+              </h1>
+              <p>
+                ¿Alguna vez quisiste ver cómo viaja una señal dentro de un circuito electrónico? El <strong>Osciloscopio (Oscilloscope)</strong> es el instrumento estrella de todo laboratorio de electrónica, ingeniería y robótica. Aquí aprenderás a dominarlo paso a paso, sin conocimientos previos y dominando su vocabulario en <strong>español e inglés</strong>.
+              </p>
+              <div class="hero-actions">
+                <button type="button" onclick="switchSection('simulator')" class="btn primary">
+                  <span>Probar el Simulador Ahora</span>
+                  <span>→</span>
+                </button>
+                <a href="#anatomia-interactiva" class="btn">
+                  Explorar Partes del Equipo
+                </a>
+              </div>
+            </div>
+
+            <!-- Tarjetas de Analogías Cotidianas -->
+            <div class="hero-analogies">
+              <div class="analogy-card">
+                <div class="analogy-icon">💓</div>
+                <div>
+                  <h3>Como un monitor cardíaco para circuitos</h3>
+                  <p>
+                    Así como un electrocardiograma muestra los latidos del corazón en una pantalla, el <strong>Osciloscopio (Oscilloscope)</strong> dibuja los "latidos eléctricos" de cualquier componente.
+                  </p>
                 </div>
               </div>
 
-              <!-- Tarjetas de Analogías Cotidianas -->
-              <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-                <div class="bg-[#090d16]/80 border border-slate-800 rounded-2xl p-4 flex items-start gap-4">
-                  <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 text-xl">
-                    💓
-                  </div>
-                  <div>
-                    <h3 class="font-bold text-white text-sm">Como un monitor cardíaco para circuitos</h3>
-                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                      Así como un electrocardiograma muestra los latidos del corazón en una pantalla, el <strong class="text-slate-200">Osciloscopio (Oscilloscope)</strong> dibuja los "latidos eléctricos" de cualquier componente.
-                    </p>
-                  </div>
-                </div>
-
-                <div class="bg-[#090d16]/80 border border-slate-800 rounded-2xl p-4 flex items-start gap-4">
-                  <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 text-xl">
-                    🎥
-                  </div>
-                  <div>
-                    <h3 class="font-bold text-white text-sm">Una cámara superlenta de la electricidad</h3>
-                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                      Un multímetro solo te da un número promedio. El osciloscopio congela señales que cambian millones de veces por segundo graficando <strong class="text-[#00ff88]">Voltaje (Voltage - Eje Y)</strong> contra <strong class="text-[#00e5ff]">Tiempo (Time - Eje X)</strong>.
-                    </p>
-                  </div>
+              <div class="analogy-card">
+                <div class="analogy-icon">🎥</div>
+                <div>
+                  <h3>Una cámara superlenta de la electricidad</h3>
+                  <p>
+                    Un multímetro solo te da un número promedio. El osciloscopio congela señales que cambian millones de veces por segundo graficando <strong>Voltaje (Voltage - Eje Y)</strong> contra <strong>Tiempo (Time - Eje X)</strong>.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- ANATOMÍA INTERACTIVA DEL OSCILOSCOPIO -->
-          <div id="anatomia-interactiva" class="space-y-5">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div id="anatomia-interactiva">
+            <div class="section-header-row">
               <div>
-                <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Explora el Panel Frontal</span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-                  Anatomía del Osciloscopio <span class="text-slate-400 font-normal text-lg">(Oscilloscope Anatomy)</span>
+                <span class="num">Explora el Panel Frontal</span>
+                <h2>
+                  Anatomía del Osciloscopio <span class="muted-sub">(Oscilloscope Anatomy)</span>
                 </h2>
               </div>
-              <p class="text-xs sm:text-sm text-slate-400">
-                Haz clic o toca cualquiera de las <strong class="text-white">5 zonas</strong> para descubrir qué hace cada control.
+              <p>
+                Haz clic o toca cualquiera de las <strong>5 zonas</strong> para descubrir qué hace cada control.
               </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <div class="anatomy-grid">
               <!-- Representación Visual Interactiva del Equipo -->
-              <div class="lg:col-span-7 scope-bezel rounded-3xl p-4 sm:p-6 flex flex-col justify-between gap-4">
-                <div class="flex items-center justify-between text-xs font-mono text-slate-400 border-b border-slate-800 pb-2">
-                  <span class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_#00ff88]"></span>
-                    DSO-1000 EDU • 100 MHz
-                  </span>
+              <div class="scope-hardware-box">
+                <div class="scope-hardware-top">
+                  <span>● DSO-1000 EDU • 100 MHz</span>
                   <span>Haz clic en un bloque</span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-stretch">
-                  <!-- ZONA 1: PANTALLA Y CUADRÍCULA (SCREEN & GRATICULE) -->
-                  <button type="button" onclick="selectAnatomy('screen')" id="zone-btn-screen"
-                    class="anatomy-zone anatomy-zone-active sm:col-span-7 text-left rounded-2xl bg-[#04130c] border-2 border-[#00ff88]/50 p-3.5 transition-all relative overflow-hidden group">
-                    <div class="flex items-center justify-between mb-2">
-                      <span class="text-[11px] font-mono font-bold text-[#00ff88] bg-emerald-500/15 px-2 py-0.5 rounded">
-                        1. Pantalla (Screen & Graticule)
-                      </span>
-                      <span class="text-[10px] font-mono text-emerald-300/70">10 × 8 Div</span>
+                <div class="scope-hardware-mid">
+                  <!-- ZONA 1: PANTALLA Y CUADRÍCULA -->
+                  <button type="button" onclick="selectAnatomy('screen')" id="zone-btn-screen" class="anatomy-zone zone-screen-box anatomy-zone-active">
+                    <div class="zone-header">
+                      <span class="zone-badge">1. Pantalla (Screen & Graticule)</span>
+                      <span class="zone-sub">10 × 8 Div</span>
                     </div>
-                    <svg viewBox="0 0 200 130" class="w-full h-36 rounded-lg bg-[#030e09] border border-emerald-500/20">
-                      <g stroke="#00ff88" stroke-opacity="0.18" stroke-width="0.7">
+                    <svg viewBox="0 0 200 130" style="width:100%;height:142px;border-radius:10px;background:#081c24;border:1px solid #44717a">
+                      <g stroke="#82e3d2" stroke-opacity="0.2" stroke-width="0.7">
                         <line x1="20" y1="0" x2="20" y2="130"/><line x1="40" y1="0" x2="40" y2="130"/>
                         <line x1="60" y1="0" x2="60" y2="130"/><line x1="80" y1="0" x2="80" y2="130"/>
                         <line x1="100" y1="0" x2="100" y2="130" stroke-opacity="0.45"/>
@@ -397,113 +1716,105 @@
                         <line x1="0" y1="65" x2="200" y2="65" stroke-opacity="0.45"/>
                         <line x1="0" y1="86" x2="200" y2="86"/><line x1="0" y1="108" x2="200" y2="108"/>
                       </g>
-                      <path d="M 0 65 Q 25 15, 50 65 T 100 65 T 150 65 T 200 65" fill="none" stroke="#00ff88" stroke-width="2.5" />
-                      <text x="8" y="14" fill="#00e5ff" font-size="8" font-family="monospace">↑ Y: Voltaje (Voltage)</text>
-                      <text x="108" y="122" fill="#ffb300" font-size="8" font-family="monospace">→ X: Tiempo (Time)</text>
+                      <path d="M 0 65 Q 25 15, 50 65 T 100 65 T 150 65 T 200 65" fill="none" stroke="#82e3d2" stroke-width="2.5" />
+                      <text x="8" y="14" fill="#d8fff4" font-size="8" font-family="sans-serif">↑ Y: Voltaje (Voltage)</text>
+                      <text x="104" y="122" fill="#ffd29d" font-size="8" font-family="sans-serif">→ X: Tiempo (Time)</text>
                     </svg>
                   </button>
 
                   <!-- CONTROLES DERECHOS (VERTICAL, HORIZONTAL, TRIGGER) -->
-                  <div class="sm:col-span-5 flex flex-col gap-3">
-                    <button type="button" onclick="selectAnatomy('vertical')" id="zone-btn-vertical"
-                      class="anatomy-zone text-left rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 hover:border-cyan-400/60 p-3 transition-all">
-                      <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono font-bold text-[#00e5ff]">2. Vertical (Vertical System)</span>
-                        <span class="w-5 h-5 rounded-full border-2 border-cyan-400 bg-slate-800 flex items-center justify-center text-[9px] font-mono text-cyan-300">V</span>
+                  <div class="zone-knobs-col">
+                    <button type="button" onclick="selectAnatomy('vertical')" id="zone-btn-vertical" class="anatomy-zone">
+                      <div class="zone-header" style="margin-bottom:0">
+                        <span class="zone-knob-title">2. Vertical (Vertical System)</span>
+                        <span class="zone-knob-circle">V</span>
                       </div>
-                      <p class="text-[11px] text-slate-400 mt-1">Volts/Div & Posición Vertical</p>
+                      <p class="zone-knob-desc">Volts/Div & Posición Vertical</p>
                     </button>
 
-                    <button type="button" onclick="selectAnatomy('horizontal')" id="zone-btn-horizontal"
-                      class="anatomy-zone text-left rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 hover:border-cyan-400/60 p-3 transition-all">
-                      <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono font-bold text-emerald-300">3. Horizontal (Time Base)</span>
-                        <span class="w-5 h-5 rounded-full border-2 border-emerald-400 bg-slate-800 flex items-center justify-center text-[9px] font-mono text-emerald-300">T</span>
+                    <button type="button" onclick="selectAnatomy('horizontal')" id="zone-btn-horizontal" class="anatomy-zone">
+                      <div class="zone-header" style="margin-bottom:0">
+                        <span class="zone-knob-title">3. Horizontal (Time Base)</span>
+                        <span class="zone-knob-circle">T</span>
                       </div>
-                      <p class="text-[11px] text-slate-400 mt-1">Time/Div & Posición Horizontal</p>
+                      <p class="zone-knob-desc">Time/Div & Posición Horizontal</p>
                     </button>
 
-                    <button type="button" onclick="selectAnatomy('trigger')" id="zone-btn-trigger"
-                      class="anatomy-zone text-left rounded-2xl bg-slate-900/90 border-2 border-slate-700/80 hover:border-amber-400/60 p-3 transition-all">
-                      <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-mono font-bold text-[#ffb300]">4. Disparo (Trigger System)</span>
-                        <span class="w-5 h-5 rounded-full border-2 border-amber-400 bg-slate-800 flex items-center justify-center text-[9px] font-mono text-amber-300">⚡</span>
+                    <button type="button" onclick="selectAnatomy('trigger')" id="zone-btn-trigger" class="anatomy-zone">
+                      <div class="zone-header" style="margin-bottom:0">
+                        <span class="zone-knob-title">4. Disparo (Trigger System)</span>
+                        <span class="zone-knob-circle">⚡</span>
                       </div>
-                      <p class="text-[11px] text-slate-400 mt-1">Trigger Level & Sincronización</p>
+                      <p class="zone-knob-desc">Trigger Level & Sincronización</p>
                     </button>
                   </div>
                 </div>
 
-                <!-- ZONA 5: CANALES DE ENTRADA Y SONDA (INPUT CHANNELS & PROBE) -->
-                <button type="button" onclick="selectAnatomy('probe')" id="zone-btn-probe"
-                  class="anatomy-zone w-full text-left rounded-2xl bg-slate-900/95 border-2 border-slate-700/80 hover:border-cyan-400/60 p-3.5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-2">
-                      <span class="w-7 h-7 rounded-full border-2 border-amber-400 bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-amber-300">CH1</span>
-                      <span class="w-7 h-7 rounded-full border-2 border-cyan-400 bg-slate-950 flex items-center justify-center text-[10px] font-mono font-bold text-cyan-300">CH2</span>
-                    </div>
+                <!-- ZONA 5: CANALES DE ENTRADA Y SONDA -->
+                <button type="button" onclick="selectAnatomy('probe')" id="zone-btn-probe" class="anatomy-zone zone-probe-bar">
+                  <div class="bnc-group">
+                    <span class="bnc-chip">CH1</span>
+                    <span class="bnc-chip">CH2</span>
                     <div>
-                      <span class="text-xs font-mono font-bold text-white block">5. Canales de Entrada y Sonda (Input Channels & Probe)</span>
-                      <span class="text-[11px] text-slate-400">Conector BNC, Punta de Sonda (Probe Tip) y Pinza de Tierra (Ground Clip)</span>
+                      <span class="zone-knob-title" style="display:block">5. Canales de Entrada y Sonda (Input Channels & Probe)</span>
+                      <span class="zone-knob-desc" style="display:block">Conector BNC, Punta de Sonda (Probe Tip) y Pinza de Tierra (Ground Clip)</span>
                     </div>
                   </div>
-                  <span class="text-[11px] font-mono text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/30 self-start sm:self-center">
-                    Acoplamiento (Coupling)
-                  </span>
+                  <span class="zone-badge">Acoplamiento (Coupling)</span>
                 </button>
               </div>
 
               <!-- Panel de Explicación Detallada de la Zona Seleccionada -->
-              <div class="lg:col-span-5 lab-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
-                <div id="anatomy-detail-content" class="space-y-4">
+              <div class="card anatomy-detail-card">
+                <div id="anatomy-detail-content">
                   <!-- Rellenado dinámicamente por JS -->
                 </div>
 
-                <div class="pt-6 mt-6 border-t border-slate-800 flex flex-wrap gap-2">
-                  <button onclick="selectAnatomy('screen')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">1. Pantalla</button>
-                  <button onclick="selectAnatomy('vertical')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">2. Vertical</button>
-                  <button onclick="selectAnatomy('horizontal')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">3. Horizontal</button>
-                  <button onclick="selectAnatomy('trigger')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">4. Disparo</button>
-                  <button onclick="selectAnatomy('probe')" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 transition">5. Sonda</button>
+                <div class="anatomy-tabs-footer">
+                  <button type="button" onclick="selectAnatomy('screen')" class="btn small">1. Pantalla</button>
+                  <button type="button" onclick="selectAnatomy('vertical')" class="btn small">2. Vertical</button>
+                  <button type="button" onclick="selectAnatomy('horizontal')" class="btn small">3. Horizontal</button>
+                  <button type="button" onclick="selectAnatomy('trigger')" class="btn small">4. Disparo</button>
+                  <button type="button" onclick="selectAnatomy('probe')" class="btn small">5. Sonda</button>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- MINI GLOSARIO BILINGÜE INTERACTIVO -->
-          <div class="space-y-5 pt-4">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="glossary-header">
               <div>
-                <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Vocabulario Técnico Esencial</span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-                  Glosario Bilingüe Interactivo <span class="text-slate-400 font-normal text-lg">(Bilingual Glossary)</span>
+                <span class="num">Vocabulario Técnico Esencial</span>
+                <h2>
+                  Glosario Bilingüe Interactivo <span class="muted-sub">(Bilingual Glossary)</span>
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                <p style="margin:4px 0 0;color:var(--muted);font-size:14px">
                   Los osciloscopios reales tienen sus botones rotulados en inglés. Haz clic en cada tarjeta para voltearla y ver su significado sencillo.
                 </p>
               </div>
 
-              <div class="relative w-full md:w-80">
+              <div class="search-wrap">
+                <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
                 <input
                   type="text"
                   id="glossary-search"
+                  class="search-input"
                   oninput="filterGlossary()"
                   placeholder="Buscar término (ej. Trigger, Período, Sonda)..."
-                  class="w-full bg-slate-900/90 border border-slate-700 focus:border-[#00e5ff] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition"
                 />
-                <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
               </div>
             </div>
 
-            <div id="glossary-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div id="glossary-grid" class="glossary-grid">
               <!-- Renderizado dinámico por JS -->
             </div>
           </div>
 
-          <div class="flex justify-end pt-4">
-            <button onclick="switchSection('simulator')" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg flex items-center gap-2">
+          <div class="section-nav-footer" style="justify-content:flex-end">
+            <button type="button" onclick="switchSection('simulator')" class="btn primary">
               <span>Siguiente: Ir al Simulador Interactivo</span>
               <span>→</span>
             </button>
@@ -514,188 +1825,156 @@
         <!-- =======================================================================
              SECCIÓN 2: SIMULADOR INTERACTIVO DE OSCILOSCOPIO EN TIEMPO REAL
         ======================================================================== -->
-        <section id="section-simulator" class="section-view hidden space-y-6">
-          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <section id="section-simulator" class="section-view hidden space-y-md">
+          <div class="section-header-row">
             <div>
-              <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Laboratorio Virtual en Tiempo Real</span>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">
-                Simulador de Osciloscopio <span class="text-slate-400 font-normal text-lg">(Interactive Oscilloscope)</span>
+              <span class="num">Laboratorio Virtual en Tiempo Real</span>
+              <h2>
+                Simulador de Osciloscopio <span class="muted-sub">(Interactive Oscilloscope)</span>
               </h2>
-              <p class="text-xs sm:text-sm text-slate-400 mt-1">
-                Modifica la señal de entrada y ajusta las escalas <strong class="text-slate-200">Volts/Div</strong>, <strong class="text-slate-200">Base de Tiempo (Time Base)</strong> y <strong class="text-amber-400">Disparo (Trigger)</strong>.
+              <p>
+                Modifica la señal de entrada y ajusta las escalas <strong>Volts/Div</strong>, <strong>Base de Tiempo (Time Base)</strong> y <strong>Disparo (Trigger)</strong>.
               </p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="text-xs font-mono text-slate-400 mr-1">Ajustes Rápidos:</span>
-              <button onclick="applySimulatorPreset('audio')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-cyan-500/20 hover:text-[#00e5ff] border border-slate-700 transition">
+            <div class="presets-bar">
+              <span style="font-size:12.5px;font-weight:700;color:var(--muted)">Ajustes Rápidos:</span>
+              <button type="button" onclick="applySimulatorPreset('audio')" class="btn small">
                 🎵 Audio 500 Hz
               </button>
-              <button onclick="applySimulatorPreset('arduino')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-emerald-500/20 hover:text-[#00ff88] border border-slate-700 transition">
+              <button type="button" onclick="applySimulatorPreset('arduino')" class="btn small">
                 🤖 Pulso Digital 1 kHz
               </button>
-              <button onclick="applySimulatorPreset('triangle')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-amber-500/20 hover:text-amber-300 border border-slate-700 transition">
+              <button type="button" onclick="applySimulatorPreset('triangle')" class="btn small">
                 📐 Rampa 250 Hz
               </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-            <!-- COLUMNA IZQUIERDA (7 cols): PANTALLA + CÁLCULOS -->
-            <div class="xl:col-span-7 space-y-5">
-              <div class="scope-bezel rounded-3xl p-4 sm:p-5 space-y-3">
-                <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono px-1">
-                  <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/40 font-bold">
-                      CH1 ON
-                    </span>
-                    <span class="text-slate-300" id="osd-volts-div">Volts/Div: 1.0 V</span>
-                    <span class="text-slate-600">|</span>
-                    <span class="text-[#00e5ff]" id="osd-time-div">Time/Div: 1.0 ms</span>
+          <div class="sim-layout">
+            <!-- COLUMNA IZQUIERDA: PANTALLA + CÁLCULOS -->
+            <div class="sim-left-col">
+              <div class="scope-screen-card">
+                <div class="osd-bar">
+                  <div class="osd-group">
+                    <span class="osd-ch1">CH1 ON</span>
+                    <span id="osd-volts-div">Volts/Div: 1.0 V</span>
+                    <span>|</span>
+                    <span id="osd-time-div" style="color:var(--mint-bright)">Time/Div: 1.0 ms</span>
                   </div>
 
-                  <div class="flex items-center gap-2">
-                    <span id="osd-trigger-badge" class="px-2 py-0.5 rounded bg-amber-500/20 text-[#ffb300] border border-amber-500/40 font-semibold">
-                      TRIG: ON (0.00 V)
-                    </span>
-                    <button onclick="toggleMeasureGuides()" id="btn-guides" class="px-2.5 py-0.5 rounded bg-cyan-500/20 text-[#00e5ff] border border-cyan-400/50 hover:bg-cyan-500/30 transition text-[11px]">
+                  <div class="osd-group">
+                    <span id="osd-trigger-badge" class="osd-trig">TRIG: ON (0.00 V)</span>
+                    <button type="button" onclick="toggleMeasureGuides()" id="btn-guides" class="osd-btn">
                       📏 Guías: ON
                     </button>
                   </div>
                 </div>
 
-                <div class="scope-screen-wrap rounded-2xl w-full aspect-[10/8]">
-                  <canvas id="sim-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+                <div class="canvas-wrap">
+                  <canvas id="sim-canvas"></canvas>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-400 px-1">
-                  <div id="cursor-readout" class="text-emerald-300/90">
+                <div class="cursor-footer">
+                  <div id="cursor-readout">
                     Cursor: Pasa el ratón o toca la pantalla para medir (V, ms)
                   </div>
-                  <div class="text-slate-500">
+                  <div>
                     Cuadrícula (Graticule): 10 Div (X) × 8 Div (Y)
                   </div>
                 </div>
               </div>
 
               <!-- CÁLCULOS EN VIVO -->
-              <div class="lab-card rounded-3xl p-5 sm:p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <div class="flex items-center gap-2.5">
-                    <span class="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/40 flex items-center justify-center text-[#00e5ff] font-mono font-bold">
-                      fx
-                    </span>
-                    <div>
-                      <h3 class="font-bold text-white text-base">Cálculos y Lectura Paso a Paso <span class="text-slate-400 font-normal text-xs">(Live Math & Reading)</span></h3>
-                      <p class="text-xs text-slate-400">Observa cómo se obtienen los valores contando los cuadros de la pantalla</p>
-                    </div>
+              <div class="card">
+                <div class="math-header">
+                  <span class="fx-badge">fx</span>
+                  <div>
+                    <h3 style="margin:0;font-size:17px">
+                      Cálculos y Lectura Paso a Paso <span class="muted-sub">(Live Math & Reading)</span>
+                    </h3>
+                    <p style="margin:2px 0 0;font-size:13px;color:var(--muted)">
+                      Observa cómo se obtienen los valores contando los cuadros de la pantalla
+                    </p>
                   </div>
                 </div>
 
-                <div id="sim-pedagogical-alert" class="hidden rounded-xl p-3 text-xs border"></div>
+                <div id="sim-pedagogical-alert" class="callout warning" style="display:none"></div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 font-mono">
-                  <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-1.5">
-                    <div class="text-[11px] text-slate-400 font-sans font-semibold">
-                      1. Voltaje Pico a Pico <span class="text-[#00ff88]">(Vpp)</span>
-                    </div>
-                    <div class="text-xs text-slate-300" id="math-vpp-formula">
-                      4.0 div × 1.0 V/div
-                    </div>
-                    <div class="text-lg font-bold text-[#00ff88]" id="math-vpp-result">
-                      4.00 Vpp
-                    </div>
+                <div class="math-grid">
+                  <div class="math-box">
+                    <div class="math-label">1. Voltaje Pico a Pico (Vpp)</div>
+                    <div class="math-formula" id="math-vpp-formula">4.0 div × 1.0 V/div</div>
+                    <div class="math-result" id="math-vpp-result">4.00 Vpp</div>
                   </div>
 
-                  <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-1.5">
-                    <div class="text-[11px] text-slate-400 font-sans font-semibold">
-                      2. Período <span class="text-[#00e5ff]">(Period - T)</span>
-                    </div>
-                    <div class="text-xs text-slate-300" id="math-period-formula">
-                      2.0 div × 1.0 ms/div
-                    </div>
-                    <div class="text-lg font-bold text-[#00e5ff]" id="math-period-result">
-                      2.00 ms
-                    </div>
+                  <div class="math-box">
+                    <div class="math-label">2. Período (Period - T)</div>
+                    <div class="math-formula" id="math-period-formula">2.0 div × 1.0 ms/div</div>
+                    <div class="math-result" id="math-period-result">2.00 ms</div>
                   </div>
 
-                  <div class="bg-[#090d16] border border-slate-800 rounded-2xl p-3.5 space-y-1.5">
-                    <div class="text-[11px] text-slate-400 font-sans font-semibold">
-                      3. Frecuencia <span class="text-[#ffb300]">(f = 1 / T)</span>
-                    </div>
-                    <div class="text-xs text-slate-300" id="math-freq-formula">
-                      1 / 0.0020 s
-                    </div>
-                    <div class="text-lg font-bold text-[#ffb300]" id="math-freq-result">
-                      500 Hz
-                    </div>
+                  <div class="math-box">
+                    <div class="math-label">3. Frecuencia (f = 1 / T)</div>
+                    <div class="math-formula" id="math-freq-formula">1 / 0.0020 s</div>
+                    <div class="math-result orange" id="math-freq-result">500 Hz</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- COLUMNA DERECHA (5 cols): CONTROLES DEL GENERADOR Y DEL OSCILOSCOPIO -->
-            <div class="xl:col-span-5 space-y-4">
+            <!-- COLUMNA DERECHA: CONTROLES DEL GENERADOR Y DEL OSCILOSCOPIO -->
+            <div class="sim-right-col">
               <!-- Panel A: Generador de Señal -->
-              <div class="lab-card rounded-3xl p-5 space-y-4">
-                <div class="flex items-center justify-between">
-                  <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88]"></span>
+              <div class="card">
+                <div class="ctrl-head">
+                  <h3 class="ctrl-title">
+                    <span class="dot-indicator"></span>
                     <span>Señal de Entrada (Input Signal)</span>
                   </h3>
-                  <span class="text-[11px] font-mono text-slate-400">Generador Virtual</span>
+                  <span style="font-size:12px;color:var(--muted);font-weight:600">Generador Virtual</span>
                 </div>
 
-                <!-- Selector de forma de onda -->
-                <div class="grid grid-cols-4 gap-1.5">
-                  <button type="button" onclick="setWaveType('sine')" id="wave-btn-sine" class="wave-btn py-2 px-2 rounded-xl text-xs font-mono font-semibold bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/50 transition">
-                    Senoidal
-                  </button>
-                  <button type="button" onclick="setWaveType('square')" id="wave-btn-square" class="wave-btn py-2 px-2 rounded-xl text-xs font-mono font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition">
-                    Cuadrada
-                  </button>
-                  <button type="button" onclick="setWaveType('triangle')" id="wave-btn-triangle" class="wave-btn py-2 px-2 rounded-xl text-xs font-mono font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition">
-                    Triangular
-                  </button>
-                  <button type="button" onclick="setWaveType('sawtooth')" id="wave-btn-sawtooth" class="wave-btn py-2 px-2 rounded-xl text-xs font-mono font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition">
-                    Sierra
-                  </button>
+                <div class="wave-selector">
+                  <button type="button" onclick="setWaveType('sine')" id="wave-btn-sine" class="wave-btn active">Senoidal</button>
+                  <button type="button" onclick="setWaveType('square')" id="wave-btn-square" class="wave-btn">Cuadrada</button>
+                  <button type="button" onclick="setWaveType('triangle')" id="wave-btn-triangle" class="wave-btn">Triangular</button>
+                  <button type="button" onclick="setWaveType('sawtooth')" id="wave-btn-sawtooth" class="wave-btn">Sierra</button>
                 </div>
 
-                <!-- Amplitud Pico a Pico -->
-                <div class="space-y-1.5">
-                  <div class="flex justify-between text-xs font-mono">
-                    <span class="text-slate-300">Voltaje Pico a Pico (Vpp)</span>
-                    <span class="text-[#00ff88] font-bold" id="val-sig-vpp">4.0 V</span>
+                <div class="slider-block">
+                  <div class="slider-label-row">
+                    <span>Voltaje Pico a Pico (Vpp)</span>
+                    <span class="slider-val" id="val-sig-vpp">4.0 V</span>
                   </div>
-                  <input type="range" id="ctrl-sig-vpp" min="0.5" max="10" step="0.5" value="4" oninput="updateSimParams()" class="lab-slider green-slider" />
+                  <input type="range" id="ctrl-sig-vpp" min="0.5" max="10" step="0.5" value="4" oninput="updateSimParams()" class="lab-slider" />
                 </div>
 
-                <!-- Frecuencia -->
-                <div class="space-y-1.5">
-                  <div class="flex justify-between text-xs font-mono">
-                    <span class="text-slate-300">Frecuencia (Frequency)</span>
-                    <span class="text-[#00e5ff] font-bold" id="val-sig-freq">500 Hz</span>
+                <div class="slider-block">
+                  <div class="slider-label-row">
+                    <span>Frecuencia (Frequency)</span>
+                    <span class="slider-val" id="val-sig-freq">500 Hz</span>
                   </div>
                   <input type="range" id="ctrl-sig-freq" min="100" max="2000" step="50" value="500" oninput="updateSimParams()" class="lab-slider" />
                 </div>
               </div>
 
               <!-- Panel B: Escalas Vertical y Horizontal -->
-              <div class="lab-card rounded-3xl p-5 space-y-4">
-                <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-[#00e5ff]"></span>
-                  <span>Escalas del Osciloscopio (Vertical & Horizontal)</span>
-                </h3>
+              <div class="card">
+                <div class="ctrl-head">
+                  <h3 class="ctrl-title">
+                    <span class="dot-indicator"></span>
+                    <span>Escalas del Osciloscopio (Vertical & Horizontal)</span>
+                  </h3>
+                </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <!-- Volts/Div -->
-                  <div class="space-y-1.5">
-                    <div class="flex justify-between text-xs font-mono">
-                      <span class="text-slate-300">Volts/Div</span>
-                      <span class="text-[#00e5ff] font-bold" id="val-volts-div">1.0 V</span>
+                <div class="scales-grid">
+                  <div>
+                    <div class="slider-label-row">
+                      <span>Volts/Div</span>
+                      <span class="slider-val" id="val-volts-div">1.0 V</span>
                     </div>
-                    <select id="ctrl-volts-div" onchange="updateSimParams()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-[#00e5ff]">
+                    <select id="ctrl-volts-div" onchange="updateSimParams()" class="lab-select">
                       <option value="0.2">0.2 V/div</option>
                       <option value="0.5">0.5 V/div</option>
                       <option value="1" selected>1.0 V/div</option>
@@ -704,13 +1983,12 @@
                     </select>
                   </div>
 
-                  <!-- Time/Div -->
-                  <div class="space-y-1.5">
-                    <div class="flex justify-between text-xs font-mono">
-                      <span class="text-slate-300">Time/Div</span>
-                      <span class="text-[#00e5ff] font-bold" id="val-time-div">1.0 ms</span>
+                  <div>
+                    <div class="slider-label-row">
+                      <span>Time/Div</span>
+                      <span class="slider-val" id="val-time-div">1.0 ms</span>
                     </div>
-                    <select id="ctrl-time-div" onchange="updateSimParams()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none focus:border-[#00e5ff]">
+                    <select id="ctrl-time-div" onchange="updateSimParams()" class="lab-select">
                       <option value="0.2">0.2 ms/div</option>
                       <option value="0.5">0.5 ms/div</option>
                       <option value="1" selected>1.0 ms/div</option>
@@ -720,32 +1998,31 @@
                   </div>
                 </div>
 
-                <!-- Posición Vertical -->
-                <div class="space-y-1.5">
-                  <div class="flex justify-between text-xs font-mono">
-                    <span class="text-slate-300">Posición Vertical (Y Offset)</span>
-                    <span class="text-slate-300 font-bold" id="val-pos-y">0.0 div</span>
+                <div class="slider-block">
+                  <div class="slider-label-row">
+                    <span>Posición Vertical (Y Offset)</span>
+                    <span class="slider-val" id="val-pos-y">0.0 div</span>
                   </div>
                   <input type="range" id="ctrl-pos-y" min="-3" max="3" step="0.5" value="0" oninput="updateSimParams()" class="lab-slider" />
                 </div>
               </div>
 
               <!-- Panel C: Control de Disparo (Trigger) -->
-              <div class="lab-card rounded-3xl p-5 space-y-4">
-                <div class="flex items-center justify-between">
-                  <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#ffb300]"></span>
+              <div class="card">
+                <div class="ctrl-head">
+                  <h3 class="ctrl-title">
+                    <span class="dot-indicator orange"></span>
                     <span>Sistema de Disparo (Trigger)</span>
                   </h3>
-                  <button type="button" onclick="toggleTrigger()" id="btn-toggle-trigger" class="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/20 text-[#ffb300] border border-amber-500/40 transition">
+                  <button type="button" onclick="toggleTrigger()" id="btn-toggle-trigger" class="btn small">
                     Estabilizar: ON
                   </button>
                 </div>
 
-                <div class="space-y-1.5">
-                  <div class="flex justify-between text-xs font-mono">
-                    <span class="text-slate-300">Nivel de Disparo (Trigger Level)</span>
-                    <span class="text-[#ffb300] font-bold" id="val-trig-level">0.0 V</span>
+                <div class="slider-block">
+                  <div class="slider-label-row">
+                    <span>Nivel de Disparo (Trigger Level)</span>
+                    <span class="slider-val orange" id="val-trig-level">0.0 V</span>
                   </div>
                   <input type="range" id="ctrl-trig-level" min="-4" max="4" step="0.2" value="0" oninput="updateSimParams()" class="lab-slider amber-slider" />
                 </div>
@@ -753,11 +2030,11 @@
             </div>
           </div>
 
-          <div class="flex justify-between pt-4">
-            <button onclick="switchSection('intro')" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+          <div class="section-nav-footer">
+            <button type="button" onclick="switchSection('intro')" class="btn">
               ← Anterior: Conceptos
             </button>
-            <button onclick="switchSection('waveforms')" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg">
+            <button type="button" onclick="switchSection('waveforms')" class="btn primary">
               Siguiente: Formas de Onda →
             </button>
           </div>
@@ -767,96 +2044,104 @@
         <!-- =======================================================================
              SECCIÓN 3: FORMAS DE ONDA Y EJEMPLOS REALES
         ======================================================================== -->
-        <section id="section-waveforms" class="section-view hidden space-y-8">
+        <section id="section-waveforms" class="section-view hidden space-y-md">
           <div>
-            <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Catálogo de Señales Eléctricas</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Formas de Onda Comunes <span class="text-slate-400 font-normal text-lg">(Common Waveforms)</span>
+            <span class="num">Catálogo de Señales Eléctricas</span>
+            <h2>
+              Formas de Onda Comunes <span class="muted-sub">(Common Waveforms)</span>
             </h2>
-            <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            <p style="margin:4px 0 0;color:var(--muted);font-size:14px">
               Identifica el aspecto visual de cada señal y en qué circuitos reales la encontrarás.
             </p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="waves-grid">
             <!-- 1. Senoidal -->
-            <article class="lab-card rounded-3xl p-6 space-y-4">
-              <div class="flex items-center justify-between">
-                <h3 class="text-xl font-extrabold text-white">1. Onda Senoidal <span class="text-sm font-mono font-normal text-[#00ff88]">(Sine Wave)</span></h3>
-                <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-[#00ff88] border border-emerald-500/30">Analógica</span>
+            <article class="card wave-card">
+              <div class="wave-card-top">
+                <h3 style="margin:0">1. Onda Senoidal <span class="muted-sub">(Sine Wave)</span></h3>
+                <span class="wave-tag">Analógica</span>
               </div>
-              <svg viewBox="0 0 240 80" class="w-full h-24 rounded-xl bg-[#04110b] border border-emerald-500/20">
-                <line x1="0" y1="40" x2="240" y2="40" stroke="#00ff88" stroke-opacity="0.2" stroke-dasharray="3 3" />
-                <path d="M 0 40 Q 30 5, 60 40 T 120 40 T 180 40 T 240 40" fill="none" stroke="#00ff88" stroke-width="2.5" />
+              <svg viewBox="0 0 240 80" class="wave-svg-preview">
+                <line x1="0" y1="40" x2="240" y2="40" stroke="#82e3d2" stroke-opacity="0.25" stroke-dasharray="3 3" />
+                <path d="M 0 40 Q 30 5, 60 40 T 120 40 T 180 40 T 240 40" fill="none" stroke="#82e3d2" stroke-width="2.6" />
               </svg>
-              <p class="text-sm text-slate-300 leading-relaxed">
+              <p style="margin:0;font-size:14.5px">
                 Representa una variación suave y continua. Es la forma natural de la corriente alterna (AC) de los enchufes domésticos (50/60 Hz) y de los tonos puros de audio.
               </p>
-              <button onclick="loadWaveIntoSimulator('sine')" class="text-xs font-mono text-[#00e5ff] hover:underline">
-                Probar en el simulador →
-              </button>
+              <div>
+                <button type="button" onclick="loadWaveIntoSimulator('sine')" class="btn small">
+                  Probar en el simulador →
+                </button>
+              </div>
             </article>
 
             <!-- 2. Cuadrada -->
-            <article class="lab-card rounded-3xl p-6 space-y-4">
-              <div class="flex items-center justify-between">
-                <h3 class="text-xl font-extrabold text-white">2. Onda Cuadrada <span class="text-sm font-mono font-normal text-[#00e5ff]">(Square Wave)</span></h3>
-                <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">Digital</span>
+            <article class="card wave-card">
+              <div class="wave-card-top">
+                <h3 style="margin:0">2. Onda Cuadrada <span class="muted-sub">(Square Wave)</span></h3>
+                <span class="wave-tag">Digital</span>
               </div>
-              <svg viewBox="0 0 240 80" class="w-full h-24 rounded-xl bg-[#04110b] border border-cyan-500/20">
-                <line x1="0" y1="40" x2="240" y2="40" stroke="#00e5ff" stroke-opacity="0.2" stroke-dasharray="3 3" />
-                <path d="M 0 65 L 0 15 L 60 15 L 60 65 L 120 65 L 120 15 L 180 15 L 180 65 L 240 65" fill="none" stroke="#00e5ff" stroke-width="2.5" />
+              <svg viewBox="0 0 240 80" class="wave-svg-preview">
+                <line x1="0" y1="40" x2="240" y2="40" stroke="#82e3d2" stroke-opacity="0.25" stroke-dasharray="3 3" />
+                <path d="M 0 65 L 0 15 L 60 15 L 60 65 L 120 65 L 120 15 L 180 15 L 180 65 L 240 65" fill="none" stroke="#d8fff4" stroke-width="2.6" />
               </svg>
-              <p class="text-sm text-slate-300 leading-relaxed">
+              <p style="margin:0;font-size:14.5px">
                 Alterna abruptamente entre dos niveles de voltaje (alto/1 lógico y bajo/0 lógico). Es fundamental en microcontroladores (Arduino), señales de reloj (Clock) y control PWM de motores.
               </p>
-              <button onclick="loadWaveIntoSimulator('square')" class="text-xs font-mono text-[#00e5ff] hover:underline">
-                Probar en el simulador →
-              </button>
+              <div>
+                <button type="button" onclick="loadWaveIntoSimulator('square')" class="btn small">
+                  Probar en el simulador →
+                </button>
+              </div>
             </article>
 
             <!-- 3. Triangular -->
-            <article class="lab-card rounded-3xl p-6 space-y-4">
-              <div class="flex items-center justify-between">
-                <h3 class="text-xl font-extrabold text-white">3. Onda Triangular <span class="text-sm font-mono font-normal text-[#ffb300]">(Triangle Wave)</span></h3>
-                <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-amber-500/10 text-[#ffb300] border border-amber-500/30">Lineal</span>
+            <article class="card wave-card">
+              <div class="wave-card-top">
+                <h3 style="margin:0">3. Onda Triangular <span class="muted-sub">(Triangle Wave)</span></h3>
+                <span class="wave-tag amber">Lineal</span>
               </div>
-              <svg viewBox="0 0 240 80" class="w-full h-24 rounded-xl bg-[#04110b] border border-amber-500/20">
-                <line x1="0" y1="40" x2="240" y2="40" stroke="#ffb300" stroke-opacity="0.2" stroke-dasharray="3 3" />
-                <path d="M 0 40 L 30 12 L 90 68 L 150 12 L 210 68 L 240 40" fill="none" stroke="#ffb300" stroke-width="2.5" />
+              <svg viewBox="0 0 240 80" class="wave-svg-preview">
+                <line x1="0" y1="40" x2="240" y2="40" stroke="#82e3d2" stroke-opacity="0.25" stroke-dasharray="3 3" />
+                <path d="M 0 40 L 30 12 L 90 68 L 150 12 L 210 68 L 240 40" fill="none" stroke="#ffd29d" stroke-width="2.6" />
               </svg>
-              <p class="text-sm text-slate-300 leading-relaxed">
+              <p style="margin:0;font-size:14.5px">
                 Sube y baja a velocidad constante formando pendientes rectas. Se utiliza en generadores de funciones, sintetizadores de audio y circuitos de modulación por ancho de pulso (PWM).
               </p>
-              <button onclick="loadWaveIntoSimulator('triangle')" class="text-xs font-mono text-[#00e5ff] hover:underline">
-                Probar en el simulador →
-              </button>
+              <div>
+                <button type="button" onclick="loadWaveIntoSimulator('triangle')" class="btn small">
+                  Probar en el simulador →
+                </button>
+              </div>
             </article>
 
             <!-- 4. Diente de Sierra -->
-            <article class="lab-card rounded-3xl p-6 space-y-4">
-              <div class="flex items-center justify-between">
-                <h3 class="text-xl font-extrabold text-white">4. Diente de Sierra <span class="text-sm font-mono font-normal text-emerald-300">(Sawtooth Wave)</span></h3>
-                <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">Barrido</span>
+            <article class="card wave-card">
+              <div class="wave-card-top">
+                <h3 style="margin:0">4. Diente de Sierra <span class="muted-sub">(Sawtooth Wave)</span></h3>
+                <span class="wave-tag">Barrido</span>
               </div>
-              <svg viewBox="0 0 240 80" class="w-full h-24 rounded-xl bg-[#04110b] border border-emerald-500/20">
-                <line x1="0" y1="40" x2="240" y2="40" stroke="#00ff88" stroke-opacity="0.2" stroke-dasharray="3 3" />
-                <path d="M 0 65 L 60 15 L 60 65 L 120 15 L 120 65 L 180 15 L 180 65 L 240 15" fill="none" stroke="#00ff88" stroke-width="2.5" />
+              <svg viewBox="0 0 240 80" class="wave-svg-preview">
+                <line x1="0" y1="40" x2="240" y2="40" stroke="#82e3d2" stroke-opacity="0.25" stroke-dasharray="3 3" />
+                <path d="M 0 65 L 60 15 L 60 65 L 120 15 L 120 65 L 180 15 L 180 65 L 240 15" fill="none" stroke="#82e3d2" stroke-width="2.6" />
               </svg>
-              <p class="text-sm text-slate-300 leading-relaxed">
+              <p style="margin:0;font-size:14.5px">
                 Aumenta linealmente hasta un pico y cae de forma casi instantánea. Es la base de los circuitos de barrido horizontal en pantallas y fuentes conmutadas.
               </p>
-              <button onclick="loadWaveIntoSimulator('sawtooth')" class="text-xs font-mono text-[#00e5ff] hover:underline">
-                Probar en el simulador →
-              </button>
+              <div>
+                <button type="button" onclick="loadWaveIntoSimulator('sawtooth')" class="btn small">
+                  Probar en el simulador →
+                </button>
+              </div>
             </article>
           </div>
 
-          <div class="flex justify-between pt-4">
-            <button onclick="switchSection('simulator')" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+          <div class="section-nav-footer">
+            <button type="button" onclick="switchSection('simulator')" class="btn">
               ← Anterior: Simulador
             </button>
-            <button onclick="switchSection('exercises')" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#00ff88] to-[#00e5ff] text-slate-950 font-extrabold text-sm hover:opacity-95 transition shadow-lg">
+            <button type="button" onclick="switchSection('exercises')" class="btn primary">
               Siguiente: Ejercicios Prácticos →
             </button>
           </div>
@@ -866,203 +2151,153 @@
         <!-- =======================================================================
              SECCIÓN 4: EJERCICIOS PRÁCTICOS (QUIZ INTERACTIVO)
         ======================================================================== -->
-        <section id="section-exercises" class="section-view hidden space-y-6">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <section id="section-exercises" class="section-view hidden space-y-md">
+          <div class="quiz-topbar">
             <div>
-              <span class="font-mono text-xs uppercase tracking-widest text-[#ffb300]">Pon a Prueba tu Lectura</span>
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-                Ejercicios Prácticos <span class="text-slate-400 font-normal text-lg">(Practice Quiz)</span>
+              <span class="num">Pon a Prueba tu Lectura</span>
+              <h2>
+                Ejercicios Prácticos <span class="muted-sub">(Practice Quiz)</span>
               </h2>
-              <p class="text-xs sm:text-sm text-slate-400 mt-1">
+              <p style="margin:4px 0 0;color:var(--muted);font-size:14px">
                 Responde las 6 preguntas sobre escalas, controles y mediciones en el osciloscopio.
               </p>
             </div>
 
-            <div class="flex items-center gap-3">
-              <div class="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 font-mono text-sm font-bold text-[#ffb300]" id="desktop-score-badge">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <div class="score-pill" id="desktop-score-badge">
                 Puntuación: 0 / 6
               </div>
-              <button onclick="resetQuiz()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300 border border-slate-700 transition">
+              <button type="button" onclick="resetQuiz()" class="btn small">
                 Reiniciar
               </button>
             </div>
           </div>
 
-          <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div id="quiz-container" class="quiz-grid">
             <!-- Renderizado dinámico por JS -->
           </div>
 
-          <div class="flex justify-start pt-4">
-            <button onclick="switchSection('waveforms')" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+          <div class="section-nav-footer">
+            <button type="button" onclick="switchSection('waveforms')" class="btn">
               ← Anterior: Formas de Onda
             </button>
           </div>
         </section>
+
       </div>
 
       <!-- =======================================================================
            BOTÓN INFERIOR PARA VOLVER A INDEX.HTML (SIEMPRE VISIBLE AL FINAL)
       ======================================================================== -->
-      <div class="pt-6 border-t border-slate-800/90 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-xs font-mono text-slate-400">
-          ¿Deseas explorar otro módulo de <span class="text-slate-200">Aprendizaje electrónico interactivo</span>?
+      <div class="back-home-bar">
+        <p>
+          ¿Deseas explorar otro módulo de <strong>Aprendizaje electrónico interactivo</strong>?
         </p>
-        <a
-          href="../index.html"
-          class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-cyan-500/15 text-[#00e5ff] border border-cyan-500/40 hover:border-[#00e5ff] font-extrabold text-sm transition shadow-[0_0_20px_rgba(0,229,255,0.12)] flex items-center justify-center gap-2.5"
-        >
+        <a href="../index.html" class="btn dark">
           <span>←</span>
           <span>Volver a la Página Principal (index.html)</span>
         </a>
       </div>
     </main>
 
-    <!-- ==================== PANEL DE NAVEGACIÓN DERECHO (IDÉNTICO A INDEX.HTML) ==================== -->
-    <aside
-      id="side-panel"
-      aria-label="Navegación del sitio"
-      class="fixed inset-y-0 right-0 z-40 w-72 shrink-0 bg-[#0b101d]/95 lg:bg-[#090d16]/70 backdrop-blur-md border-l border-slate-800/90 transform translate-x-full lg:translate-x-0 lg:sticky lg:top-[69px] lg:h-[calc(100vh-69px)] transition-transform duration-200 ease-out flex flex-col justify-between sidebar-scroll overflow-y-auto"
-    >
-      <div class="p-4 space-y-6">
+    <!-- ==================== PANEL DE NAVEGACIÓN DERECHO ==================== -->
+    <aside id="side-panel" class="side-panel" aria-label="Navegación del sitio">
+      <div class="side-panel-inner">
         <!-- Encabezado móvil del panel -->
-        <div class="flex items-center justify-between lg:hidden pb-3 border-b border-slate-800">
-          <span class="font-mono text-xs uppercase tracking-wider text-[#00e5ff]">Navegación</span>
-          <button type="button" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-1">
-            ✕
-          </button>
+        <div class="side-mobile-head">
+          <span>Navegación</span>
+          <button type="button" onclick="toggleSidebar()" aria-label="Cerrar navegación" style="background:none;border:0;font-size:18px;color:var(--navy)">✕</button>
         </div>
 
         <!-- Bloque 1: Enlaces a las páginas del sitio -->
-        <div class="space-y-2">
-          <div class="px-2.5 flex items-center justify-between">
-            <span class="font-mono text-[11px] uppercase tracking-widest text-[#00ff88] font-semibold">
-              Páginas del sitio
-            </span>
-            <a href="../index.html" class="font-mono text-[10px] text-[#00e5ff] hover:underline">
-              Inicio
-            </a>
+        <div class="side-group">
+          <div class="side-group-head">
+            <span class="side-group-title">Páginas del sitio</span>
+            <a href="../index.html" class="side-home-link">Inicio</a>
           </div>
 
-          <nav class="space-y-1.5">
+          <nav class="side-page-list">
             <!-- Enlace 1: lab_interact_osc_1.html (Página actual resaltada) -->
-            <a
-              href="lab_interact_osc_1.html"
-              aria-current="page"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-400/50 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/20 border border-emerald-500/40 px-1.5 py-0.5 rounded mt-0.5">
-                01
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-[#00ff88] truncate">
-                  Título página 1
-                </p>
-                <p class="text-[11px] font-mono text-slate-300 truncate">lab_interact_osc_1.html</p>
+            <a href="lab_interact_osc_1.html" aria-current="page" class="side-page-link current">
+              <span class="side-num">01</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 1</p>
+                <p class="side-page-file">lab_interact_osc_1.html</p>
               </div>
-              <span class="text-[#00ff88] text-xs mt-0.5">●</span>
+              <span class="side-arrow">●</span>
             </a>
 
             <!-- Enlace 2: diodo_1.html -->
-            <a
-              href="diodo_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                02
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
-                  Título página 2
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">diodo_1.html</p>
+            <a href="diodo_1.html" class="side-page-link">
+              <span class="side-num">02</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 2</p>
+                <p class="side-page-file">diodo_1.html</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
             <!-- Enlace 3: binary_code_1.html -->
-            <a
-              href="binary_code_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                03
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
-                  Título página 3
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">binary_code_1.html</p>
+            <a href="binary_code_1.html" class="side-page-link">
+              <span class="side-num">03</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 3</p>
+                <p class="side-page-file">binary_code_1.html</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
             <!-- Enlace 4: SCR_1.html -->
-            <a
-              href="SCR_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-amber-500/10 border border-slate-800/90 hover:border-amber-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#ffb300] bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                04
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#ffb300] transition truncate">
-                  Título página 4
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">SCR_1.html</p>
+            <a href="SCR_1.html" class="side-page-link">
+              <span class="side-num">04</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 4</p>
+                <p class="side-page-file">SCR_1.html</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#ffb300] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
             <!-- Enlace 5: basic_psd_1.html -->
-            <a
-              href="basic_psd_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                05
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
-                  Título página 5
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">basic_psd_1.html</p>
+            <a href="basic_psd_1.html" class="side-page-link">
+              <span class="side-num">05</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 5</p>
+                <p class="side-page-file">basic_psd_1.html</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
           </nav>
         </div>
 
         <!-- Bloque 2: Secciones en index.html -->
-        <div class="space-y-2 pt-3 border-t border-slate-800/80">
-          <div class="px-2.5">
-            <span class="font-mono text-[11px] uppercase tracking-widest text-slate-400 font-semibold">
-              Secciones
-            </span>
+        <div class="side-group">
+          <div class="side-group-head">
+            <span class="side-group-title">Secciones</span>
           </div>
 
-          <nav class="space-y-1 text-xs">
-            <a href="../index.html" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+          <nav class="side-sec-list">
+            <a href="../index.html" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Conocimientos electrónicos básicos</span>
             </a>
-            <a href="../index.html#sec-analogica" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+            <a href="../index.html#sec-analogica" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Diseño electrónico analógico</span>
             </a>
-            <a href="../index.html#sec-digital" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+            <a href="../index.html#sec-digital" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Diseño electrónico digital</span>
             </a>
-            <a href="../index.html#sec-potencia" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#ffb300]"></span>
+            <a href="../index.html#sec-potencia" class="side-sec-link">
+              <span class="side-dot amber"></span>
               <span>Electrónica de potencia</span>
             </a>
-            <a href="../index.html#sec-dsp" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+            <a href="../index.html#sec-dsp" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Procesamiento digital de señales</span>
             </a>
-            <a href="../index.html#autor" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            <a href="../index.html#autor" class="side-sec-link">
+              <span class="side-dot navy"></span>
               <span>Autor</span>
             </a>
           </nav>
@@ -1070,8 +2305,8 @@
       </div>
 
       <!-- Pie del Panel Lateral -->
-      <div class="p-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-500">
-        <a href="../index.html" class="text-[#00e5ff] hover:underline">← Volver a Inicio</a>
+      <div class="side-panel-footer">
+        <a href="../index.html">← Volver a Inicio</a>
       </div>
     </aside>
 
@@ -1083,8 +2318,8 @@
     function toggleSidebar() {
       const sidebar = document.getElementById('side-panel');
       const backdrop = document.getElementById('sidebar-backdrop');
-      sidebar.classList.toggle('translate-x-full');
-      backdrop.classList.toggle('hidden');
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('open');
     }
 
     // 2. NAVEGACIÓN ENTRE PESTAÑAS DE OSCILOLAB
@@ -1095,10 +2330,10 @@
         const tab = document.getElementById('tab-' + id);
         if (id === sectionId) {
           el.classList.remove('hidden');
-          tab.className = 'nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all bg-cyan-500/15 text-[#00e5ff] border border-cyan-400/50 shadow-[0_0_15px_rgba(0,229,255,0.15)]';
+          tab.classList.add('active');
         } else {
           el.classList.add('hidden');
-          tab.className = 'nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all text-slate-400 hover:text-white hover:bg-slate-800/70 border border-transparent';
+          tab.classList.remove('active');
         }
       });
 
@@ -1151,13 +2386,11 @@
       if (activeBtn) activeBtn.classList.add('anatomy-zone-active');
 
       document.getElementById('anatomy-detail-content').innerHTML = `
-        <span class="inline-block font-mono text-xs px-2.5 py-1 rounded-lg bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
-          ${data.badge}
-        </span>
-        <h3 class="text-xl sm:text-2xl font-extrabold text-white">${data.title}</h3>
-        <p class="text-sm text-slate-300 leading-relaxed">${data.desc}</p>
-        <div class="p-3.5 rounded-2xl bg-[#090d16]/90 border border-emerald-500/25 text-xs text-emerald-300 leading-relaxed">
-          <strong class="text-[#00ff88]">Consejo práctico:</strong> ${data.tip}
+        <span class="anatomy-tag">${data.badge}</span>
+        <h3>${data.title}</h3>
+        <p style="margin:0 0 14px;font-size:14.5px">${data.desc}</p>
+        <div class="callout">
+          <strong>Consejo práctico:</strong> ${data.tip}
         </div>
       `;
     }
@@ -1179,21 +2412,21 @@
       grid.innerHTML = list.map(item => `
         <div class="flip-card" onclick="this.classList.toggle('flipped')">
           <div class="flip-card-inner">
-            <div class="flip-card-front lab-card p-5 flex flex-col justify-between">
-              <div class="flex items-center justify-between">
-                <span class="text-[10px] font-mono uppercase tracking-wider text-[#00e5ff] bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/30">EN / ES</span>
-                <span class="text-[11px] font-mono text-slate-500">Clic para voltear ↻</span>
+            <div class="flip-card-front">
+              <div class="flip-top">
+                <span class="flip-lang-badge">EN / ES</span>
+                <span class="flip-hint">Clic para voltear ↻</span>
               </div>
               <div>
-                <h3 class="text-lg font-extrabold text-white">${item.en}</h3>
-                <p class="text-sm font-mono text-[#00ff88] mt-1">${item.es}</p>
+                <h3 class="flip-en">${item.en}</h3>
+                <p class="flip-es">${item.es}</p>
               </div>
-              <div class="text-[11px] text-slate-400">Ver definición →</div>
+              <div style="font-size:12px;color:var(--muted);font-weight:600">Ver definición →</div>
             </div>
-            <div class="flip-card-back bg-[#0f1c2e] border border-cyan-400/50 p-5 flex flex-col justify-between">
-              <span class="text-xs font-mono font-bold text-[#00e5ff]">${item.es} (${item.en})</span>
-              <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">${item.def}</p>
-              <span class="text-[10px] font-mono text-slate-400">Clic para regresar ↺</span>
+            <div class="flip-card-back">
+              <span class="flip-back-title">${item.es} (${item.en})</span>
+              <p class="flip-back-def">${item.def}</p>
+              <span style="font-size:11.5px;color:#075f5d;font-weight:700">Clic para regresar ↺</span>
             </div>
           </div>
         </div>
@@ -1228,11 +2461,7 @@
       simState.waveType = type;
       ['sine', 'square', 'triangle', 'sawtooth'].forEach(w => {
         const btn = document.getElementById('wave-btn-' + w);
-        if (w === type) {
-          btn.className = 'wave-btn py-2 px-2 rounded-xl text-xs font-mono font-semibold bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/50 transition';
-        } else {
-          btn.className = 'wave-btn py-2 px-2 rounded-xl text-xs font-mono font-semibold bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition';
-        }
+        btn.classList.toggle('active', w === type);
       });
       updateSimCalculations();
     }
@@ -1324,15 +2553,15 @@
       const alertBox = document.getElementById('sim-pedagogical-alert');
       const halfAmp = simState.vpp / 2;
       if (vDivs > 8) {
-        alertBox.className = 'rounded-xl p-3 text-xs border bg-rose-500/10 border-rose-500/40 text-rose-300';
+        alertBox.className = 'callout danger';
         alertBox.textContent = '⚠️ La señal supera los 8 cuadros verticales de la pantalla. Aumenta el selector Volts/Div para ver los picos completos.';
-        alertBox.classList.remove('hidden');
+        alertBox.style.display = 'block';
       } else if (!simState.triggerOn || Math.abs(simState.triggerLevel) > halfAmp) {
-        alertBox.className = 'rounded-xl p-3 text-xs border bg-amber-500/10 border-amber-500/40 text-amber-300';
+        alertBox.className = 'callout warning';
         alertBox.textContent = '⚡ Sin disparo sincronizado (el nivel de Trigger está fuera de la onda o apagado), por eso la señal se desplaza horizontalmente.';
-        alertBox.classList.remove('hidden');
+        alertBox.style.display = 'block';
       } else {
-        alertBox.classList.add('hidden');
+        alertBox.style.display = 'none';
       }
     }
 
@@ -1370,7 +2599,7 @@
         const dy = h / rows;
 
         // Cuadrícula
-        simCtx.strokeStyle = 'rgba(0, 255, 136, 0.16)';
+        simCtx.strokeStyle = 'rgba(130, 227, 210, 0.18)';
         simCtx.lineWidth = 1;
         for (let i = 1; i < cols; i++) {
           simCtx.beginPath();
@@ -1386,7 +2615,7 @@
         }
 
         // Ejes centrales
-        simCtx.strokeStyle = 'rgba(0, 255, 136, 0.38)';
+        simCtx.strokeStyle = 'rgba(130, 227, 210, 0.42)';
         simCtx.beginPath();
         simCtx.moveTo(w / 2, 0);
         simCtx.lineTo(w / 2, h);
@@ -1397,7 +2626,7 @@
         // Línea de nivel de Trigger
         const trigY = h / 2 - ((simState.triggerLevel / simState.voltsDiv) + simState.posY) * dy;
         simCtx.save();
-        simCtx.strokeStyle = 'rgba(255, 179, 0, 0.65)';
+        simCtx.strokeStyle = '#ffb347';
         simCtx.setLineDash([5, 4]);
         simCtx.beginPath();
         simCtx.moveTo(0, trigY);
@@ -1424,10 +2653,10 @@
         // Dibujo de la onda
         const totalTimeSec = (cols * simState.timeDivMs) / 1000;
         simCtx.save();
-        simCtx.strokeStyle = '#00ff88';
-        simCtx.lineWidth = 2.6;
-        simCtx.shadowColor = 'rgba(0, 255, 136, 0.75)';
-        simCtx.shadowBlur = 10;
+        simCtx.strokeStyle = '#30FF00';
+        simCtx.lineWidth = 2.8;
+        simCtx.shadowColor = 'rgba(130, 227, 210, 0.65)';
+        simCtx.shadowBlur = 8;
         simCtx.beginPath();
 
         for (let px = 0; px <= w; px += 1.5) {
@@ -1441,12 +2670,12 @@
         simCtx.stroke();
         simCtx.restore();
 
-        // Guías visuales de Vpp y Período
+        // Guías visuales de Vpp
         if (simState.showGuides) {
           const topY = h / 2 - ((halfAmp / simState.voltsDiv) + simState.posY) * dy;
           const botY = h / 2 - ((-halfAmp / simState.voltsDiv) + simState.posY) * dy;
           simCtx.save();
-          simCtx.strokeStyle = 'rgba(0, 229, 255, 0.6)';
+          simCtx.strokeStyle = 'rgba(216, 255, 244, 0.55)';
           simCtx.setLineDash([3, 3]);
           simCtx.beginPath();
           simCtx.moveTo(12, topY);
@@ -1509,19 +2738,19 @@
     function renderQuiz() {
       const container = document.getElementById('quiz-container');
       container.innerHTML = quizQuestions.map((item, qIdx) => `
-        <div class="lab-card rounded-3xl p-5 space-y-3">
-          <p class="font-bold text-white text-sm leading-relaxed">${item.q}</p>
-          <div class="space-y-2">
+        <div class="quiz-item-card">
+          <p class="quiz-q-title">${item.q}</p>
+          <div class="quiz-options">
             ${item.options.map((opt, oIdx) => {
-              let btnClass = 'w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-mono border transition ';
-              if (userAnswers[qIdx] === null) {
-                btnClass += 'bg-slate-900/90 hover:bg-slate-800 border-slate-800 text-slate-300';
-              } else if (oIdx === item.answer) {
-                btnClass += 'bg-emerald-500/20 border-emerald-400 text-[#00ff88] font-bold';
-              } else if (oIdx === userAnswers[qIdx]) {
-                btnClass += 'bg-rose-500/20 border-rose-400 text-rose-300';
-              } else {
-                btnClass += 'bg-slate-900/50 border-slate-800/60 text-slate-500';
+              let btnClass = 'quiz-opt-btn';
+              if (userAnswers[qIdx] !== null) {
+                if (oIdx === item.answer) {
+                  btnClass += ' correct';
+                } else if (oIdx === userAnswers[qIdx]) {
+                  btnClass += ' wrong';
+                } else {
+                  btnClass += ' dimmed';
+                }
               }
               return `<button type="button" onclick="answerQuiz(${qIdx}, ${oIdx})" class="${btnClass}">${opt}</button>`;
             }).join('')}

@@ -1,345 +1,1037 @@
 <!DOCTYPE html>
-<html lang="es" class="dark scroll-smooth">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Aprendizaje electrónico interactivo</title>
 
-  <!-- Google Fonts: Plus Jakarta Sans y JetBrains Mono -->
+  <!-- Google Fonts: DM Sans y Space Grotesk (misma tipografía que diode.html) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            lab: {
-              bg: '#090d16',
-              card: '#0f1624',
-              panel: '#131c2e',
-              border: '#1e293b',
-              phosphor: '#00ff88',
-              cyan: '#00e5ff',
-              amber: '#ffb300',
-            }
-          }
-        }
-      }
-    };
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    /* Estilos personalizados de Laboratorio Electrónico Oscuro ("Dark Lab UI") */
+    :root {
+      --navy: #102c39;
+      --teal: #087d79;
+      --teal-dark: #075e5c;
+      --mint: #e5f5f0;
+      --cream: #f7f8f3;
+      --white: #ffffff;
+      --line: #c9d9d8;
+      --text: #17323b;
+      --muted: #465f67;
+      --orange: #b85717;
+      --pale: #fff2df;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body,
+    button,
+    input {
+      font-family: "DM Sans", sans-serif;
+    }
+
     body {
-      background-color: #090d16;
-      color: #e2e8f0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      background: var(--cream);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       overflow-x: hidden;
-      background-image:
-        radial-gradient(circle at 15% 15%, rgba(0, 229, 255, 0.06) 0%, transparent 35%),
-        radial-gradient(circle at 85% 25%, rgba(0, 255, 136, 0.05) 0%, transparent 35%);
     }
 
-    /* Paneles estilo laboratorio */
-    .lab-card {
-      background: linear-gradient(180deg, rgba(19, 28, 46, 0.85) 0%, rgba(13, 19, 33, 0.92) 100%);
-      border: 1px solid #1e293b;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
-      transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    button {
+      font-size: inherit;
+      cursor: pointer;
     }
 
-    .lab-card:hover {
-      border-color: rgba(0, 229, 255, 0.35);
+    a {
+      color: #075f64;
     }
 
-    .lab-card-interactive:hover {
-      transform: translateY(-2px);
-      border-color: rgba(0, 255, 136, 0.45);
-      box-shadow: 0 16px 35px -12px rgba(0, 255, 136, 0.14), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+    :focus-visible {
+      outline: 3px solid #e17622;
+      outline-offset: 3px;
     }
 
-    /* Marco estilo instrumento para el carrusel */
-    .scope-bezel {
-      background: linear-gradient(145deg, #161f33 0%, #0b101b 100%);
-      border: 2px solid #26344d;
-      box-shadow:
-        0 0 35px rgba(0, 255, 136, 0.08),
-        inset 0 2px 12px rgba(0, 0, 0, 0.85);
+    .skip {
+      position: absolute;
+      left: -9999px;
+      top: 8px;
+      background: var(--white);
+      color: var(--navy);
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 8px;
+      z-index: 100;
     }
 
-    .scope-screen-wrap {
+    .skip:focus {
+      left: 8px;
+    }
+
+    /* ==================== BARRA SUPERIOR FIJA (ESTILO DIODE.HTML) ==================== */
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      background: var(--navy);
+      color: var(--white);
+      padding: 15px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #234958;
+    }
+
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      text-decoration: none;
+      color: var(--white);
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #1d4652;
+      border: 1px solid #44717a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #82e3d2;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .brand-link:hover .brand-icon {
+      border-color: #91e5d7;
+      transform: translateY(-1px);
+    }
+
+    .brand {
+      font: 700 19px/1.2 "Space Grotesk", sans-serif;
+      letter-spacing: -0.03em;
+      display: block;
+    }
+
+    .brand span {
+      color: #82e3d2;
+    }
+
+    .brand-sub {
+      display: block;
+      font-size: 12.5px;
+      color: #cee7e4;
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .top-nav-link {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 9px;
+      border: 1px solid #44717a;
+      background: rgba(29, 70, 82, 0.55);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .top-nav-link:hover {
+      background: var(--teal);
+      border-color: #82e3d2;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 9px;
+      border: 1px solid #44717a;
+      background: #1d4652;
+      color: var(--white);
+    }
+
+    .mobile-menu-btn:hover {
+      background: var(--teal);
+    }
+
+    /* ==================== HERO SUPERIOR (ESTILO DIODE.HTML) ==================== */
+    .hero {
+      background: var(--navy);
+      color: var(--white);
+      padding: 52px 28px 64px;
+      border-bottom: 1px solid #234958;
+    }
+
+    .hero-inner {
+      max-width: 1280px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: "Space Grotesk", sans-serif;
+      line-height: 1.15;
+      letter-spacing: -0.035em;
+    }
+
+    h1 {
+      font-size: clamp(36px, 5vw, 62px);
+      margin: 14px 0 16px;
+      color: var(--white);
+    }
+
+    h2 {
+      font-size: clamp(26px, 3.4vw, 38px);
+      margin: 4px 0 6px;
+      color: var(--navy);
+    }
+
+    h3 {
+      font-size: 21px;
+      margin: 0 0 6px;
+      color: var(--navy);
+    }
+
+    .pill {
+      display: inline-block;
+      border: 1px solid #85d9cc;
+      color: #d8fff4;
+      border-radius: 30px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .hero p {
+      max-width: 620px;
+      color: #d3e6e5;
+      font-size: 17.5px;
+      margin: 0;
+    }
+
+    /* Marco del Carrusel inspirado en .hero-art de diode.html */
+    .hero-art {
+      background: #1d4652;
+      border: 1px solid #44717a;
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+    }
+
+    .carousel-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      color: #91e5d7;
+      padding: 0 4px 10px;
+    }
+
+    .carousel-topbar span:last-child {
+      color: #d8fff4;
+    }
+
+    .carousel-viewport {
       position: relative;
-      background-color: #04110b;
-      border: 1px solid rgba(0, 255, 136, 0.25);
-      box-shadow: inset 0 0 28px rgba(0, 255, 136, 0.08);
+      width: 100%;
+      height: 255px;
+      border-radius: 16px;
       overflow: hidden;
+      background: #102c39;
+      border: 1px solid #44717a;
     }
 
-    /* Scrollbar discreta para el panel lateral */
-    .sidebar-scroll::-webkit-scrollbar {
-      width: 5px;
+    .carousel-track {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s ease-out;
     }
-    .sidebar-scroll::-webkit-scrollbar-track {
-      background: transparent;
+
+    .carousel-slide {
+      width: 100%;
+      height: 100%;
+      flex-shrink: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #133542;
     }
-    .sidebar-scroll::-webkit-scrollbar-thumb {
-      background: #1e293b;
+
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .slide-fallback {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      color: #d8fff4;
+    }
+
+    .slide-fallback.hidden {
+      display: none;
+    }
+
+    .slide-fallback strong {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 16px;
+      color: #91e5d7;
+    }
+
+    .slide-fallback small {
+      color: #cee7e4;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: rgba(16, 44, 57, 0.85);
+      color: var(--white);
+      border: 1px solid #85d9cc;
+      font-size: 20px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    .carousel-arrow:hover {
+      background: var(--teal);
+    }
+
+    .carousel-arrow.prev {
+      left: 10px;
+    }
+
+    .carousel-arrow.next {
+      right: 10px;
+    }
+
+    .carousel-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding-top: 12px;
+    }
+
+    .carousel-dot {
+      height: 7px;
+      width: 14px;
+      border: 0;
       border-radius: 999px;
+      background: rgba(216, 255, 244, 0.3);
+      padding: 0;
+      transition: width 0.25s ease, background 0.25s ease;
     }
-    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-      background: #334155;
+
+    .carousel-dot.active {
+      width: 28px;
+      background: #82e3d2;
+    }
+
+    /* ==================== ESTRUCTURA PRINCIPAL + PANEL LATERAL DERECHO ==================== */
+    .layout-wrapper {
+      flex: 1;
+      display: flex;
+      width: 100%;
+    }
+
+    main {
+      flex: 1;
+      min-width: 0;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 12px 28px 72px;
+    }
+
+    .section {
+      padding: 54px 0;
+      border-bottom: 1px solid var(--line);
+      scroll-margin-top: 84px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 26px;
+    }
+
+    .num {
+      color: var(--teal);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 12px;
+      display: block;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    /* ==================== TARJETAS Y BOTONES (ESTILO DIODE.HTML) ==================== */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 5px 24px #153b3b08;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--teal);
+      box-shadow: 0 10px 28px rgba(8, 125, 121, 0.09);
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--mint);
+      color: #075f5d;
+      border: 1px solid #b5dfd5;
+      border-radius: 30px;
+      padding: 4px 11px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tag-amber {
+      background: var(--pale);
+      color: var(--orange);
+      border-color: #f0cfa4;
+    }
+
+    .cat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .card-subtitle {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--teal);
+      margin: 0 0 10px;
+    }
+
+    .card p.card-desc {
+      color: var(--text);
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .card-footer {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      text-decoration: none;
+      border: 1px solid var(--teal);
+      background: var(--white);
+      color: #075b59;
+      padding: 11px 16px;
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: center;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .btn.primary:hover {
+      background: var(--teal-dark);
+      border-color: var(--teal-dark);
+    }
+
+    /* ==================== BLOQUE DEL AUTOR ==================== */
+    .author-section {
+      padding-top: 48px;
+      scroll-margin-top: 84px;
+    }
+
+    .author-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--teal);
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: 0 5px 24px #153b3b08;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .author-info-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .author-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: var(--navy);
+      color: #82e3d2;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .author-details h2 {
+      font-size: 24px;
+      margin: 4px 0;
+    }
+
+    .author-role {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--teal);
+      margin: 0 0 6px;
+    }
+
+    .author-bio {
+      font-size: 14.5px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .author-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 180px;
+    }
+
+    .author-links .btn {
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+
+    /* ==================== PANEL DE NAVEGACIÓN DERECHO ==================== */
+    .side-panel {
+      width: 290px;
+      flex-shrink: 0;
+      background: var(--white);
+      border-left: 1px solid var(--line);
+      position: sticky;
+      top: 73px;
+      height: calc(100vh - 73px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .side-panel-inner {
+      padding: 20px 16px;
+    }
+
+    .side-mobile-head {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .side-group {
+      margin-bottom: 22px;
+    }
+
+    .side-group-title {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--teal);
+      padding: 0 8px 8px;
+    }
+
+    .side-page-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .side-page-link {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: var(--cream);
+      border: 1px solid var(--line);
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .side-page-link:hover {
+      background: var(--mint);
+      border-color: var(--teal);
+    }
+
+    .side-num {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--navy);
+      color: #82e3d2;
+      padding: 2px 6px;
+      border-radius: 6px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .side-page-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .side-page-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .side-page-file {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 1px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .side-arrow {
+      font-size: 12px;
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    .side-sec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .side-sec-link {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: 9px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .side-sec-link:hover {
+      background: var(--mint);
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .side-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      flex-shrink: 0;
+    }
+
+    .side-dot.amber {
+      background: var(--orange);
+    }
+
+    .side-dot.navy {
+      background: var(--navy);
+    }
+
+    .side-panel-footer {
+      padding: 14px 18px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--cream);
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 44, 57, 0.55);
+      z-index: 40;
+    }
+
+    .sidebar-backdrop.open {
+      display: block;
+    }
+
+    /* ==================== PIE DE PÁGINA (ESTILO DIODE.HTML) ==================== */
+    .footer {
+      background: var(--navy);
+      color: #d8ebe7;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .footer-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #82e3d2;
+    }
+
+    /* ==================== RESPONSIVO ==================== */
+    @media (max-width: 1024px) {
+      .mobile-menu-btn {
+        display: inline-flex;
+      }
+
+      .side-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        height: 100vh;
+        z-index: 60;
+        transform: translateX(100%);
+        transition: transform 0.25s ease-out;
+        box-shadow: -10px 0 30px rgba(16, 44, 57, 0.2);
+      }
+
+      .side-panel.open {
+        transform: translateX(0);
+      }
+
+      .side-mobile-head {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        padding: 38px 20px 48px;
+      }
+
+      .hero-inner,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .top {
+        padding: 14px 20px;
+      }
+
+      main {
+        padding: 8px 20px 56px;
+      }
+
+      .section {
+        padding: 40px 0;
+      }
+
+      .author-links {
+        width: 100%;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-cyan-400/20 selection:text-cyan-300">
+<body>
+  <a class="skip" href="#main">Saltar al contenido</a>
 
-  <!-- ==================== BARRA SUPERIOR FIJA (ANCHO COMPLETO) ==================== -->
-  <header class="sticky top-0 z-50 w-full bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/90">
-    <div class="w-full px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between py-3.5 gap-4">
-        <!-- Título del sitio -->
-        <a href="index.html" class="flex items-center gap-3 group">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(0,255,136,0.2)] group-hover:border-[#00ff88] transition">
-            <svg class="w-6 h-6 text-[#00ff88]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 12h4l3-7 4 14 3-7h6" />
-              <circle cx="19" cy="12" r="1.5" fill="currentColor" />
-            </svg>
-          </div>
-          <div>
-            <span class="font-extrabold text-base sm:text-lg tracking-tight text-white block">
-              Aprendizaje electrónico interactivo
-            </span>
-            <span class="text-xs font-mono text-slate-400 block">
-            Conceptos, simuladores y laboratorios
-            </span>
-          </div>
-        </a>
-
-        <!-- Enlace a sección de autor + Botón menú móvil a la derecha -->
-        <div class="flex items-center gap-2.5">
-          <a href="#autor" class="text-xs font-mono text-slate-300 hover:text-[#00e5ff] transition px-3 py-1.5 rounded-lg border border-slate-800 hover:border-cyan-500/40">
-            Acerca de mí
-          </a>
-
-          <button
-            type="button"
-            onclick="toggleSidebar()"
-            aria-label="Abrir navegación"
-            class="lg:hidden p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+  <!-- ==================== BARRA SUPERIOR FIJA ==================== -->
+  <header class="top">
+    <a href="index.html" class="brand-link">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12h4l3-7 4 14 3-7h6" />
+          <circle cx="19" cy="12" r="1.5" fill="currentColor" />
+        </svg>
       </div>
+      <div>
+        <span class="brand">Aprendizaje electrónico interactivo &nbsp;<span>estilo canvas</span></span>
+        <span class="brand-sub">Conceptos, simuladores y laboratorios</span>
+      </div>
+    </a>
+
+    <div class="top-actions">
+      <a href="#autor" class="top-nav-link">Acerca de mí</a>
+
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        onclick="toggleSidebar()"
+        aria-label="Abrir navegación"
+      >
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
     </div>
   </header>
 
   <!-- Fondo oscuro para menú móvil -->
-  <div
-    id="sidebar-backdrop"
-    onclick="toggleSidebar()"
-    class="fixed inset-0 bg-black/65 backdrop-blur-xs z-40 hidden lg:hidden"
-  ></div>
+  <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
 
-  <!-- ==================== CONTENEDOR FLEX DE ANCHO COMPLETO (SIN MÁRGENES LATERALES) ==================== -->
-  <div class="flex-1 flex w-full">
+  <!-- ==================== HERO SUPERIOR + CARRUSEL DE 4 IMÁGENES ==================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <div>
+        <span class="pill">[Etiqueta superior]</span>
+        <h1 id="hero-title">Aprendizaje Electrónico Interactivo</h1>
+        <p>[Inserta aquí tu texto de presentación o introducción para el sitio web.]</p>
+      </div>
 
-    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
-    <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-8 space-y-12">
-
-      <!-- HERO SUPERIOR: ESPACIO PARA TU TEXTO + CARRUSEL DE 4 IMÁGENES -->
-      <section class="lab-card rounded-3xl p-6 sm:p-8 relative overflow-hidden">
-        <div class="absolute -right-16 -top-16 w-64 h-64 bg-[#00ff88]/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-center relative z-10">
-          <!-- Columna Izquierda: Indicación para insertar texto -->
-          <div class="xl:col-span-6 space-y-4">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-[#00ff88] text-xs font-mono">
-              [Etiqueta superior]
-            </div>
-
-            <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
-              Aprendizaje Electrónico Interactivo
-            </h1>
-
-            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-              [Inserta aquí tu texto de presentación o introducción para el sitio web.]
-            </p>
-          </div>
-
-          <!-- Columna Derecha: Frame Carrusel de 4 Imágenes -->
-          <div class="xl:col-span-6">
-            <div
-              id="hero-carousel"
-              onmouseenter="pauseCarousel()"
-              onmouseleave="resumeCarousel()"
-              class="scope-bezel rounded-2xl p-3.5 space-y-2.5"
-            >
-              <!-- Barra superior del frame -->
-              <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 px-1">
-                <span id="carousel-caption" class="text-[#00ff88] truncate">Imagen 1 / 4</span>
-                <span class="text-[#00e5ff]">[Galería]</span>
-              </div>
-
-              <!-- Ventana de visualización del carrusel -->
-              <div class="scope-screen-wrap rounded-xl w-full h-56 sm:h-64 relative group">
-                <div id="carousel-track" class="flex w-full h-full transition-transform duration-500 ease-out">
-                  <!-- SLIDE 1 -->
-                  <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-[#06131c]">
-                    <img
-                      src="images/roboto.png"
-                      alt="Mr. Roboto"
-                      onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
-                      class="w-full h-full object-cover"
-                    />
-                    <div class="hidden flex-col items-center justify-center text-center p-4 font-mono">
-                      <span class="text-[#00ff88] text-sm font-bold">[Imagen 1]</span>
-                      <span class="text-slate-400 text-xs mt-1">src="imagen1.jpg"</span>
-                    </div>
-                  </div>
-
-                  <!-- SLIDE 2 -->
-                  <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-[#06131c]">
-                    <img
-                      src="images/layout1.png"
-                      alt="layout1"
-                      onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
-                      class="w-full h-full object-cover"
-                    />
-                    <div class="hidden flex-col items-center justify-center text-center p-4 font-mono">
-                      <span class="text-[#00e5ff] text-sm font-bold">[Imagen 2]</span>
-                      <span class="text-slate-400 text-xs mt-1">src="imagen2.jpg"</span>
-                    </div>
-                  </div>
-
-                  <!-- SLIDE 3 -->
-                  <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-[#06131c]">
-                    <img
-                      src="images/pcb1.png"
-                      alt="pcb1"
-                      onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
-                      class="w-full h-full object-cover"
-                    />
-                    <div class="hidden flex-col items-center justify-center text-center p-4 font-mono">
-                      <span class="text-[#ffb300] text-sm font-bold">[Imagen 3]</span>
-                      <span class="text-slate-400 text-xs mt-1">src="imagen3.jpg"</span>
-                    </div>
-                  </div>
-
-                  <!-- SLIDE 4 -->
-                  <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-[#06131c]">
-                    <img
-                      src="images/pcb2.png"
-                      alt="pcb2"
-                      onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
-                      class="w-full h-full object-cover"
-                    />
-                    <div class="hidden flex-col items-center justify-center text-center p-4 font-mono">
-                      <span class="text-[#00ff88] text-sm font-bold">[Imagen 4]</span>
-                      <span class="text-slate-400 text-xs mt-1">src="imagen4.jpg"</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Botón Anterior -->
-                <button
-                  type="button"
-                  onclick="prevSlide()"
-                  aria-label="Imagen anterior"
-                  class="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-[#090d16]/80 hover:bg-[#090d16] text-white border border-slate-700 hover:border-[#00e5ff] flex items-center justify-center transition"
-                >
-                  ‹
-                </button>
-
-                <!-- Botón Siguiente -->
-                <button
-                  type="button"
-                  onclick="nextSlide()"
-                  aria-label="Imagen siguiente"
-                  class="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-[#090d16]/80 hover:bg-[#090d16] text-white border border-slate-700 hover:border-[#00e5ff] flex items-center justify-center transition"
-                >
-                  ›
-                </button>
-              </div>
-
-              <!-- Indicadores inferiores de las 4 imágenes -->
-              <div class="flex items-center justify-center gap-2 pt-0.5">
-                <button type="button" onclick="goToSlide(0)" aria-label="Ir a imagen 1" class="carousel-dot w-6 h-1.5 rounded-full bg-[#00ff88] transition-all"></button>
-                <button type="button" onclick="goToSlide(1)" aria-label="Ir a imagen 2" class="carousel-dot w-3 h-1.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all"></button>
-                <button type="button" onclick="goToSlide(2)" aria-label="Ir a imagen 3" class="carousel-dot w-3 h-1.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all"></button>
-                <button type="button" onclick="goToSlide(3)" aria-label="Ir a imagen 4" class="carousel-dot w-3 h-1.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all"></button>
-              </div>
-            </div>
-          </div>
+      <!-- Frame Carrusel de 4 Imágenes -->
+      <div
+        id="hero-carousel"
+        class="hero-art"
+        onmouseenter="pauseCarousel()"
+        onmouseleave="resumeCarousel()"
+      >
+        <div class="carousel-topbar">
+          <span id="carousel-caption">Imagen 1 / 4</span>
+          <span>[Galería]</span>
         </div>
-      </section>
+
+        <div class="carousel-viewport">
+          <div id="carousel-track" class="carousel-track">
+            <!-- SLIDE 1 -->
+            <div class="carousel-slide">
+              <img
+                src="images/roboto.png"
+                alt="Mr. Roboto"
+                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+              />
+              <div class="slide-fallback hidden">
+                <strong>[Imagen 1]</strong>
+                <small>src="imagen1.jpg"</small>
+              </div>
+            </div>
+
+            <!-- SLIDE 2 -->
+            <div class="carousel-slide">
+              <img
+                src="images/layout1.png"
+                alt="layout1"
+                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+              />
+              <div class="slide-fallback hidden">
+                <strong>[Imagen 2]</strong>
+                <small>src="imagen2.jpg"</small>
+              </div>
+            </div>
+
+            <!-- SLIDE 3 -->
+            <div class="carousel-slide">
+              <img
+                src="images/pcb1.png"
+                alt="pcb1"
+                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+              />
+              <div class="slide-fallback hidden">
+                <strong>[Imagen 3]</strong>
+                <small>src="imagen3.jpg"</small>
+              </div>
+            </div>
+
+            <!-- SLIDE 4 -->
+            <div class="carousel-slide">
+              <img
+                src="images/pcb2.png"
+                alt="pcb2"
+                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+              />
+              <div class="slide-fallback hidden">
+                <strong>[Imagen 4]</strong>
+                <small>src="imagen4.jpg"</small>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="carousel-arrow prev" onclick="prevSlide()" aria-label="Imagen anterior">‹</button>
+          <button type="button" class="carousel-arrow next" onclick="nextSlide()" aria-label="Imagen siguiente">›</button>
+        </div>
+
+        <div class="carousel-dots">
+          <button type="button" class="carousel-dot active" onclick="goToSlide(0)" aria-label="Ir a imagen 1"></button>
+          <button type="button" class="carousel-dot" onclick="goToSlide(1)" aria-label="Ir a imagen 2"></button>
+          <button type="button" class="carousel-dot" onclick="goToSlide(2)" aria-label="Ir a imagen 3"></button>
+          <button type="button" class="carousel-dot" onclick="goToSlide(3)" aria-label="Ir a imagen 4"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CONTENEDOR PRINCIPAL + PANEL LATERAL DERECHO ==================== -->
+  <div class="layout-wrapper">
+    <main id="main">
 
       <!-- =====================================================================
            PRIMERA SECCIÓN: CONOCIMIENTOS ELECTRÓNICOS BÁSICOS
       ====================================================================== -->
-      <section id="sec-basica" class="scroll-mt-24 space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-800/80 pb-3">
+      <section id="sec-basica" class="section">
+        <div class="section-head">
           <div>
-            <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Sección 01</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Conocimientos electrónicos básicos
-            </h2>
+            <span class="num">Sección 01</span>
+            <h2>Conocimientos electrónicos básicos</h2>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Enlace a lab_interact_osc_1.html -->
-          <article class="lab-card lab-card-interactive rounded-3xl p-6 flex flex-col justify-between border-emerald-500/35">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-[#00ff88] border border-emerald-500/30">
-                  Instrumentos electrónicos
-                </span>
+        <div class="grid">
+          <!-- Enlace a electronics_basic/lab_multi_1.html -->
+          <article class="card">
+            <div>
+              <div class="card-meta">
+                <span class="tag">Instrumentos electrónicos</span>
               </div>
-              <div>
-                <h3 class="text-xl font-extrabold text-white">Medición de magnitudes elécticas</h3>
-                <p class="text-xs font-mono text-slate-400 mt-0.5">El Osciloscopio</p>
-              </div>
-
-              <p class="text-sm text-slate-300 leading-relaxed">
-                Taller virtual para visualización de señales utilizando el osciloscopio.
-              </p>
+              <h3>Medición de magnitudes elécticas</h3>
+              <p class="card-subtitle">El Osciloscopio</p>
+              <p class="card-desc">Taller virtual para visualización de señales utilizando el osciloscopio.</p>
             </div>
 
-            <div class="pt-5 mt-5 border-t border-slate-800">
-              <a href="electronics_basic/lab_multi_1.html" class="w-full py-3 px-4 rounded-xl bg-[#00ff88] hover:bg-emerald-300 text-slate-950 font-extrabold text-sm transition flex items-center justify-center gap-2 shadow-[0_0_18px_rgba(0,255,136,0.2)]">
+            <div class="card-footer">
+              <a href="electronics_basic/lab_multi_1.html" class="btn primary">
                 <span>Iniciar aprendizaje de medición de magnitudes eléctricas.</span>
                 <span>→</span>
               </a>
             </div>
           </article>
 
-          <!-- Segundo enlace para conocimientos básicos electrónicos -->
-          <article class="lab-card lab-card-interactive rounded-3xl p-6 flex flex-col justify-between border-emerald-500/35">
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-[#00ff88] border border-emerald-500/30">
-                  Instrumentos electrónicos
-                </span>
+          <!-- Enlace a electronics_basic/lab_interact_osc_1.html -->
+          <article class="card">
+            <div>
+              <div class="card-meta">
+                <span class="tag">Instrumentos electrónicos</span>
               </div>
-              <h3 class="text-xl font-extrabold text-white">Visualización de señales</h3>
-              <p class="text-sm text-slate-300 leading-relaxed">
-                Taller virtual para visualización de señales utilizando el osciloscopio.
-              </p>
+              <h3>Visualización de señales</h3>
+              <p class="card-desc">Taller virtual para visualización de señales utilizando el osciloscopio.</p>
             </div>
-            <div class="pt-5 mt-5 border-t border-slate-800">
-              <a href="electronics_basic/lab_interact_osc_1.html" class="w-full py-3 px-4 rounded-xl bg-[#00ff88] hover:bg-emerald-300 text-slate-950 font-extrabold text-sm transition flex items-center justify-center gap-2 shadow-[0_0_18px_rgba(0,255,136,0.2)]">
+
+            <div class="card-footer">
+              <a href="electronics_basic/lab_interact_osc_1.html" class="btn primary">
                 <span>Iniciar aprendizaje de visualización de señales.</span>
                 <span>→</span>
               </a>
@@ -351,40 +1043,30 @@
       <!-- =====================================================================
            SEGUNDA SECCIÓN: DISEÑO ELECTRÓNICO ANALÓGICO
       ====================================================================== -->
-      <section id="sec-analogica" class="scroll-mt-24 space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-800/80 pb-3">
+      <section id="sec-analogica" class="section">
+        <div class="section-head">
           <div>
-            <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Sección 02</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Diseño electrónico analógico
-            </h2>
+            <span class="num">Sección 02</span>
+            <h2>Diseño electrónico analógico</h2>
           </div>
-          <span class="font-mono text-xs text-slate-400">[Subtítulo sección 2]</span>
+          <span class="section-sub">[Subtítulo sección 2]</span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid">
           <!-- Enlace a diodo_1.html -->
-          <article class="lab-card lab-card-interactive rounded-3xl p-6 flex flex-col justify-between">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
-                  [Etiqueta 2.1]
-                </span>
-                <span class="text-[11px] font-mono text-slate-400">[Categoría 2.1]</span>
+          <article class="card">
+            <div>
+              <div class="card-meta">
+                <span class="tag">[Etiqueta 2.1]</span>
+                <span class="cat-label">[Categoría 2.1]</span>
               </div>
-
-              <div>
-                <h3 class="text-xl font-extrabold text-white">Título 2.1</h3>
-                <p class="text-xs font-mono text-slate-400 mt-0.5">[Subtítulo 2.1]</p>
-              </div>
-
-              <p class="text-sm text-slate-300 leading-relaxed">
-                Descripción 2.1 — [Inserta aquí el texto descriptivo para este recurso.]
-              </p>
+              <h3>Título 2.1</h3>
+              <p class="card-subtitle">[Subtítulo 2.1]</p>
+              <p class="card-desc">Descripción 2.1 — [Inserta aquí el texto descriptivo para este recurso.]</p>
             </div>
 
-            <div class="pt-5 mt-5 border-t border-slate-800">
-              <a href="diodo_1.html" class="w-full py-3 px-4 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-[#00e5ff] border border-cyan-400/50 font-bold text-sm transition flex items-center justify-center gap-2">
+            <div class="card-footer">
+              <a href="diodo_1.html" class="btn">
                 <span>Botón 2.1</span>
                 <span>→</span>
               </a>
@@ -396,40 +1078,30 @@
       <!-- =====================================================================
            TERCERA SECCIÓN: DISEÑO ELECTRÓNICO DIGITAL
       ====================================================================== -->
-      <section id="sec-digital" class="scroll-mt-24 space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-800/80 pb-3">
+      <section id="sec-digital" class="section">
+        <div class="section-head">
           <div>
-            <span class="font-mono text-xs uppercase tracking-widest text-[#00ff88]">Sección 03</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Diseño electrónico digital
-            </h2>
+            <span class="num">Sección 03</span>
+            <h2>Diseño electrónico digital</h2>
           </div>
-          <span class="font-mono text-xs text-slate-400">[Subtítulo sección 3]</span>
+          <span class="section-sub">[Subtítulo sección 3]</span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid">
           <!-- Enlace a binary_code_1.html -->
-          <article class="lab-card lab-card-interactive rounded-3xl p-6 flex flex-col justify-between">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-[#00ff88] border border-emerald-500/30">
-                  [Etiqueta 3.1]
-                </span>
-                <span class="text-[11px] font-mono text-slate-400">[Categoría 3.1]</span>
+          <article class="card">
+            <div>
+              <div class="card-meta">
+                <span class="tag">[Etiqueta 3.1]</span>
+                <span class="cat-label">[Categoría 3.1]</span>
               </div>
-
-              <div>
-                <h3 class="text-xl font-extrabold text-white">Título 3.1</h3>
-                <p class="text-xs font-mono text-slate-400 mt-0.5">[Subtítulo 3.1]</p>
-              </div>
-
-              <p class="text-sm text-slate-300 leading-relaxed">
-                Descripción 3.1 — [Inserta aquí el texto descriptivo para este recurso.]
-              </p>
+              <h3>Título 3.1</h3>
+              <p class="card-subtitle">[Subtítulo 3.1]</p>
+              <p class="card-desc">Descripción 3.1 — [Inserta aquí el texto descriptivo para este recurso.]</p>
             </div>
 
-            <div class="pt-5 mt-5 border-t border-slate-800">
-              <a href="binary_code_1.html" class="w-full py-3 px-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-[#00ff88] border border-emerald-400/50 font-bold text-sm transition flex items-center justify-center gap-2">
+            <div class="card-footer">
+              <a href="binary_code_1.html" class="btn">
                 <span>Botón 3.1</span>
                 <span>→</span>
               </a>
@@ -441,40 +1113,30 @@
       <!-- =====================================================================
            CUARTA SECCIÓN: ELECTRÓNICA DE POTENCIA
       ====================================================================== -->
-      <section id="sec-potencia" class="scroll-mt-24 space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-800/80 pb-3">
+      <section id="sec-potencia" class="section">
+        <div class="section-head">
           <div>
-            <span class="font-mono text-xs uppercase tracking-widest text-[#ffb300]">Sección 04</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Electrónica de potencia
-            </h2>
+            <span class="num">Sección 04</span>
+            <h2>Electrónica de potencia</h2>
           </div>
-          <span class="font-mono text-xs text-slate-400">[Subtítulo sección 4]</span>
+          <span class="section-sub">[Subtítulo sección 4]</span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid">
           <!-- Enlace a SCR_1.html -->
-          <article class="lab-card lab-card-interactive rounded-3xl p-6 flex flex-col justify-between">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-amber-500/10 text-[#ffb300] border border-amber-500/30">
-                  [Etiqueta 4.1]
-                </span>
-                <span class="text-[11px] font-mono text-slate-400">[Categoría 4.1]</span>
+          <article class="card">
+            <div>
+              <div class="card-meta">
+                <span class="tag tag-amber">[Etiqueta 4.1]</span>
+                <span class="cat-label">[Categoría 4.1]</span>
               </div>
-
-              <div>
-                <h3 class="text-xl font-extrabold text-white">Título 4.1</h3>
-                <p class="text-xs font-mono text-slate-400 mt-0.5">[Subtítulo 4.1]</p>
-              </div>
-
-              <p class="text-sm text-slate-300 leading-relaxed">
-                Descripción 4.1 — [Inserta aquí el texto descriptivo para este recurso.]
-              </p>
+              <h3>Título 4.1</h3>
+              <p class="card-subtitle">[Subtítulo 4.1]</p>
+              <p class="card-desc">Descripción 4.1 — [Inserta aquí el texto descriptivo para este recurso.]</p>
             </div>
 
-            <div class="pt-5 mt-5 border-t border-slate-800">
-              <a href="SCR_1.html" class="w-full py-3 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-[#ffb300] border border-amber-400/50 font-bold text-sm transition flex items-center justify-center gap-2">
+            <div class="card-footer">
+              <a href="SCR_1.html" class="btn">
                 <span>Botón 4.1</span>
                 <span>→</span>
               </a>
@@ -486,40 +1148,30 @@
       <!-- =====================================================================
            QUINTA SECCIÓN: PROCESAMIENTO DIGITAL DE SEÑALES
       ====================================================================== -->
-      <section id="sec-dsp" class="scroll-mt-24 space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-800/80 pb-3">
+      <section id="sec-dsp" class="section">
+        <div class="section-head">
           <div>
-            <span class="font-mono text-xs uppercase tracking-widest text-[#00e5ff]">Sección 05</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Procesamiento digital de señales
-            </h2>
+            <span class="num">Sección 05</span>
+            <h2>Procesamiento digital de señales</h2>
           </div>
-          <span class="font-mono text-xs text-slate-400">[Subtítulo sección 5]</span>
+          <span class="section-sub">[Subtítulo sección 5]</span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid">
           <!-- Enlace a basic_psd_1.html -->
-          <article class="lab-card lab-card-interactive rounded-3xl p-6 flex flex-col justify-between">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-cyan-500/10 text-[#00e5ff] border border-cyan-500/30">
-                  [Etiqueta 5.1]
-                </span>
-                <span class="text-[11px] font-mono text-slate-400">[Categoría 5.1]</span>
+          <article class="card">
+            <div>
+              <div class="card-meta">
+                <span class="tag">[Etiqueta 5.1]</span>
+                <span class="cat-label">[Categoría 5.1]</span>
               </div>
-
-              <div>
-                <h3 class="text-xl font-extrabold text-white">Título 5.1</h3>
-                <p class="text-xs font-mono text-slate-400 mt-0.5">[Subtítulo 5.1]</p>
-              </div>
-
-              <p class="text-sm text-slate-300 leading-relaxed">
-                Descripción 5.1 — [Inserta aquí el texto descriptivo para este recurso.]
-              </p>
+              <h3>Título 5.1</h3>
+              <p class="card-subtitle">[Subtítulo 5.1]</p>
+              <p class="card-desc">Descripción 5.1 — [Inserta aquí el texto descriptivo para este recurso.]</p>
             </div>
 
-            <div class="pt-5 mt-5 border-t border-slate-800">
-              <a href="basic_psd_1.html" class="w-full py-3 px-4 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-[#00e5ff] border border-cyan-400/50 font-bold text-sm transition flex items-center justify-center gap-2">
+            <div class="card-footer">
+              <a href="basic_psd_1.html" class="btn">
                 <span>Botón 5.1</span>
                 <span>→</span>
               </a>
@@ -531,214 +1183,135 @@
       <!-- =====================================================================
            ESPACIO PARA DATOS DEL AUTOR
       ====================================================================== -->
-      <section id="autor" class="scroll-mt-24 pt-4">
-        <div class="lab-card rounded-3xl p-6 sm:p-8 border-slate-700/80 relative overflow-hidden">
-          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-            <div class="flex items-start gap-4 sm:gap-5">
-              <!-- Iniciales del Autor -->
-              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00ff88]/20 to-[#00e5ff]/20 border border-cyan-400/40 flex items-center justify-center shrink-0 font-mono font-extrabold text-xl text-[#00e5ff]">
-                [AU]
-              </div>
+      <section id="autor" class="author-section">
+        <div class="author-card">
+          <div class="author-info-wrap">
+            <div class="author-avatar">[AU]</div>
 
-              <!-- Datos editables del autor -->
-              <div class="space-y-1.5">
-                <span class="font-mono text-[11px] uppercase tracking-widest text-[#00ff88]">
-                  Datos del autor
-                </span>
-                <h2 class="text-xl sm:text-2xl font-extrabold text-white">
-                  Miguel F.
-                </h2>
-                <p class="text-xs sm:text-sm font-mono text-[#00e5ff]">
-                  Docente e investigador
-                </p>
-                <p class="text-sm text-slate-300 max-w-2xl leading-relaxed pt-1">
-                  miguel.flores@udb.edu.sv
-                </p>
-              </div>
+            <div class="author-details">
+              <span class="num">Datos del autor</span>
+              <h2>Miguel F.</h2>
+              <p class="author-role">Docente e investigador</p>
+              <p class="author-bio">miguel.flores@udb.edu.sv</p>
             </div>
+          </div>
 
-            <!-- Enlaces de contacto del autor -->
-            <div class="flex flex-wrap md:flex-col gap-2 shrink-0 w-full md:w-auto">
-              <a href="#" class="px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-200 transition text-center">
-                [Enlace autor 1]
-              </a>
-              <a href="#" class="px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-[#00e5ff] transition text-center">
-                [Enlace autor 2]
-              </a>
-            </div>
+          <div class="author-links">
+            <a href="#" class="btn">[Enlace autor 1]</a>
+            <a href="#" class="btn primary">[Enlace autor 2]</a>
           </div>
         </div>
       </section>
 
     </main>
 
-    <!-- ==================== PANEL DE NAVEGACIÓN DERECHO (PEGADO AL BORDE DERECHO) ==================== -->
-    <aside
-      id="side-panel"
-      aria-label="Navegación del sitio"
-      class="fixed inset-y-0 right-0 z-40 w-72 shrink-0 bg-[#0b101d]/95 lg:bg-[#090d16]/70 backdrop-blur-md border-l border-slate-800/90 transform translate-x-full lg:translate-x-0 lg:sticky lg:top-[69px] lg:h-[calc(100vh-69px)] transition-transform duration-200 ease-out flex flex-col justify-between sidebar-scroll overflow-y-auto"
-    >
-      <div class="p-4 space-y-6">
-        <!-- Encabezado móvil del panel -->
-        <div class="flex items-center justify-between lg:hidden pb-3 border-b border-slate-800">
-          <span class="font-mono text-xs uppercase tracking-wider text-[#00e5ff]">Navegación</span>
-          <button type="button" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-1">
-            ✕
-          </button>
+    <!-- ==================== PANEL DE NAVEGACIÓN DERECHO ==================== -->
+    <aside id="side-panel" class="side-panel" aria-label="Navegación del sitio">
+      <div class="side-panel-inner">
+        <!-- Encabezado móvil -->
+        <div class="side-mobile-head">
+          <span>Navegación</span>
+          <button type="button" onclick="toggleSidebar()" aria-label="Cerrar navegación" style="background:none;border:0;font-size:18px;color:var(--navy)">✕</button>
         </div>
 
-        <!-- Bloque 1: Enlaces a las páginas del sitio -->
-        <div class="space-y-2">
-          <div class="px-2.5">
-            <span class="font-mono text-[11px] uppercase tracking-widest text-[#00ff88] font-semibold">
-              Páginas del sitio
-            </span>
-          </div>
+        <!-- Bloque 1: Páginas del sitio -->
+        <div class="side-group">
+          <span class="side-group-title">Páginas del sitio</span>
 
-          <nav class="space-y-1.5">
-            <!-- Enlace 1: lab_interact_osc_1.html -->
-            <a
-              href="electronics_basic/lab_interact_osc_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                01
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
-                  Título página 1
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">Lab Osciloscopio.html</p>
+          <nav class="side-page-list">
+            <a href="electronics_basic/lab_interact_osc_1.html" class="side-page-link">
+              <span class="side-num">01</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 1</p>
+                <p class="side-page-file">Lab Osciloscopio.html</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
-            <!-- Enlace 2: diodo_1.html -->
-            <a
-              href="diodo_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                02
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
-                  Título página 2
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">diodo_1.html</p>
+            <a href="diodo_1.html" class="side-page-link">
+              <span class="side-num">02</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 2</p>
+                <p class="side-page-file">diodo_1.html</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
-            <!-- Enlace 3: binary_code_1.html -->
-            <a
-              href="binary_code_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-emerald-500/10 border border-slate-800/90 hover:border-emerald-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00ff88] bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                03
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00ff88] transition truncate">
-                  Título página 3
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">binary_code_1.html</p>
+            <a href="binary_code_1.html" class="side-page-link">
+              <span class="side-num">03</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 3</p>
+                <p class="side-page-file">binary_code_1.html</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00ff88] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
-            <!-- Enlace 4: SCR_1.html -->
-            <a
-              href="SCR_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-amber-500/10 border border-slate-800/90 hover:border-amber-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#ffb300] bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                04
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#ffb300] transition truncate">
-                  Título página 4
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">SCR_1.html</p>
+            <a href="SCR_1.html" class="side-page-link">
+              <span class="side-num">04</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 4</p>
+                <p class="side-page-file">SCR_1.html</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#ffb300] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
 
-            <!-- Enlace 5: basic_psd_1.html -->
-            <a
-              href="basic_psd_1.html"
-              class="group flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 hover:bg-cyan-500/10 border border-slate-800/90 hover:border-cyan-400/40 transition"
-            >
-              <span class="font-mono text-[11px] font-bold text-[#00e5ff] bg-cyan-500/10 border border-cyan-500/30 px-1.5 py-0.5 rounded mt-0.5">
-                05
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-bold text-white group-hover:text-[#00e5ff] transition truncate">
-                  Título página 5
-                </p>
-                <p class="text-[11px] font-mono text-slate-400 truncate">basic_psd_1.html</p>
+            <a href="basic_psd_1.html" class="side-page-link">
+              <span class="side-num">05</span>
+              <div class="side-page-text">
+                <p class="side-page-title">Título página 5</p>
+                <p class="side-page-file">basic_psd_1.html</p>
               </div>
-              <span class="text-slate-500 group-hover:text-[#00e5ff] text-xs mt-0.5">↗</span>
+              <span class="side-arrow">↗</span>
             </a>
           </nav>
         </div>
 
         <!-- Bloque 2: Secciones en esta página -->
-        <div class="space-y-2 pt-3 border-t border-slate-800/80">
-          <div class="px-2.5">
-            <span class="font-mono text-[11px] uppercase tracking-widest text-slate-400 font-semibold">
-              Secciones
-            </span>
-          </div>
+        <div class="side-group">
+          <span class="side-group-title">Secciones</span>
 
-          <nav class="space-y-1 text-xs">
-            <a href="#sec-basica" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+          <nav class="side-sec-list">
+            <a href="#sec-basica" onclick="closeSidebarOnMobile()" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Conocimientos electrónicos básicos</span>
             </a>
-            <a href="#sec-analogica" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+            <a href="#sec-analogica" onclick="closeSidebarOnMobile()" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Diseño electrónico analógico</span>
             </a>
-            <a href="#sec-digital" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
+            <a href="#sec-digital" onclick="closeSidebarOnMobile()" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Diseño electrónico digital</span>
             </a>
-            <a href="#sec-potencia" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#ffb300]"></span>
+            <a href="#sec-potencia" onclick="closeSidebarOnMobile()" class="side-sec-link">
+              <span class="side-dot amber"></span>
               <span>Electrónica de potencia</span>
             </a>
-            <a href="#sec-dsp" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff]"></span>
+            <a href="#sec-dsp" onclick="closeSidebarOnMobile()" class="side-sec-link">
+              <span class="side-dot"></span>
               <span>Procesamiento digital de señales</span>
             </a>
-            <a href="#autor" onclick="closeSidebarOnMobile()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            <a href="#autor" onclick="closeSidebarOnMobile()" class="side-sec-link">
+              <span class="side-dot navy"></span>
               <span>Autor</span>
             </a>
           </nav>
         </div>
       </div>
 
-      <!-- Pie del Panel Lateral -->
-      <div class="p-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-500">
+      <div class="side-panel-footer">
         <span>[Texto pie panel]</span>
       </div>
     </aside>
-
   </div>
 
   <!-- ==================== PIE DE PÁGINA ==================== -->
-  <footer class="w-full border-t border-slate-800/90 bg-[#090d16]/95">
-    <div class="w-full px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-[#00ff88]"></span>
-        <span class="font-semibold text-slate-200">Aprendizaje electrónico interactivo</span>
-      </div>
-      <div class="font-mono text-slate-500">
-        [Texto pie de página]
-      </div>
+  <footer class="footer">
+    <div class="footer-brand">
+      <span class="footer-dot"></span>
+      <span>Aprendizaje electrónico interactivo</span>
     </div>
+    <div>[Texto pie de página]</div>
   </footer>
 
   <!-- ==================== SCRIPTS: MENÚ LATERAL Y CARRUSEL DE 4 IMÁGENES ==================== -->
@@ -747,16 +1320,16 @@
     function toggleSidebar() {
       const sidebar = document.getElementById('side-panel');
       const backdrop = document.getElementById('sidebar-backdrop');
-      sidebar.classList.toggle('translate-x-full');
-      backdrop.classList.toggle('hidden');
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('open');
     }
 
     function closeSidebarOnMobile() {
-      if (window.innerWidth < 1024) {
+      if (window.innerWidth <= 1024) {
         const sidebar = document.getElementById('side-panel');
         const backdrop = document.getElementById('sidebar-backdrop');
-        sidebar.classList.add('translate-x-full');
-        backdrop.classList.add('hidden');
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('open');
       }
     }
 
@@ -778,13 +1351,7 @@
       }
 
       dots.forEach((dot, idx) => {
-        if (idx === currentSlide) {
-          dot.classList.remove('w-3', 'bg-slate-700');
-          dot.classList.add('w-6', 'bg-[#00ff88]');
-        } else {
-          dot.classList.remove('w-6', 'bg-[#00ff88]');
-          dot.classList.add('w-3', 'bg-slate-700');
-        }
+        dot.classList.toggle('active', idx === currentSlide);
       });
     }
 

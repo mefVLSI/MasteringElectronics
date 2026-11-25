@@ -10,8 +10,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
+  <script>
+    // Aplicar el tema guardado (compartido con index.html y lab_interact_osc_1.html) antes del renderizado
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('site-theme');
+        if (savedTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <style>
     :root {
+      /* TEMA CLARO (Por defecto — paleta base de index.html) */
       --navy: #102c39;
       --navy-panel: #1d4652;
       --teal: #087d79;
@@ -28,6 +41,69 @@
       --danger-bg: #fdeceb;
       --danger-border: #b42318;
       --danger-text: #7a1c15;
+
+      /* Variables auxiliares de superficies, textos y componentes */
+      --top-bg: #102c39;
+      --top-border: #234958;
+      --hero-bg: #102c39;
+      --hero-panel: #1d4652;
+      --hero-panel-border: #44717a;
+      --heading-color: #102c39;
+      --link-color: #075f64;
+      --btn-text: #075b59;
+      --tag-text: #075f5d;
+      --tag-border: #b5dfd5;
+      --tag-amber-border: #f0cfa4;
+      --input-border: #718f91;
+      --callout-warn-text: #5c2d0c;
+      --safety-panel-border: #e6b4af;
+      --safety-crit-bg: #fff9f8;
+      --safety-crit-border: #ecc0bc;
+      --safety-amber-bg: #fffcf7;
+      --safety-amber-border: #f0d7b4;
+      --code-bg: rgba(16, 44, 57, 0.08);
+      --card-shadow: 0 5px 24px #153b3b08;
+    }
+
+    /* TEMA OSCURO (Misma paleta oscura de index.html y lab_interact_osc_1.html) */
+    html[data-theme="dark"] {
+      --navy: #e6f4f1;
+      --navy-panel: #10222b;
+      --teal: #17b89c;
+      --teal-dark: #119881;
+      --mint: #16343d;
+      --mint-bright: #82e3d2;
+      --cream: #0a1419;
+      --white: #102129;
+      --line: #213c47;
+      --text: #d7e7e6;
+      --muted: #8faab0;
+      --orange: #f4a261;
+      --pale: #2c2115;
+      --danger-bg: #2f1415;
+      --danger-border: #f87171;
+      --danger-text: #fecaca;
+
+      --top-bg: #070f13;
+      --top-border: #1b323c;
+      --hero-bg: #081217;
+      --hero-panel: #10222b;
+      --hero-panel-border: #254654;
+      --heading-color: #eef8f6;
+      --link-color: #6ee7d4;
+      --btn-text: #7beadd;
+      --tag-text: #82e3d2;
+      --tag-border: #265459;
+      --tag-amber-border: #5c3d22;
+      --input-border: #2c515f;
+      --callout-warn-text: #ffd6a5;
+      --safety-panel-border: #5c2626;
+      --safety-crit-bg: #231315;
+      --safety-crit-border: #5c282a;
+      --safety-amber-bg: #241c13;
+      --safety-amber-border: #593d20;
+      --code-bg: rgba(130, 227, 210, 0.12);
+      --card-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
     }
 
     * {
@@ -54,6 +130,7 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     button,
@@ -67,13 +144,14 @@
     }
 
     a {
-      color: #075f64;
+      color: var(--link-color);
     }
 
     code {
       font-family: "Space Grotesk", monospace;
       font-weight: 700;
-      background: rgba(16, 44, 57, 0.08);
+      background: var(--code-bg);
+      color: var(--heading-color);
       padding: 1px 6px;
       border-radius: 5px;
     }
@@ -88,7 +166,7 @@
       left: -9999px;
       top: 8px;
       background: var(--white);
-      color: var(--navy);
+      color: var(--heading-color);
       font-weight: 700;
       padding: 8px 14px;
       border-radius: 8px;
@@ -105,15 +183,16 @@
       top: 0;
       z-index: 50;
       width: 100%;
-      background: var(--navy);
-      color: var(--white);
+      background: var(--top-bg);
+      color: #ffffff;
       padding: 14px 26px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 18px;
       flex-wrap: wrap;
-      border-bottom: 1px solid #234958;
+      border-bottom: 1px solid var(--top-border);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .top-left {
@@ -133,7 +212,7 @@
       width: 42px;
       height: 42px;
       border-radius: 12px;
-      background: var(--navy-panel);
+      background: #1d4652;
       border: 1px solid #44717a;
       display: flex;
       align-items: center;
@@ -152,7 +231,7 @@
     .brand {
       font: 700 20px/1.15 "Space Grotesk", sans-serif;
       letter-spacing: -0.03em;
-      color: var(--white);
+      color: #ffffff;
     }
 
     .brand span {
@@ -184,6 +263,32 @@
       flex-wrap: wrap;
     }
 
+    /* Botón Selector entre Tema Claro y Tema Oscuro (misma colocación y estilo que index.html) */
+    .theme-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #d8fff4;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 13px;
+      border-radius: 9px;
+      border: 1px solid #85d9cc;
+      background: rgba(29, 70, 82, 0.8);
+      white-space: nowrap;
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--teal);
+      border-color: #82e3d2;
+      color: #06181c;
+    }
+
+    .theme-toggle-btn svg {
+      flex-shrink: 0;
+    }
+
     .mobile-score-badge {
       display: none;
       font-family: "Space Grotesk", sans-serif;
@@ -193,7 +298,7 @@
       border-radius: 8px;
       background: var(--pale);
       color: var(--orange);
-      border: 1px solid #f0cfa4;
+      border: 1px solid var(--tag-amber-border);
     }
 
     .mobile-menu-btn {
@@ -203,8 +308,8 @@
       padding: 8px 10px;
       border-radius: 9px;
       border: 1px solid #44717a;
-      background: var(--navy-panel);
-      color: var(--white);
+      background: #1d4652;
+      color: #ffffff;
     }
 
     .mobile-menu-btn:hover {
@@ -235,15 +340,19 @@
     }
 
     .nav-tab:hover {
-      background: var(--navy-panel);
-      color: var(--white);
+      background: #1d4652;
+      color: #ffffff;
       border-color: #85d9cc;
     }
 
     .nav-tab.active {
       background: var(--teal);
-      color: var(--white);
+      color: #ffffff;
       border-color: var(--mint-bright);
+    }
+
+    html[data-theme="dark"] .nav-tab.active {
+      color: #05181c;
     }
 
     .nav-tab-num {
@@ -283,19 +392,19 @@
     h1 {
       font-size: clamp(32px, 4.4vw, 52px);
       margin: 12px 0 16px;
-      color: var(--white);
+      color: #ffffff;
     }
 
     h2 {
       font-size: clamp(25px, 3.2vw, 36px);
       margin: 4px 0 6px;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     h3 {
       font-size: 20px;
       margin: 0 0 8px;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     .num {
@@ -342,15 +451,17 @@
 
     /* ==================== HERO DE SECCIÓN 1 (ESTILO DIODE.HTML) ==================== */
     .hero-box {
-      background: var(--navy);
-      color: var(--white);
+      background: var(--hero-bg);
+      color: #ffffff;
+      border: 1px solid var(--top-border);
       border-radius: 24px;
       padding: 36px 34px;
       display: grid;
       grid-template-columns: 1.25fr 0.75fr;
       gap: 28px;
       align-items: center;
-      box-shadow: 0 10px 30px rgba(16, 44, 57, 0.14);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .pill {
@@ -383,7 +494,7 @@
     }
 
     .hero-box p strong {
-      color: var(--white);
+      color: #ffffff;
     }
 
     .hero-actions {
@@ -399,8 +510,8 @@
     }
 
     .mag-card {
-      background: var(--navy-panel);
-      border: 1px solid #44717a;
+      background: var(--hero-panel);
+      border: 1px solid var(--hero-panel-border);
       border-radius: 16px;
       padding: 15px 16px;
       display: flex;
@@ -430,7 +541,7 @@
     }
 
     .mag-card h3 {
-      color: var(--white);
+      color: #ffffff;
       font-size: 15px;
       margin: 0 0 3px;
     }
@@ -449,13 +560,14 @@
       border: 1px solid var(--line);
       border-radius: 18px;
       padding: 24px;
-      box-shadow: 0 5px 24px #153b3b08;
+      box-shadow: var(--card-shadow);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .btn {
       border: 1px solid var(--teal);
       background: var(--white);
-      color: #075b59;
+      color: var(--btn-text);
       padding: 10px 16px;
       border-radius: 9px;
       font-weight: 700;
@@ -471,12 +583,21 @@
     .btn:hover,
     .btn.active {
       background: var(--teal);
-      color: var(--white);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .btn:hover,
+    html[data-theme="dark"] .btn.active {
+      color: #05181c;
     }
 
     .btn.primary {
       background: var(--teal);
-      color: var(--white);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .btn.primary {
+      color: #05181c;
     }
 
     .btn.primary:hover {
@@ -485,25 +606,31 @@
     }
 
     .btn.dark {
-      background: var(--navy);
-      border-color: var(--navy);
-      color: var(--white);
+      background: #102c39;
+      border-color: #2c5563;
+      color: #ffffff;
     }
 
     .btn.dark:hover {
-      background: var(--navy-panel);
+      background: #1d4652;
+      border-color: #82e3d2;
+      color: #ffffff;
     }
 
     .btn.danger-outline {
       background: var(--danger-bg);
-      border-color: #e6a19b;
+      border-color: var(--safety-panel-border);
       color: var(--danger-text);
     }
 
     .btn.danger-outline:hover {
       background: var(--danger-border);
       border-color: var(--danger-border);
-      color: var(--white);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .btn.danger-outline:hover {
+      color: #160808;
     }
 
     .btn.small {
@@ -523,7 +650,7 @@
     .callout.warning {
       background: var(--pale);
       border-left-color: var(--orange);
-      color: #5c2d0c;
+      color: var(--callout-warn-text);
     }
 
     .callout.danger {
@@ -535,11 +662,12 @@
     /* ==================== BLOQUE DE ADVERTENCIAS DE SEGURIDAD ==================== */
     .safety-panel {
       background: var(--white);
-      border: 1px solid #e6b4af;
+      border: 1px solid var(--safety-panel-border);
       border-top: 5px solid var(--danger-border);
       border-radius: 20px;
       padding: 26px;
-      box-shadow: 0 6px 26px rgba(180, 35, 24, 0.06);
+      box-shadow: var(--card-shadow);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .safety-header {
@@ -564,7 +692,7 @@
       height: 42px;
       border-radius: 12px;
       background: var(--danger-bg);
-      border: 1px solid #e6a19b;
+      border: 1px solid var(--safety-panel-border);
       color: var(--danger-border);
       font-size: 20px;
       font-weight: 700;
@@ -581,7 +709,7 @@
       border-radius: 9px;
       background: var(--danger-bg);
       color: var(--danger-text);
-      border: 1px solid #e6a19b;
+      border: 1px solid var(--safety-panel-border);
     }
 
     .safety-grid {
@@ -595,16 +723,17 @@
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 16px;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .safety-item.critical {
-      background: #fff9f8;
-      border-color: #ecc0bc;
+      background: var(--safety-crit-bg);
+      border-color: var(--safety-crit-border);
     }
 
     .safety-item.amber {
-      background: #fffcf7;
-      border-color: #f0d7b4;
+      background: var(--safety-amber-bg);
+      border-color: var(--safety-amber-border);
     }
 
     .safety-item-num {
@@ -661,8 +790,8 @@
     }
 
     .dmm-hardware-box {
-      background: var(--navy);
-      color: var(--white);
+      background: var(--hero-bg);
+      color: #ffffff;
       border: 1px solid #2c5563;
       border-radius: 22px;
       padding: 20px;
@@ -687,9 +816,9 @@
       width: 100%;
       text-align: left;
       border-radius: 15px;
-      background: var(--navy-panel);
-      border: 2px solid #44717a;
-      color: var(--white);
+      background: var(--hero-panel);
+      border: 2px solid var(--hero-panel-border);
+      color: #ffffff;
       padding: 14px;
       transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
@@ -734,7 +863,7 @@
       height: 46px;
       border-radius: 50%;
       border: 2px solid var(--mint-bright);
-      background: var(--navy);
+      background: #102c39;
       color: var(--mint-bright);
       font-family: "Space Grotesk", sans-serif;
       font-size: 11px;
@@ -761,9 +890,9 @@
       height: 34px;
       margin: 0 auto 7px;
       border-radius: 50%;
-      background: var(--navy);
+      background: #102c39;
       border: 2px solid #85d9cc;
-      color: var(--white);
+      color: #ffffff;
       font-family: "Space Grotesk", sans-serif;
       font-size: 10px;
       font-weight: 700;
@@ -791,8 +920,8 @@
     .anatomy-tag {
       display: inline-block;
       background: var(--mint);
-      color: #075f5d;
-      border: 1px solid #b5dfd5;
+      color: var(--tag-text);
+      border: 1px solid var(--tag-border);
       border-radius: 30px;
       padding: 4px 12px;
       font-size: 11.5px;
@@ -828,7 +957,7 @@
     .search-input {
       width: 100%;
       background: var(--white);
-      border: 1px solid #718f91;
+      border: 1px solid var(--input-border);
       border-radius: 10px;
       padding: 10px 14px 10px 36px;
       color: var(--text);
@@ -884,7 +1013,7 @@
     .flip-card-front {
       background: var(--white);
       border: 1px solid var(--line);
-      box-shadow: 0 5px 20px #153b3b08;
+      box-shadow: var(--card-shadow);
     }
 
     .flip-card-front:hover {
@@ -907,7 +1036,7 @@
 
     .flip-lang-badge {
       background: var(--mint);
-      color: #075f5d;
+      color: var(--tag-text);
       font-weight: 700;
       padding: 2px 8px;
       border-radius: 6px;
@@ -921,7 +1050,7 @@
       font-family: "Space Grotesk", sans-serif;
       font-size: 18px;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
       margin: 0;
     }
 
@@ -936,13 +1065,19 @@
       font-family: "Space Grotesk", sans-serif;
       font-size: 13px;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     .flip-back-def {
       font-size: 13px;
       line-height: 1.5;
       margin: 0;
+    }
+
+    .flip-back-return {
+      font-size: 11.5px;
+      color: var(--tag-text);
+      font-weight: 700;
     }
 
     /* ==================== SIMULADOR INTERACTIVO DE MULTÍMETRO ==================== */
@@ -968,15 +1103,15 @@
     }
 
     .meter-screen-card {
-      background: var(--navy);
-      color: var(--white);
+      background: var(--hero-bg);
+      color: #ffffff;
       border: 1px solid #2c5563;
       border-radius: 22px;
       padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 14px;
-      box-shadow: 0 10px 28px rgba(16, 44, 57, 0.14);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
     }
 
     .osd-bar {
@@ -992,6 +1127,7 @@
     .osd-scen-pill {
       background: var(--pale);
       color: var(--orange);
+      border: 1px solid var(--tag-amber-border);
       padding: 4px 10px;
       border-radius: 7px;
     }
@@ -1163,7 +1299,7 @@
     .choice-btn.active {
       background: var(--mint);
       border-color: var(--teal);
-      color: #075f5d;
+      color: var(--tag-text);
     }
 
     .choice-btn.active-red {
@@ -1181,12 +1317,12 @@
     .lab-select {
       width: 100%;
       background: var(--cream);
-      border: 1px solid #718f91;
+      border: 1px solid var(--input-border);
       border-radius: 10px;
       padding: 10px 12px;
       font-weight: 700;
       font-size: 13.5px;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     .power-row {
@@ -1223,19 +1359,21 @@
       padding: 4px 10px;
       border-radius: 30px;
       background: var(--mint);
-      color: #075f5d;
+      color: var(--tag-text);
+      border: 1px solid var(--tag-border);
     }
 
     .mode-pill.amber {
       background: var(--pale);
       color: var(--orange);
+      border-color: var(--tag-amber-border);
     }
 
     .mode-svg {
       width: 100%;
       height: 108px;
       border-radius: 12px;
-      background: var(--navy);
+      background: #0b222b;
       border: 1px solid #35606e;
       display: block;
     }
@@ -1266,7 +1404,7 @@
       border-radius: 10px;
       background: var(--pale);
       color: var(--orange);
-      border: 1px solid #f0cfa4;
+      border: 1px solid var(--tag-amber-border);
     }
 
     .quiz-grid {
@@ -1280,13 +1418,13 @@
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 5px 24px #153b3b08;
+      box-shadow: var(--card-shadow);
     }
 
     .quiz-q-title {
       font-weight: 700;
       font-size: 15px;
-      color: var(--navy);
+      color: var(--heading-color);
       margin: 0 0 12px;
     }
 
@@ -1311,13 +1449,13 @@
 
     .quiz-opt-btn:hover {
       border-color: var(--teal);
-      background: #edf6f3;
+      background: var(--mint);
     }
 
     .quiz-opt-btn.correct {
       background: var(--mint);
       border-color: var(--teal);
-      color: #075f5d;
+      color: var(--tag-text);
       font-weight: 700;
     }
 
@@ -1370,6 +1508,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .side-panel-inner {
@@ -1384,7 +1523,7 @@
       margin-bottom: 14px;
       border-bottom: 1px solid var(--line);
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     .side-group {
@@ -1410,7 +1549,7 @@
       font-size: 12px;
       font-weight: 700;
       text-decoration: none;
-      color: #075f64;
+      color: var(--link-color);
     }
 
     .side-home-link:hover {
@@ -1441,16 +1580,30 @@
       border-color: var(--teal);
     }
 
+    .side-page-link.current {
+      background: var(--mint);
+      border-color: var(--teal);
+    }
+
     .side-num {
       font-family: "Space Grotesk", sans-serif;
       font-size: 11px;
       font-weight: 700;
-      background: var(--navy);
+      background: #102c39;
       color: var(--mint-bright);
       padding: 2px 6px;
       border-radius: 6px;
       margin-top: 2px;
       flex-shrink: 0;
+    }
+
+    .side-page-link.current .side-num {
+      background: var(--teal);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .side-page-link.current .side-num {
+      color: #05181c;
     }
 
     .side-page-text {
@@ -1461,7 +1614,7 @@
     .side-page-title {
       font-size: 13px;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
       margin: 0;
       white-space: nowrap;
       overflow: hidden;
@@ -1506,7 +1659,7 @@
 
     .side-sec-link:hover {
       background: var(--mint);
-      color: var(--navy);
+      color: var(--heading-color);
       font-weight: 700;
     }
 
@@ -1523,7 +1676,7 @@
     }
 
     .side-dot.navy {
-      background: var(--navy);
+      background: var(--heading-color);
     }
 
     .side-panel-footer {
@@ -1532,11 +1685,12 @@
       font-size: 12.5px;
       font-weight: 700;
       background: var(--cream);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .side-panel-footer a {
       text-decoration: none;
-      color: #075f64;
+      color: var(--link-color);
     }
 
     .side-panel-footer a:hover {
@@ -1547,7 +1701,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(16, 44, 57, 0.55);
+      background: rgba(8, 20, 26, 0.65);
       z-index: 40;
     }
 
@@ -1570,7 +1724,7 @@
         z-index: 60;
         transform: translateX(100%);
         transition: transform 0.25s ease-out;
-        box-shadow: -10px 0 30px rgba(16, 44, 57, 0.2);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.35);
       }
 
       .side-panel.open {
@@ -1667,6 +1821,32 @@
         </button>
       </nav>
 
+      <!-- Botón selector entre Tema Claro y Tema Oscuro (misma colocación y estilo que index.html) -->
+      <button
+        type="button"
+        id="theme-toggle"
+        class="theme-toggle-btn"
+        onclick="toggleTheme()"
+        aria-label="Cambiar entre tema claro y tema oscuro"
+        title="Cambiar tema de color"
+      >
+        <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        <svg id="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <span id="theme-label">Tema oscuro</span>
+      </button>
+
       <button
         type="button"
         class="mobile-menu-btn"
@@ -1717,7 +1897,7 @@
               </div>
             </div>
 
-            <!-- Resumen Visual de las 3 Magnitudes-->
+            <!-- Resumen Visual de las 3 Magnitudes -->
             <div class="hero-magnitudes">
               <div class="mag-card">
                 <div class="mag-badge">V</div>
@@ -2300,10 +2480,10 @@
         <!-- Encabezado móvil del panel -->
         <div class="side-mobile-head">
           <span>Navegación</span>
-          <button type="button" onclick="toggleSidebar()" aria-label="Cerrar navegación" style="background:none;border:0;font-size:18px;color:var(--navy)">✕</button>
+          <button type="button" onclick="toggleSidebar()" aria-label="Cerrar navegación" style="background:none;border:0;font-size:18px;color:var(--heading-color)">✕</button>
         </div>
 
-        <!-- Bloque 1: Enlaces a las otras páginas del sitio (editar href con rutas reales) -->
+        <!-- Bloque 1: Enlaces a las otras páginas del sitio -->
         <div class="side-group">
           <div class="side-group-head">
             <span class="side-group-title">Páginas del sitio</span>
@@ -2312,51 +2492,51 @@
 
           <nav class="side-page-list">
             <!-- Página 1 -->
-            <a href="#" class="side-page-link">
+            <a href="lab_interact_osc_1.html" class="side-page-link">
               <span class="side-num">01</span>
               <div class="side-page-text">
                 <p class="side-page-title">Título página 1</p>
-                <p class="side-page-file">[Colocar enlace 1]</p>
+                <p class="side-page-file">lab_interact_osc_1.html</p>
               </div>
               <span class="side-arrow">↗</span>
             </a>
 
             <!-- Página 2 -->
-            <a href="#" class="side-page-link">
+            <a href="diodo_1.html" class="side-page-link">
               <span class="side-num">02</span>
               <div class="side-page-text">
                 <p class="side-page-title">Título página 2</p>
-                <p class="side-page-file">[Colocar enlace 2]</p>
+                <p class="side-page-file">diodo_1.html</p>
               </div>
               <span class="side-arrow">↗</span>
             </a>
 
             <!-- Página 3 -->
-            <a href="#" class="side-page-link">
+            <a href="binary_code_1.html" class="side-page-link">
               <span class="side-num">03</span>
               <div class="side-page-text">
                 <p class="side-page-title">Título página 3</p>
-                <p class="side-page-file">[Colocar enlace 3]</p>
+                <p class="side-page-file">binary_code_1.html</p>
               </div>
               <span class="side-arrow">↗</span>
             </a>
 
             <!-- Página 4 -->
-            <a href="#" class="side-page-link">
+            <a href="SCR_1.html" class="side-page-link">
               <span class="side-num">04</span>
               <div class="side-page-text">
                 <p class="side-page-title">Título página 4</p>
-                <p class="side-page-file">[Colocar enlace 4]</p>
+                <p class="side-page-file">SCR_1.html</p>
               </div>
               <span class="side-arrow">↗</span>
             </a>
 
             <!-- Página 5 -->
-            <a href="#" class="side-page-link">
+            <a href="basic_psd_1.html" class="side-page-link">
               <span class="side-num">05</span>
               <div class="side-page-text">
                 <p class="side-page-title">Título página 5</p>
-                <p class="side-page-file">[Colocar enlace 5]</p>
+                <p class="side-page-file">basic_psd_1.html</p>
               </div>
               <span class="side-arrow">↗</span>
             </a>
@@ -2408,6 +2588,45 @@
 
   <!-- ==================== SCRIPTS INTERACTIVOS ==================== -->
   <script>
+    // 0. CONTROL DEL SELECTOR DE TEMA CLARO / TEMA OSCURO (SINCRONIZADO CON INDEX.HTML)
+    function syncThemeButton(theme) {
+      const label = document.getElementById('theme-label');
+      const moon = document.getElementById('theme-icon-moon');
+      const sun = document.getElementById('theme-icon-sun');
+      if (!label || !moon || !sun) return;
+
+      if (theme === 'dark') {
+        label.textContent = 'Tema claro';
+        moon.style.display = 'none';
+        sun.style.display = 'inline-block';
+      } else {
+        label.textContent = 'Tema oscuro';
+        moon.style.display = 'inline-block';
+        sun.style.display = 'none';
+      }
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      const isDark = root.getAttribute('data-theme') === 'dark';
+      const nextTheme = isDark ? 'light' : 'dark';
+
+      if (nextTheme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+      } else {
+        root.removeAttribute('data-theme');
+      }
+
+      try {
+        localStorage.setItem('site-theme', nextTheme);
+      } catch (e) {}
+
+      syncThemeButton(nextTheme);
+    }
+
+    // Sincronizar etiqueta e ícono del botón al cargar
+    syncThemeButton(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
     // 1. CONTROL DEL PANEL LATERAL DERECHO EN MÓVIL
     function toggleSidebar() {
       const sidebar = document.getElementById('side-panel');
@@ -2516,7 +2735,7 @@
             <div class="flip-card-back">
               <span class="flip-back-title">${item.es} (${item.en})</span>
               <p class="flip-back-def">${item.def}</p>
-              <span style="font-size:11.5px;color:#075f5d;font-weight:700">Clic para regresar ↺</span>
+              <span class="flip-back-return">Clic para regresar ↺</span>
             </div>
           </div>
         </div>

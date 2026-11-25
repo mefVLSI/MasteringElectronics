@@ -10,8 +10,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
+  <script>
+    // Aplicar el tema guardado antes del renderizado para evitar parpadeos
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('site-theme');
+        if (savedTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <style>
     :root {
+      /* TEMA CLARO (Por defecto — colores originales) */
       --navy: #102c39;
       --teal: #087d79;
       --teal-dark: #075e5c;
@@ -23,6 +36,52 @@
       --muted: #465f67;
       --orange: #b85717;
       --pale: #fff2df;
+
+      /* Variables auxiliares para superficies y detalles */
+      --top-bg: #102c39;
+      --top-border: #234958;
+      --hero-bg: #102c39;
+      --hero-panel: #1d4652;
+      --hero-panel-border: #44717a;
+      --heading-color: #102c39;
+      --link-color: #075f64;
+      --btn-text: #075b59;
+      --tag-text: #075f5d;
+      --tag-border: #b5dfd5;
+      --tag-amber-border: #f0cfa4;
+      --card-shadow: 0 5px 24px #153b3b08;
+      --card-hover-shadow: 0 10px 28px rgba(8, 125, 121, 0.09);
+      --footer-bg: #102c39;
+    }
+
+    /* TEMA OSCURO (Tonos oscuros coherentes con la paleta petróleo/menta) */
+    html[data-theme="dark"] {
+      --navy: #e6f4f1;
+      --teal: #17b89c;
+      --teal-dark: #119881;
+      --mint: #111111;
+      --cream: #000000;
+      --white: #111111;
+      --line: #213c47;
+      --text: #d7e7e6;
+      --muted: #8faab0;
+      --orange: #f4a261;
+      --pale: #2c2115;
+
+      --top-bg: #000000;
+      --top-border: #1b323c;
+      --hero-bg: #000000;
+      --hero-panel: #000000;
+      --hero-panel-border: #254654;
+      --heading-color: #eef8f6;
+      --link-color: #6ee7d4;
+      --btn-text: #7beadd;
+      --tag-text: #82e3d2;
+      --tag-border: #265459;
+      --tag-amber-border: #5c3d22;
+      --card-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      --card-hover-shadow: 0 12px 32px rgba(23, 184, 156, 0.16);
+      --footer-bg: #000000;
     }
 
     * {
@@ -48,6 +107,7 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     button {
@@ -56,7 +116,7 @@
     }
 
     a {
-      color: #075f64;
+      color: var(--link-color);
     }
 
     :focus-visible {
@@ -69,7 +129,7 @@
       left: -9999px;
       top: 8px;
       background: var(--white);
-      color: var(--navy);
+      color: var(--heading-color);
       font-weight: 700;
       padding: 8px 14px;
       border-radius: 8px;
@@ -86,15 +146,16 @@
       top: 0;
       z-index: 50;
       width: 100%;
-      background: var(--navy);
-      color: var(--white);
+      background: var(--top-bg);
+      color: #ffffff;
       padding: 15px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
       flex-wrap: wrap;
-      border-bottom: 1px solid #234958;
+      border-bottom: 1px solid var(--top-border);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .brand-link {
@@ -102,7 +163,7 @@
       align-items: center;
       gap: 13px;
       text-decoration: none;
-      color: var(--white);
+      color: #ffffff;
     }
 
     .brand-icon {
@@ -144,11 +205,12 @@
     .top-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .top-nav-link {
-      color: var(--white);
+      color: #ffffff;
       text-decoration: none;
       font-size: 13px;
       font-weight: 700;
@@ -162,6 +224,32 @@
     .top-nav-link:hover {
       background: var(--teal);
       border-color: #82e3d2;
+      color: #06181c;
+    }
+
+    /* Botón Selector de Tema Claro / Oscuro */
+    .theme-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #d8fff4;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 13px;
+      border-radius: 9px;
+      border: 1px solid #85d9cc;
+      background: rgba(29, 70, 82, 0.8);
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--teal);
+      border-color: #82e3d2;
+      color: #06181c;
+    }
+
+    .theme-toggle-btn svg {
+      flex-shrink: 0;
     }
 
     .mobile-menu-btn {
@@ -172,7 +260,7 @@
       border-radius: 9px;
       border: 1px solid #44717a;
       background: #1d4652;
-      color: var(--white);
+      color: #ffffff;
     }
 
     .mobile-menu-btn:hover {
@@ -181,10 +269,11 @@
 
     /* ==================== HERO SUPERIOR (ESTILO DIODE.HTML) ==================== */
     .hero {
-      background: var(--navy);
-      color: var(--white);
+      background: var(--hero-bg);
+      color: #ffffff;
       padding: 52px 28px 64px;
-      border-bottom: 1px solid #234958;
+      border-bottom: 1px solid var(--top-border);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .hero-inner {
@@ -207,19 +296,19 @@
     h1 {
       font-size: clamp(36px, 5vw, 62px);
       margin: 14px 0 16px;
-      color: var(--white);
+      color: #ffffff;
     }
 
     h2 {
       font-size: clamp(26px, 3.4vw, 38px);
       margin: 4px 0 6px;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     h3 {
       font-size: 21px;
       margin: 0 0 6px;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     .pill {
@@ -242,11 +331,12 @@
 
     /* Marco del Carrusel inspirado en .hero-art de diode.html */
     .hero-art {
-      background: #1d4652;
-      border: 1px solid #44717a;
+      background: var(--hero-panel);
+      border: 1px solid var(--hero-panel-border);
       border-radius: 24px;
       padding: 18px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .carousel-topbar {
@@ -269,8 +359,8 @@
       height: 255px;
       border-radius: 16px;
       overflow: hidden;
-      background: #102c39;
-      border: 1px solid #44717a;
+      background: #0c1f27;
+      border: 1px solid var(--hero-panel-border);
     }
 
     .carousel-track {
@@ -332,7 +422,7 @@
       height: 34px;
       border-radius: 9px;
       background: rgba(16, 44, 57, 0.85);
-      color: var(--white);
+      color: #ffffff;
       border: 1px solid #85d9cc;
       font-size: 20px;
       line-height: 1;
@@ -434,17 +524,17 @@
       border: 1px solid var(--line);
       border-radius: 18px;
       padding: 24px;
-      box-shadow: 0 5px 24px #153b3b08;
+      box-shadow: var(--card-shadow);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease;
     }
 
     .card:hover {
       transform: translateY(-2px);
       border-color: var(--teal);
-      box-shadow: 0 10px 28px rgba(8, 125, 121, 0.09);
+      box-shadow: var(--card-hover-shadow);
     }
 
     .card-meta {
@@ -459,8 +549,8 @@
     .tag {
       display: inline-block;
       background: var(--mint);
-      color: #075f5d;
-      border: 1px solid #b5dfd5;
+      color: var(--tag-text);
+      border: 1px solid var(--tag-border);
       border-radius: 30px;
       padding: 4px 11px;
       font-size: 12px;
@@ -470,7 +560,7 @@
     .tag-amber {
       background: var(--pale);
       color: var(--orange);
-      border-color: #f0cfa4;
+      border-color: var(--tag-amber-border);
     }
 
     .cat-label {
@@ -507,7 +597,7 @@
       text-decoration: none;
       border: 1px solid var(--teal);
       background: var(--white);
-      color: #075b59;
+      color: var(--btn-text);
       padding: 11px 16px;
       border-radius: 9px;
       font-weight: 700;
@@ -518,12 +608,20 @@
 
     .btn:hover {
       background: var(--teal);
-      color: var(--white);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .btn:hover {
+      color: #05181c;
     }
 
     .btn.primary {
       background: var(--teal);
-      color: var(--white);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .btn.primary {
+      color: #05181c;
     }
 
     .btn.primary:hover {
@@ -543,12 +641,13 @@
       border-left: 5px solid var(--teal);
       border-radius: 18px;
       padding: 26px;
-      box-shadow: 0 5px 24px #153b3b08;
+      box-shadow: var(--card-shadow);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 24px;
       flex-wrap: wrap;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .author-info-wrap {
@@ -561,7 +660,8 @@
       width: 64px;
       height: 64px;
       border-radius: 16px;
-      background: var(--navy);
+      background: #102c39;
+      border: 1px solid #2b5463;
       color: #82e3d2;
       font-family: "Space Grotesk", sans-serif;
       font-weight: 700;
@@ -615,6 +715,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .side-panel-inner {
@@ -629,7 +730,7 @@
       margin-bottom: 14px;
       border-bottom: 1px solid var(--line);
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     .side-group {
@@ -674,7 +775,7 @@
       font-family: "Space Grotesk", sans-serif;
       font-size: 11px;
       font-weight: 700;
-      background: var(--navy);
+      background: #102c39;
       color: #82e3d2;
       padding: 2px 6px;
       border-radius: 6px;
@@ -690,7 +791,7 @@
     .side-page-title {
       font-size: 13px;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
       margin: 0;
       white-space: nowrap;
       overflow: hidden;
@@ -735,7 +836,7 @@
 
     .side-sec-link:hover {
       background: var(--mint);
-      color: var(--navy);
+      color: var(--heading-color);
       font-weight: 700;
     }
 
@@ -752,7 +853,7 @@
     }
 
     .side-dot.navy {
-      background: var(--navy);
+      background: var(--heading-color);
     }
 
     .side-panel-footer {
@@ -761,13 +862,14 @@
       font-size: 12px;
       color: var(--muted);
       background: var(--cream);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .sidebar-backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(16, 44, 57, 0.55);
+      background: rgba(8, 20, 26, 0.65);
       z-index: 40;
     }
 
@@ -777,7 +879,7 @@
 
     /* ==================== PIE DE PÁGINA (ESTILO DIODE.HTML) ==================== */
     .footer {
-      background: var(--navy);
+      background: var(--footer-bg);
       color: #d8ebe7;
       padding: 24px 28px;
       display: flex;
@@ -786,6 +888,8 @@
       flex-wrap: wrap;
       gap: 12px;
       font-size: 13px;
+      border-top: 1px solid var(--top-border);
+      transition: background-color 0.25s ease;
     }
 
     .footer-brand {
@@ -793,7 +897,7 @@
       align-items: center;
       gap: 8px;
       font-weight: 700;
-      color: var(--white);
+      color: #ffffff;
     }
 
     .footer-dot {
@@ -818,7 +922,7 @@
         z-index: 60;
         transform: translateX(100%);
         transition: transform 0.25s ease-out;
-        box-shadow: -10px 0 30px rgba(16, 44, 57, 0.2);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.35);
       }
 
       .side-panel.open {
@@ -877,6 +981,32 @@
     </a>
 
     <div class="top-actions">
+      <!-- Botón selector entre Tema Claro y Tema Oscuro -->
+      <button
+        type="button"
+        id="theme-toggle"
+        class="theme-toggle-btn"
+        onclick="toggleTheme()"
+        aria-label="Cambiar entre tema claro y tema oscuro"
+        title="Cambiar tema de color"
+      >
+        <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        <svg id="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <span id="theme-label">Tema oscuro</span>
+      </button>
+
       <a href="#autor" class="top-nav-link">Acerca de mí</a>
 
       <button
@@ -1211,7 +1341,7 @@
         <!-- Encabezado móvil -->
         <div class="side-mobile-head">
           <span>Navegación</span>
-          <button type="button" onclick="toggleSidebar()" aria-label="Cerrar navegación" style="background:none;border:0;font-size:18px;color:var(--navy)">✕</button>
+          <button type="button" onclick="toggleSidebar()" aria-label="Cerrar navegación" style="background:none;border:0;font-size:18px;color:var(--heading-color)">✕</button>
         </div>
 
         <!-- Bloque 1: Páginas del sitio -->
@@ -1314,8 +1444,47 @@
     <div>[Texto pie de página]</div>
   </footer>
 
-  <!-- ==================== SCRIPTS: MENÚ LATERAL Y CARRUSEL DE 4 IMÁGENES ==================== -->
+  <!-- ==================== SCRIPTS: TEMA CLARO/OSCURO, MENÚ LATERAL Y CARRUSEL ==================== -->
   <script>
+    // Control del selector de Tema Claro / Tema Oscuro
+    function syncThemeButton(theme) {
+      const label = document.getElementById('theme-label');
+      const moon = document.getElementById('theme-icon-moon');
+      const sun = document.getElementById('theme-icon-sun');
+      if (!label || !moon || !sun) return;
+
+      if (theme === 'dark') {
+        label.textContent = 'Tema claro';
+        moon.style.display = 'none';
+        sun.style.display = 'inline-block';
+      } else {
+        label.textContent = 'Tema oscuro';
+        moon.style.display = 'inline-block';
+        sun.style.display = 'none';
+      }
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      const isDark = root.getAttribute('data-theme') === 'dark';
+      const nextTheme = isDark ? 'light' : 'dark';
+
+      if (nextTheme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+      } else {
+        root.removeAttribute('data-theme');
+      }
+
+      try {
+        localStorage.setItem('site-theme', nextTheme);
+      } catch (e) {}
+
+      syncThemeButton(nextTheme);
+    }
+
+    // Sincronizar etiqueta e ícono del botón al cargar
+    syncThemeButton(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
     // Control del panel lateral derecho en dispositivos móviles
     function toggleSidebar() {
       const sidebar = document.getElementById('side-panel');

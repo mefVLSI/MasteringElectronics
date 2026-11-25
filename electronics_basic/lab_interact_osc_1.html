@@ -3,15 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OsciloLab — Aprende a Usar el Osciloscopio desde Cero</title>
+  <title>MultiLab — Guía interactiva para manejo de multímetro (Multitester Guide)</title>
 
   <!-- Google Fonts: DM Sans y Space Grotesk (misma tipografía que diode.html) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
+  <script>
+    // Aplicar el tema guardado (compartido con index.html y lab_interact_osc_1.html) antes del renderizado
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('site-theme');
+        if (savedTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <style>
     :root {
+      /* TEMA CLARO (Por defecto — paleta base de index.html) */
       --navy: #102c39;
       --navy-panel: #1d4652;
       --teal: #087d79;
@@ -25,6 +38,72 @@
       --muted: #465f67;
       --orange: #b85717;
       --pale: #fff2df;
+      --danger-bg: #fdeceb;
+      --danger-border: #b42318;
+      --danger-text: #7a1c15;
+
+      /* Variables auxiliares de superficies, textos y componentes */
+      --top-bg: #102c39;
+      --top-border: #234958;
+      --hero-bg: #102c39;
+      --hero-panel: #1d4652;
+      --hero-panel-border: #44717a;
+      --heading-color: #102c39;
+      --link-color: #075f64;
+      --btn-text: #075b59;
+      --tag-text: #075f5d;
+      --tag-border: #b5dfd5;
+      --tag-amber-border: #f0cfa4;
+      --input-border: #718f91;
+      --callout-warn-text: #5c2d0c;
+      --safety-panel-border: #e6b4af;
+      --safety-crit-bg: #fff9f8;
+      --safety-crit-border: #ecc0bc;
+      --safety-amber-bg: #fffcf7;
+      --safety-amber-border: #f0d7b4;
+      --code-bg: rgba(16, 44, 57, 0.08);
+      --card-shadow: 0 5px 24px #153b3b08;
+    }
+
+    /* TEMA OSCURO (Misma paleta oscura de index.html y lab_interact_osc_1.html) */
+    html[data-theme="dark"] {
+      --navy: #e6f4f1;
+      --navy-panel: #10222b;
+      --teal: #17b89c;
+      --teal-dark: #119881;
+      --mint: #16343d;
+      --mint-bright: #82e3d2;
+      --cream: #0a1419;
+      --white: #102129;
+      --line: #213c47;
+      --text: #d7e7e6;
+      --muted: #8faab0;
+      --orange: #f4a261;
+      --pale: #2c2115;
+      --danger-bg: #2f1415;
+      --danger-border: #f87171;
+      --danger-text: #fecaca;
+
+      --top-bg: #070f13;
+      --top-border: #1b323c;
+      --hero-bg: #081217;
+      --hero-panel: #10222b;
+      --hero-panel-border: #254654;
+      --heading-color: #eef8f6;
+      --link-color: #6ee7d4;
+      --btn-text: #7beadd;
+      --tag-text: #82e3d2;
+      --tag-border: #265459;
+      --tag-amber-border: #5c3d22;
+      --input-border: #2c515f;
+      --callout-warn-text: #ffd6a5;
+      --safety-panel-border: #5c2626;
+      --safety-crit-bg: #231315;
+      --safety-crit-border: #5c282a;
+      --safety-amber-bg: #241c13;
+      --safety-amber-border: #593d20;
+      --code-bg: rgba(130, 227, 210, 0.12);
+      --card-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
     }
 
     * {
@@ -51,6 +130,7 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     button,
@@ -64,7 +144,16 @@
     }
 
     a {
-      color: #075f64;
+      color: var(--link-color);
+    }
+
+    code {
+      font-family: "Space Grotesk", monospace;
+      font-weight: 700;
+      background: var(--code-bg);
+      color: var(--heading-color);
+      padding: 1px 6px;
+      border-radius: 5px;
     }
 
     :focus-visible {
@@ -77,7 +166,7 @@
       left: -9999px;
       top: 8px;
       background: var(--white);
-      color: var(--navy);
+      color: var(--heading-color);
       font-weight: 700;
       padding: 8px 14px;
       border-radius: 8px;
@@ -94,15 +183,16 @@
       top: 0;
       z-index: 50;
       width: 100%;
-      background: var(--navy);
-      color: var(--white);
+      background: var(--top-bg);
+      color: #ffffff;
       padding: 14px 26px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 18px;
       flex-wrap: wrap;
-      border-bottom: 1px solid #234958;
+      border-bottom: 1px solid var(--top-border);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .top-left {
@@ -122,7 +212,7 @@
       width: 42px;
       height: 42px;
       border-radius: 12px;
-      background: var(--navy-panel);
+      background: #1d4652;
       border: 1px solid #44717a;
       display: flex;
       align-items: center;
@@ -141,11 +231,11 @@
     .brand {
       font: 700 20px/1.15 "Space Grotesk", sans-serif;
       letter-spacing: -0.03em;
-      color: var(--white);
+      color: #ffffff;
     }
 
     .brand span {
-      color: var(--mint-bright);
+      color: #ffd29d;
     }
 
     .bilingual-pill {
@@ -173,6 +263,32 @@
       flex-wrap: wrap;
     }
 
+    /* Botón Selector entre Tema Claro y Tema Oscuro (misma colocación y estilo que index.html) */
+    .theme-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #d8fff4;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 13px;
+      border-radius: 9px;
+      border: 1px solid #85d9cc;
+      background: rgba(29, 70, 82, 0.8);
+      white-space: nowrap;
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--teal);
+      border-color: #82e3d2;
+      color: #06181c;
+    }
+
+    .theme-toggle-btn svg {
+      flex-shrink: 0;
+    }
+
     .mobile-score-badge {
       display: none;
       font-family: "Space Grotesk", sans-serif;
@@ -182,7 +298,7 @@
       border-radius: 8px;
       background: var(--pale);
       color: var(--orange);
-      border: 1px solid #f0cfa4;
+      border: 1px solid var(--tag-amber-border);
     }
 
     .mobile-menu-btn {
@@ -192,15 +308,14 @@
       padding: 8px 10px;
       border-radius: 9px;
       border: 1px solid #44717a;
-      background: var(--navy-panel);
-      color: var(--white);
+      background: #1d4652;
+      color: #ffffff;
     }
 
     .mobile-menu-btn:hover {
       background: var(--teal);
     }
 
-    /* Pestañas de navegación de OsciloLab */
     .tab-nav {
       display: flex;
       align-items: center;
@@ -225,15 +340,19 @@
     }
 
     .nav-tab:hover {
-      background: var(--navy-panel);
-      color: var(--white);
+      background: #1d4652;
+      color: #ffffff;
       border-color: #85d9cc;
     }
 
     .nav-tab.active {
       background: var(--teal);
-      color: var(--white);
+      color: #ffffff;
       border-color: var(--mint-bright);
+    }
+
+    html[data-theme="dark"] .nav-tab.active {
+      color: #05181c;
     }
 
     .nav-tab-num {
@@ -263,7 +382,8 @@
 
     h1,
     h2,
-    h3 {
+    h3,
+    h4 {
       font-family: "Space Grotesk", sans-serif;
       line-height: 1.16;
       letter-spacing: -0.03em;
@@ -272,19 +392,19 @@
     h1 {
       font-size: clamp(32px, 4.4vw, 52px);
       margin: 12px 0 16px;
-      color: var(--white);
+      color: #ffffff;
     }
 
     h2 {
       font-size: clamp(25px, 3.2vw, 36px);
       margin: 4px 0 6px;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     h3 {
       font-size: 20px;
       margin: 0 0 8px;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     .num {
@@ -331,23 +451,25 @@
 
     /* ==================== HERO DE SECCIÓN 1 (ESTILO DIODE.HTML) ==================== */
     .hero-box {
-      background: var(--navy);
-      color: var(--white);
+      background: var(--hero-bg);
+      color: #ffffff;
+      border: 1px solid var(--top-border);
       border-radius: 24px;
       padding: 36px 34px;
       display: grid;
       grid-template-columns: 1.25fr 0.75fr;
       gap: 28px;
       align-items: center;
-      box-shadow: 0 10px 30px rgba(16, 44, 57, 0.14);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      border: 1px solid #85d9cc;
-      color: #d8fff4;
+      border: 1px solid #ffd29d;
+      color: #ffebd2;
       border-radius: 30px;
       padding: 6px 13px;
       font-size: 12px;
@@ -358,7 +480,7 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--mint-bright);
+      background: #ffd29d;
     }
 
     .hero-box h1 span {
@@ -372,7 +494,7 @@
     }
 
     .hero-box p strong {
-      color: var(--white);
+      color: #ffffff;
     }
 
     .hero-actions {
@@ -381,62 +503,71 @@
       gap: 10px;
     }
 
-    .hero-analogies {
+    .hero-magnitudes {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
-    .analogy-card {
-      background: var(--navy-panel);
-      border: 1px solid #44717a;
-      border-radius: 18px;
-      padding: 18px;
+    .mag-card {
+      background: var(--hero-panel);
+      border: 1px solid var(--hero-panel-border);
+      border-radius: 16px;
+      padding: 15px 16px;
       display: flex;
       align-items: flex-start;
-      gap: 14px;
+      gap: 13px;
     }
 
-    .analogy-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: rgba(16, 44, 57, 0.75);
+    .mag-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: rgba(16, 44, 57, 0.85);
       border: 1px solid #85d9cc;
+      color: var(--mint-bright);
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
       flex-shrink: 0;
     }
 
-    .analogy-card h3 {
-      color: var(--white);
-      font-size: 15.5px;
-      margin: 0 0 4px;
+    .mag-badge.amber {
+      border-color: #ffd29d;
+      color: #ffd29d;
     }
 
-    .analogy-card p {
+    .mag-card h3 {
+      color: #ffffff;
+      font-size: 15px;
+      margin: 0 0 3px;
+    }
+
+    .mag-card p {
       color: #cee7e4;
-      font-size: 13px;
+      font-size: 12.8px;
       margin: 0;
-      line-height: 1.55;
+      line-height: 1.5;
     }
 
-    /* ==================== TARJETAS, BOTONES Y PANELES (ESTILO DIODE.HTML) ==================== */
+    /* ==================== TARJETAS, BOTONES Y PANELES ==================== */
     .card,
     .panel {
       background: var(--white);
       border: 1px solid var(--line);
       border-radius: 18px;
       padding: 24px;
-      box-shadow: 0 5px 24px #153b3b08;
+      box-shadow: var(--card-shadow);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .btn {
       border: 1px solid var(--teal);
       background: var(--white);
-      color: #075b59;
+      color: var(--btn-text);
       padding: 10px 16px;
       border-radius: 9px;
       font-weight: 700;
@@ -452,12 +583,21 @@
     .btn:hover,
     .btn.active {
       background: var(--teal);
-      color: var(--white);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .btn:hover,
+    html[data-theme="dark"] .btn.active {
+      color: #05181c;
     }
 
     .btn.primary {
       background: var(--teal);
-      color: var(--white);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .btn.primary {
+      color: #05181c;
     }
 
     .btn.primary:hover {
@@ -466,13 +606,31 @@
     }
 
     .btn.dark {
-      background: var(--navy);
-      border-color: var(--navy);
-      color: var(--white);
+      background: #102c39;
+      border-color: #2c5563;
+      color: #ffffff;
     }
 
     .btn.dark:hover {
-      background: var(--navy-panel);
+      background: #1d4652;
+      border-color: #82e3d2;
+      color: #ffffff;
+    }
+
+    .btn.danger-outline {
+      background: var(--danger-bg);
+      border-color: var(--safety-panel-border);
+      color: var(--danger-text);
+    }
+
+    .btn.danger-outline:hover {
+      background: var(--danger-border);
+      border-color: var(--danger-border);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .btn.danger-outline:hover {
+      color: #160808;
     }
 
     .btn.small {
@@ -492,16 +650,123 @@
     .callout.warning {
       background: var(--pale);
       border-left-color: var(--orange);
-      color: #5c2d0c;
+      color: var(--callout-warn-text);
     }
 
     .callout.danger {
-      background: #fdeceb;
-      border-left-color: #b42318;
-      color: #7a1c15;
+      background: var(--danger-bg);
+      border-left-color: var(--danger-border);
+      color: var(--danger-text);
     }
 
-    /* ==================== ANATOMÍA INTERACTIVA DEL OSCILOSCOPIO ==================== */
+    /* ==================== BLOQUE DE ADVERTENCIAS DE SEGURIDAD ==================== */
+    .safety-panel {
+      background: var(--white);
+      border: 1px solid var(--safety-panel-border);
+      border-top: 5px solid var(--danger-border);
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: var(--card-shadow);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .safety-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .safety-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .safety-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--danger-bg);
+      border: 1px solid var(--safety-panel-border);
+      color: var(--danger-border);
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .safety-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 9px;
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid var(--safety-panel-border);
+    }
+
+    .safety-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .safety-item {
+      background: var(--cream);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .safety-item.critical {
+      background: var(--safety-crit-bg);
+      border-color: var(--safety-crit-border);
+    }
+
+    .safety-item.amber {
+      background: var(--safety-amber-bg);
+      border-color: var(--safety-amber-border);
+    }
+
+    .safety-item-num {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--danger-border);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .safety-item.amber .safety-item-num {
+      color: var(--orange);
+    }
+
+    .safety-item.teal .safety-item-num {
+      color: var(--teal);
+    }
+
+    .safety-item h3 {
+      font-size: 15.5px;
+      margin: 0 0 6px;
+    }
+
+    .safety-item p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ==================== ANATOMÍA INTERACTIVA DEL MULTÍMETRO ==================== */
     .section-header-row {
       display: flex;
       align-items: flex-end;
@@ -519,14 +784,14 @@
 
     .anatomy-grid {
       display: grid;
-      grid-template-columns: 1.25fr 0.85fr;
+      grid-template-columns: 1fr 1fr;
       gap: 20px;
       align-items: stretch;
     }
 
-    .scope-hardware-box {
-      background: var(--navy);
-      color: var(--white);
+    .dmm-hardware-box {
+      background: var(--hero-bg);
+      color: #ffffff;
       border: 1px solid #2c5563;
       border-radius: 22px;
       padding: 20px;
@@ -536,35 +801,29 @@
       gap: 14px;
     }
 
-    .scope-hardware-top {
+    .dmm-hardware-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
       font-size: 12px;
       font-weight: 700;
-      color: #91e5d7;
+      color: #ffd29d;
       padding-bottom: 10px;
       border-bottom: 1px solid #2b5260;
     }
 
-    .scope-hardware-mid {
-      display: grid;
-      grid-template-columns: 1.25fr 0.85fr;
-      gap: 14px;
-      align-items: stretch;
-    }
-
-    .anatomy-zone {
+    .dmm-zone {
+      width: 100%;
       text-align: left;
-      border-radius: 16px;
-      background: var(--navy-panel);
-      border: 2px solid #44717a;
-      color: var(--white);
-      padding: 13px;
+      border-radius: 15px;
+      background: var(--hero-panel);
+      border: 2px solid var(--hero-panel-border);
+      color: #ffffff;
+      padding: 14px;
       transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .anatomy-zone:hover {
+    .dmm-zone:hover {
       border-color: var(--mint-bright);
     }
 
@@ -574,95 +833,82 @@
       box-shadow: 0 0 0 3px rgba(130, 227, 210, 0.28) !important;
     }
 
-    .zone-screen-box {
-      background: #0b222b;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .zone-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .zone-badge {
-      font-size: 11px;
+    .lcd-preview-box {
+      background: #091d26;
+      border: 1px solid #44717a;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-top: 8px;
+      text-align: right;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 28px;
       font-weight: 700;
-      background: var(--teal);
-      color: var(--white);
-      padding: 3px 8px;
-      border-radius: 6px;
+      color: var(--mint-bright);
     }
 
-    .zone-sub {
-      font-size: 11px;
-      color: #91e5d7;
-    }
-
-    .zone-knobs-col {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .zone-knob-title {
-      font-size: 12.5px;
-      font-weight: 700;
+    .lcd-preview-box span {
+      font-size: 14px;
       color: #d8fff4;
     }
 
-    .zone-knob-circle {
-      width: 22px;
-      height: 22px;
+    .dial-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .dial-circle {
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
       border: 2px solid var(--mint-bright);
-      background: var(--navy);
+      background: #102c39;
       color: var(--mint-bright);
-      font-size: 10px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 11px;
       font-weight: 700;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
-    .zone-knob-desc {
-      margin: 4px 0 0;
-      font-size: 11.5px;
-      color: #cee7e4;
-    }
-
-    .zone-probe-bar {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+    .jacks-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
     }
 
-    .bnc-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .jack-zone {
+      text-align: center;
+      padding: 12px 8px;
     }
 
-    .bnc-chip {
-      width: 30px;
-      height: 30px;
+    .jack-ring {
+      width: 34px;
+      height: 34px;
+      margin: 0 auto 7px;
       border-radius: 50%;
-      background: var(--navy);
+      background: #102c39;
       border: 2px solid #85d9cc;
-      color: var(--white);
+      color: #ffffff;
+      font-family: "Space Grotesk", sans-serif;
       font-size: 10px;
       font-weight: 700;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .jack-ring.amber {
+      border-color: #ffd29d;
+      color: #ffd29d;
+    }
+
+    .jack-ring.red {
+      border-color: #ff9c94;
+      color: #ff9c94;
     }
 
     .anatomy-detail-card {
@@ -674,8 +920,8 @@
     .anatomy-tag {
       display: inline-block;
       background: var(--mint);
-      color: #075f5d;
-      border: 1px solid #b5dfd5;
+      color: var(--tag-text);
+      border: 1px solid var(--tag-border);
       border-radius: 30px;
       padding: 4px 12px;
       font-size: 11.5px;
@@ -711,7 +957,7 @@
     .search-input {
       width: 100%;
       background: var(--white);
-      border: 1px solid #718f91;
+      border: 1px solid var(--input-border);
       border-radius: 10px;
       padding: 10px 14px 10px 36px;
       color: var(--text);
@@ -767,7 +1013,7 @@
     .flip-card-front {
       background: var(--white);
       border: 1px solid var(--line);
-      box-shadow: 0 5px 20px #153b3b08;
+      box-shadow: var(--card-shadow);
     }
 
     .flip-card-front:hover {
@@ -790,7 +1036,7 @@
 
     .flip-lang-badge {
       background: var(--mint);
-      color: #075f5d;
+      color: var(--tag-text);
       font-weight: 700;
       padding: 2px 8px;
       border-radius: 6px;
@@ -804,14 +1050,14 @@
       font-family: "Space Grotesk", sans-serif;
       font-size: 18px;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
       margin: 0;
     }
 
     .flip-es {
       font-size: 14px;
       font-weight: 700;
-      color: var(--teal);
+      color: var(--orange);
       margin: 3px 0 0;
     }
 
@@ -819,7 +1065,7 @@
       font-family: "Space Grotesk", sans-serif;
       font-size: 13px;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     .flip-back-def {
@@ -828,17 +1074,23 @@
       margin: 0;
     }
 
-    /* ==================== SIMULADOR INTERACTIVO ==================== */
+    .flip-back-return {
+      font-size: 11.5px;
+      color: var(--tag-text);
+      font-weight: 700;
+    }
+
+    /* ==================== SIMULADOR INTERACTIVO DE MULTÍMETRO ==================== */
     .presets-bar {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 7px;
     }
 
     .sim-layout {
       display: grid;
-      grid-template-columns: 1.25fr 0.85fr;
+      grid-template-columns: 1.2fr 0.8fr;
       gap: 22px;
       align-items: start;
     }
@@ -850,17 +1102,16 @@
       gap: 18px;
     }
 
-    /* Pantalla del osciloscopio con marco navy/teal estilo diode.html */
-    .scope-screen-card {
-      background: var(--navy);
-      color: var(--white);
+    .meter-screen-card {
+      background: var(--hero-bg);
+      color: #ffffff;
       border: 1px solid #2c5563;
       border-radius: 22px;
-      padding: 18px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      box-shadow: 0 10px 28px rgba(16, 44, 57, 0.14);
+      gap: 14px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
     }
 
     .osd-bar {
@@ -873,145 +1124,119 @@
       font-weight: 700;
     }
 
-    .osd-group {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .osd-ch1 {
-      background: var(--teal);
-      color: var(--white);
-      padding: 3px 9px;
-      border-radius: 6px;
-    }
-
-    .osd-trig {
+    .osd-scen-pill {
       background: var(--pale);
       color: var(--orange);
-      padding: 3px 9px;
-      border-radius: 6px;
-    }
-
-    .osd-btn {
-      background: var(--navy-panel);
-      color: #d8fff4;
-      border: 1px solid #85d9cc;
+      border: 1px solid var(--tag-amber-border);
       padding: 4px 10px;
       border-radius: 7px;
-      font-size: 11.5px;
-      font-weight: 700;
     }
 
-    .osd-btn:hover {
-      background: var(--teal);
-    }
-
-    .canvas-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 10 / 8;
-      border-radius: 14px;
-      overflow: hidden;
+    .lcd-display-box {
       background: #091d26;
       border: 2px solid #44717a;
+      border-radius: 16px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    #sim-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      cursor: crosshair;
-    }
-
-    .cursor-footer {
+    .lcd-top-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 8px;
       font-size: 12px;
+      font-weight: 700;
+    }
+
+    .lcd-readout-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 6px 0;
+    }
+
+    .lcd-value {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(40px, 5vw, 62px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.03em;
+      color: var(--mint-bright);
+    }
+
+    .lcd-value.warn {
+      color: #ffd29d;
+    }
+
+    .lcd-value.danger {
+      color: #ff9c94;
+    }
+
+    .lcd-unit {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #d8fff4;
+    }
+
+    .lcd-bottom-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid #234958;
+      font-size: 12px;
       color: #cee7e4;
     }
 
-    #cursor-readout {
-      color: var(--mint-bright);
-      font-weight: 700;
+    .diagram-box {
+      background: #0c242e;
+      border: 1px solid #35606e;
+      border-radius: 14px;
+      padding: 14px;
     }
 
-    /* Cálculos en vivo */
-    .math-header {
+    .diagram-head {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--line);
-      margin-bottom: 16px;
-    }
-
-    .fx-badge {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: var(--mint);
-      border: 1px solid #9fd6c9;
-      color: var(--teal);
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .math-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .math-box {
-      background: #edf6f3;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 13px;
-    }
-
-    .math-label {
+      justify-content: space-between;
       font-size: 12px;
+      color: #cee7e4;
+      margin-bottom: 8px;
+    }
+
+    #diagram-status-tag {
       font-weight: 700;
-      color: var(--muted);
-      margin-bottom: 4px;
+      color: var(--mint-bright);
     }
 
-    .math-formula {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
+    #diagram-status-tag.warn {
+      color: #ffd29d;
     }
 
-    .math-result {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--teal);
-      margin-top: 4px;
+    #diagram-status-tag.danger {
+      color: #ff9c94;
     }
 
-    .math-result.orange {
-      color: var(--orange);
+    #connection-svg {
+      width: 100%;
+      height: 145px;
+      display: block;
     }
 
-    /* Controles de la derecha */
     .ctrl-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .ctrl-title {
@@ -1030,152 +1255,136 @@
       flex-shrink: 0;
     }
 
+    .dot-indicator.red {
+      background: var(--danger-border);
+    }
+
     .dot-indicator.orange {
       background: var(--orange);
     }
 
-    .wave-selector {
+    .two-col-btns {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 6px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
     }
 
-    .wave-btn {
-      padding: 8px 6px;
-      border-radius: 8px;
-      font-size: 12px;
+    .stack-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .choice-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 13px;
+      border-radius: 10px;
+      font-size: 13px;
       font-weight: 700;
       border: 1px solid var(--line);
       background: var(--cream);
       color: var(--text);
-      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     }
 
-    .wave-btn:hover {
+    .choice-btn.center {
+      text-align: center;
+    }
+
+    .choice-btn:hover {
       border-color: var(--teal);
     }
 
-    .wave-btn.active {
-      background: var(--teal);
+    .choice-btn.active {
+      background: var(--mint);
       border-color: var(--teal);
-      color: var(--white);
+      color: var(--tag-text);
     }
 
-    .slider-block {
-      margin-bottom: 14px;
+    .choice-btn.active-red {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger-text);
     }
 
-    .slider-block:last-child {
-      margin-bottom: 0;
-    }
-
-    .slider-label-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .slider-val {
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 700;
-      color: var(--teal);
-    }
-
-    .slider-val.orange {
+    .choice-btn.active-amber {
+      background: var(--pale);
+      border-color: var(--orange);
       color: var(--orange);
-    }
-
-    input[type="range"].lab-slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 7px;
-      border-radius: 999px;
-      background: #d5e4e2;
-      outline: none;
-      cursor: pointer;
-    }
-
-    input[type="range"].lab-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 19px;
-      height: 19px;
-      border-radius: 50%;
-      background: var(--teal);
-      border: 2px solid var(--white);
-      box-shadow: 0 2px 6px rgba(16, 44, 57, 0.35);
-      cursor: pointer;
-    }
-
-    input[type="range"].lab-slider.amber-slider::-webkit-slider-thumb {
-      background: var(--orange);
-    }
-
-    .scales-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 14px;
     }
 
     .lab-select {
       width: 100%;
       background: var(--cream);
-      border: 1px solid #718f91;
-      border-radius: 9px;
-      padding: 8px 10px;
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 10px 12px;
       font-weight: 700;
-      font-size: 13px;
-      color: var(--navy);
+      font-size: 13.5px;
+      color: var(--heading-color);
     }
 
-    /* ==================== FORMAS DE ONDA (SECCIÓN 3) ==================== */
-    .waves-grid {
+    .power-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* ==================== PROCEDIMIENTOS V, A Y Ω (SECCIÓN 3) ==================== */
+    .modes-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 20px;
     }
 
-    .wave-card {
+    .mode-card {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 14px;
+      gap: 16px;
     }
 
-    .wave-card-top {
+    .mode-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      flex-wrap: wrap;
     }
 
-    .wave-tag {
+    .mode-pill {
       font-size: 12px;
       font-weight: 700;
       padding: 4px 10px;
       border-radius: 30px;
       background: var(--mint);
-      color: #075f5d;
+      color: var(--tag-text);
+      border: 1px solid var(--tag-border);
     }
 
-    .wave-tag.amber {
+    .mode-pill.amber {
       background: var(--pale);
       color: var(--orange);
+      border-color: var(--tag-amber-border);
     }
 
-    .wave-svg-preview {
+    .mode-svg {
       width: 100%;
-      height: 92px;
+      height: 108px;
       border-radius: 12px;
-      background: var(--navy);
+      background: #0b222b;
       border: 1px solid #35606e;
       display: block;
+    }
+
+    .mode-steps {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     /* ==================== EJERCICIOS PRÁCTICOS / QUIZ (SECCIÓN 4) ==================== */
@@ -1195,7 +1404,7 @@
       border-radius: 10px;
       background: var(--pale);
       color: var(--orange);
-      border: 1px solid #f0cfa4;
+      border: 1px solid var(--tag-amber-border);
     }
 
     .quiz-grid {
@@ -1209,13 +1418,13 @@
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 5px 24px #153b3b08;
+      box-shadow: var(--card-shadow);
     }
 
     .quiz-q-title {
       font-weight: 700;
       font-size: 15px;
-      color: var(--navy);
+      color: var(--heading-color);
       margin: 0 0 12px;
     }
 
@@ -1240,20 +1449,20 @@
 
     .quiz-opt-btn:hover {
       border-color: var(--teal);
-      background: #edf6f3;
+      background: var(--mint);
     }
 
     .quiz-opt-btn.correct {
       background: var(--mint);
       border-color: var(--teal);
-      color: #075f5d;
+      color: var(--tag-text);
       font-weight: 700;
     }
 
     .quiz-opt-btn.wrong {
-      background: #fdeceb;
-      border-color: #b42318;
-      color: #7a1c15;
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger-text);
     }
 
     .quiz-opt-btn.dimmed {
@@ -1299,6 +1508,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .side-panel-inner {
@@ -1313,7 +1523,7 @@
       margin-bottom: 14px;
       border-bottom: 1px solid var(--line);
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
     }
 
     .side-group {
@@ -1339,7 +1549,7 @@
       font-size: 12px;
       font-weight: 700;
       text-decoration: none;
-      color: #075f64;
+      color: var(--link-color);
     }
 
     .side-home-link:hover {
@@ -1379,7 +1589,7 @@
       font-family: "Space Grotesk", sans-serif;
       font-size: 11px;
       font-weight: 700;
-      background: var(--navy);
+      background: #102c39;
       color: var(--mint-bright);
       padding: 2px 6px;
       border-radius: 6px;
@@ -1389,7 +1599,11 @@
 
     .side-page-link.current .side-num {
       background: var(--teal);
-      color: var(--white);
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .side-page-link.current .side-num {
+      color: #05181c;
     }
 
     .side-page-text {
@@ -1400,7 +1614,7 @@
     .side-page-title {
       font-size: 13px;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--heading-color);
       margin: 0;
       white-space: nowrap;
       overflow: hidden;
@@ -1445,7 +1659,7 @@
 
     .side-sec-link:hover {
       background: var(--mint);
-      color: var(--navy);
+      color: var(--heading-color);
       font-weight: 700;
     }
 
@@ -1462,7 +1676,7 @@
     }
 
     .side-dot.navy {
-      background: var(--navy);
+      background: var(--heading-color);
     }
 
     .side-panel-footer {
@@ -1471,11 +1685,12 @@
       font-size: 12.5px;
       font-weight: 700;
       background: var(--cream);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .side-panel-footer a {
       text-decoration: none;
-      color: #075f64;
+      color: var(--link-color);
     }
 
     .side-panel-footer a:hover {
@@ -1486,7 +1701,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(16, 44, 57, 0.55);
+      background: rgba(8, 20, 26, 0.65);
       z-index: 40;
     }
 
@@ -1509,7 +1724,7 @@
         z-index: 60;
         transform: translateX(100%);
         transition: transform 0.25s ease-out;
-        box-shadow: -10px 0 30px rgba(16, 44, 57, 0.2);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.35);
       }
 
       .side-panel.open {
@@ -1520,8 +1735,13 @@
         display: flex;
       }
 
-      .sim-layout {
+      .sim-layout,
+      .modes-grid {
         grid-template-columns: 1fr;
+      }
+
+      .safety-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .glossary-grid {
@@ -1536,10 +1756,8 @@
 
       .hero-box,
       .anatomy-grid,
-      .scope-hardware-mid,
-      .waves-grid,
-      .quiz-grid,
-      .math-grid {
+      .safety-grid,
+      .quiz-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1566,16 +1784,17 @@
       <div class="brand-wrap">
         <div class="brand-icon" aria-hidden="true">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0 3.5-4 5 0" />
-            <line x1="2" y1="12" x2="22" y2="12" stroke-opacity="0.35" stroke-dasharray="2 2" />
+            <circle cx="12" cy="12" r="9" />
+            <line x1="12" y1="12" x2="16.5" y2="7.5" />
+            <circle cx="12" cy="12" r="1.5" fill="currentColor" />
           </svg>
         </div>
         <div>
           <div class="brand-title-row">
-            <span class="brand">Oscilo<span>Lab</span></span>
+            <span class="brand">Multi<span>Lab</span></span>
             <span class="bilingual-pill">Bilingüe ES / EN</span>
           </div>
-          <p class="brand-sub">Guía Interactiva de Osciloscopio (Oscilloscope Guide)</p>
+          <p class="brand-sub">Guía interactiva para manejo de multímetro (Multitester Guide)</p>
         </div>
       </div>
     </div>
@@ -1586,21 +1805,47 @@
       <nav aria-label="Secciones principales" class="tab-nav">
         <button type="button" onclick="switchSection('intro')" id="tab-intro" class="nav-tab active">
           <span class="nav-tab-num">01</span>
-          <span>Inicio y Conceptos</span>
+          <span>Inicio y Seguridad</span>
         </button>
         <button type="button" onclick="switchSection('simulator')" id="tab-simulator" class="nav-tab">
           <span class="nav-tab-num">02</span>
           <span>Simulador Interactivo</span>
         </button>
-        <button type="button" onclick="switchSection('waveforms')" id="tab-waveforms" class="nav-tab">
+        <button type="button" onclick="switchSection('modes')" id="tab-modes" class="nav-tab">
           <span class="nav-tab-num">03</span>
-          <span>Formas de Onda y Ejemplos</span>
+          <span>Medir V, A y Ω</span>
         </button>
         <button type="button" onclick="switchSection('exercises')" id="tab-exercises" class="nav-tab">
           <span class="nav-tab-num">04</span>
           <span>Ejercicios Prácticos</span>
         </button>
       </nav>
+
+      <!-- Botón selector entre Tema Claro y Tema Oscuro (misma colocación y estilo que index.html) -->
+      <button
+        type="button"
+        id="theme-toggle"
+        class="theme-toggle-btn"
+        onclick="toggleTheme()"
+        aria-label="Cambiar entre tema claro y tema oscuro"
+        title="Cambiar tema de color"
+      >
+        <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        <svg id="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <span id="theme-label">Tema oscuro</span>
+      </button>
 
       <button
         type="button"
@@ -1625,7 +1870,7 @@
       <div>
 
         <!-- =======================================================================
-             SECCIÓN 1: INICIO, CONCEPTOS Y ANATOMÍA DEL OSCILOSCOPIO
+             SECCIÓN 1: INICIO, SEGURIDAD Y ANATOMÍA DEL MULTÍMETRO
         ======================================================================== -->
         <section id="section-intro" class="section-view space-y-lg">
           <!-- Hero Motivador -->
@@ -1633,155 +1878,209 @@
             <div>
               <span class="pill">
                 <span class="pill-dot"></span>
-                Nivel Inicial • Ideal para recién graduados de bachillerato
+                Instrumentación Esencial • Todo en Uno (V · A · Ω)
               </span>
               <h1>
-                Aprende a ver la <span>electricidad en movimiento</span>
+                Domina el <span>multímetro digital</span> con precisión y seguridad
               </h1>
               <p>
-                ¿Alguna vez quisiste ver cómo viaja una señal dentro de un circuito electrónico? El <strong>Osciloscopio (Oscilloscope)</strong> es el instrumento estrella de todo laboratorio de electrónica, ingeniería y robótica. Aquí aprenderás a dominarlo paso a paso, sin conocimientos previos y dominando su vocabulario en <strong>español e inglés</strong>.
+                El <strong>Multímetro Digital (Digital Multimeter - DMM)</strong> combina tres instrumentos fundamentales en un solo equipo: <strong>Voltímetro (Voltmeter)</strong>, <strong>Amperímetro (Ammeter)</strong> y <strong>Óhmetro (Ohmmeter)</strong>. Aprende a conectar las puntas correctamente y evita errores que puedan dañar tu circuito o el fusible del equipo.
               </p>
               <div class="hero-actions">
                 <button type="button" onclick="switchSection('simulator')" class="btn primary">
                   <span>Probar el Simulador Ahora</span>
                   <span>→</span>
                 </button>
-                <a href="#anatomia-interactiva" class="btn">
-                  Explorar Partes del Equipo
+                <a href="#advertencias-seguridad" class="btn danger-outline">
+                  ⚠ Reglas de Seguridad
                 </a>
               </div>
             </div>
 
-            <!-- Tarjetas de Analogías Cotidianas -->
-            <div class="hero-analogies">
-              <div class="analogy-card">
-                <div class="analogy-icon">💓</div>
+            <!-- Resumen Visual de las 3 Magnitudes -->
+            <div class="hero-magnitudes">
+              <div class="mag-card">
+                <div class="mag-badge">V</div>
                 <div>
-                  <h3>Como un monitor cardíaco para circuitos</h3>
-                  <p>
-                    Así como un electrocardiograma muestra los latidos del corazón en una pantalla, el <strong>Osciloscopio (Oscilloscope)</strong> dibuja los "latidos eléctricos" de cualquier componente.
-                  </p>
+                  <h3>Voltaje (Voltage — V⎓ / V~)</h3>
+                  <p>Mide la diferencia de potencial eléctrico. Se conecta siempre en <strong>paralelo</strong> con el componente.</p>
                 </div>
               </div>
 
-              <div class="analogy-card">
-                <div class="analogy-icon">🎥</div>
+              <div class="mag-card">
+                <div class="mag-badge amber">A</div>
                 <div>
-                  <h3>Una cámara superlenta de la electricidad</h3>
-                  <p>
-                    Un multímetro solo te da un número promedio. El osciloscopio congela señales que cambian millones de veces por segundo graficando <strong>Voltaje (Voltage - Eje Y)</strong> contra <strong>Tiempo (Time - Eje X)</strong>.
-                  </p>
+                  <h3>Corriente (Current — A / mA)</h3>
+                  <p>Mide el flujo de electrones. Requiere abrir el circuito y conectar el medidor en <strong>serie</strong>.</p>
+                </div>
+              </div>
+
+              <div class="mag-card">
+                <div class="mag-badge">Ω</div>
+                <div>
+                  <h3>Resistencia (Resistance — Ω)</h3>
+                  <p>Mide la oposición al paso de corriente. Se mide con el <strong>circuito apagado</strong> y el componente aislado.</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- ANATOMÍA INTERACTIVA DEL OSCILOSCOPIO -->
-          <div id="anatomia-interactiva">
+          <!-- ==================== BLOQUE DESTACADO: ADVERTENCIAS DE SEGURIDAD ==================== -->
+          <div id="advertencias-seguridad" class="safety-panel">
+            <div class="safety-header">
+              <div class="safety-title-group">
+                <div class="safety-icon">⚠</div>
+                <div>
+                  <span class="num" style="color:var(--danger-border)">Protocolo Obligatorio de Laboratorio</span>
+                  <h2 style="margin:2px 0 0">
+                    Advertencias Críticas de Seguridad <span class="muted-sub">(Safety Warnings)</span>
+                  </h2>
+                </div>
+              </div>
+              <span class="safety-badge">Lee antes de medir</span>
+            </div>
+
+            <div class="safety-grid">
+              <!-- Advertencia 1 -->
+              <div class="safety-item critical">
+                <span class="safety-item-num">01 • CONTACTO FÍSICO</span>
+                <h3>No toques las puntas metálicas al medir</h3>
+                <p>
+                  Sujeta siempre las sondas por su mango aislante detrás del protector de dedos. Tocar el metal durante una medición puede provocar <strong>descargas eléctricas</strong> y además altera las lecturas de resistencia debido a la resistencia de tu piel.
+                </p>
+              </div>
+
+              <!-- Advertencia 2 -->
+              <div class="safety-item amber">
+                <span class="safety-item-num">02 • ESCALA DE CORRIENTE</span>
+                <h3>Usa la escala más alta al medir corriente</h3>
+                <p>
+                  Si desconoces cuánta corriente circula, empieza siempre en la <strong>escala máxima (10A)</strong> y con la punta roja en la borna <code>10A</code>. Usar una escala baja (mA) con corrientes altas quemará inmediatamente el fusible interno.
+                </p>
+              </div>
+
+              <!-- Advertencia 3 -->
+              <div class="safety-item critical">
+                <span class="safety-item-num">03 • CORTOCIRCUITO EN MODO A</span>
+                <h3>Nunca midas voltaje con la punta en 10A / mA</h3>
+                <p>
+                  En modo amperímetro, la resistencia interna del multímetro es casi cero. Si lo conectas en paralelo a una batería o toma de corriente, crearás un <strong>cortocircuito directo</strong>. Al terminar de medir corriente, regresa la punta roja a <code>VΩmA</code>.
+                </p>
+              </div>
+
+              <!-- Advertencia 4 -->
+              <div class="safety-item teal">
+                <span class="safety-item-num">04 • CIRCUITO DESENERGIZADO</span>
+                <h3>Apaga la energía antes de medir resistencia (Ω)</h3>
+                <p>
+                  El multímetro inyecta una pequeña corriente propia para calcular ohmios. Medir resistencia o continuidad en un circuito encendido arroja valores falsos y puede <strong>dañar el circuito interno</strong> del instrumento.
+                </p>
+              </div>
+
+              <!-- Advertencia 5 -->
+              <div class="safety-item teal">
+                <span class="safety-item-num">05 • SELECCIÓN AC vs. DC</span>
+                <h3>Verifica corriente continua (⎓) o alterna (~)</h3>
+                <p>
+                  Las baterías y fuentes electrónicas usan <strong>DC (V⎓)</strong>, mientras que los enchufes de pared usan <strong>AC (V~)</strong>. Seleccionar el tipo equivocado mostrará lecturas cercanas a cero o erráticas.
+                </p>
+              </div>
+
+              <!-- Advertencia 6 -->
+              <div class="safety-item amber">
+                <span class="safety-item-num">06 • ESTADO DE SONDAS</span>
+                <h3>Inspecciona el aislamiento de los cables</h3>
+                <p>
+                  Antes de medir, revisa que los cables rojo y negro no tengan grietas ni cobre expuesto. Comienza siempre en un rango de voltaje superior al valor esperado.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== ANATOMÍA INTERACTIVA DEL MULTÍMETRO ==================== -->
+          <div id="anatomia-dmm">
             <div class="section-header-row">
               <div>
-                <span class="num">Explora el Panel Frontal</span>
+                <span class="num">Explora el Instrumento</span>
                 <h2>
-                  Anatomía del Osciloscopio <span class="muted-sub">(Oscilloscope Anatomy)</span>
+                  Anatomía del Multímetro <span class="muted-sub">(Multimeter Anatomy)</span>
                 </h2>
               </div>
               <p>
-                Haz clic o toca cualquiera de las <strong>5 zonas</strong> para descubrir qué hace cada control.
+                Haz clic en cualquiera de las <strong>5 partes</strong> para ver su función.
               </p>
             </div>
 
             <div class="anatomy-grid">
-              <!-- Representación Visual Interactiva del Equipo -->
-              <div class="scope-hardware-box">
-                <div class="scope-hardware-top">
-                  <span>● DSO-1000 EDU • 100 MHz</span>
+              <!-- Esquema interactivo del DMM -->
+              <div class="dmm-hardware-box">
+                <div class="dmm-hardware-top">
+                  <span>● DMM-830 PRO • CAT III 600V</span>
                   <span>Haz clic en un bloque</span>
                 </div>
 
-                <div class="scope-hardware-mid">
-                  <!-- ZONA 1: PANTALLA Y CUADRÍCULA -->
-                  <button type="button" onclick="selectAnatomy('screen')" id="zone-btn-screen" class="anatomy-zone zone-screen-box anatomy-zone-active">
-                    <div class="zone-header">
-                      <span class="zone-badge">1. Pantalla (Screen & Graticule)</span>
-                      <span class="zone-sub">10 × 8 Div</span>
+                <!-- 1. Pantalla LCD -->
+                <button type="button" onclick="selectDmmAnatomy('display')" id="dmm-zone-display" class="dmm-zone anatomy-zone-active">
+                  <div style="display:flex;align-items:center;justify-content:space-between;font-size:11.5px;font-weight:700;color:#91e5d7">
+                    <span>1. Pantalla Digital (LCD Display)</span>
+                    <span>AUTO / HOLD</span>
+                  </div>
+                  <div class="lcd-preview-box">
+                    12.48 <span>V DC</span>
+                  </div>
+                </button>
+
+                <!-- 2. Selector Rotatorio -->
+                <button type="button" onclick="selectDmmAnatomy('dial')" id="dmm-zone-dial" class="dmm-zone">
+                  <div class="dial-row">
+                    <div>
+                      <span style="font-size:13px;font-weight:700;color:#d8fff4;display:block">2. Perilla Selectora (Rotary Function Switch)</span>
+                      <span style="font-size:12px;color:#cee7e4">Permite elegir magnitud (V, A, Ω) y escala máxima</span>
                     </div>
-                    <svg viewBox="0 0 200 130" style="width:100%;height:142px;border-radius:10px;background:#081c24;border:1px solid #44717a">
-                      <g stroke="#82e3d2" stroke-opacity="0.2" stroke-width="0.7">
-                        <line x1="20" y1="0" x2="20" y2="130"/><line x1="40" y1="0" x2="40" y2="130"/>
-                        <line x1="60" y1="0" x2="60" y2="130"/><line x1="80" y1="0" x2="80" y2="130"/>
-                        <line x1="100" y1="0" x2="100" y2="130" stroke-opacity="0.45"/>
-                        <line x1="120" y1="0" x2="120" y2="130"/><line x1="140" y1="0" x2="140" y2="130"/>
-                        <line x1="160" y1="0" x2="160" y2="130"/><line x1="180" y1="0" x2="180" y2="130"/>
-                        <line x1="0" y1="22" x2="200" y2="22"/><line x1="0" y1="44" x2="200" y2="44"/>
-                        <line x1="0" y1="65" x2="200" y2="65" stroke-opacity="0.45"/>
-                        <line x1="0" y1="86" x2="200" y2="86"/><line x1="0" y1="108" x2="200" y2="108"/>
-                      </g>
-                      <path d="M 0 65 Q 25 15, 50 65 T 100 65 T 150 65 T 200 65" fill="none" stroke="#82e3d2" stroke-width="2.5" />
-                      <text x="8" y="14" fill="#d8fff4" font-size="8" font-family="sans-serif">↑ Y: Voltaje (Voltage)</text>
-                      <text x="104" y="122" fill="#ffd29d" font-size="8" font-family="sans-serif">→ X: Tiempo (Time)</text>
-                    </svg>
+                    <div class="dial-circle">V / Ω / A</div>
+                  </div>
+                </button>
+
+                <!-- Bornas de conexión (3, 4 y 5) -->
+                <div class="jacks-grid">
+                  <button type="button" onclick="selectDmmAnatomy('jack10a')" id="dmm-zone-jack10a" class="dmm-zone jack-zone">
+                    <span class="jack-ring amber">10A</span>
+                    <span style="font-size:12px;font-weight:700;display:block">3. Borna 10A</span>
+                    <span style="font-size:11px;color:#cee7e4;display:block">Corriente alta</span>
                   </button>
 
-                  <!-- CONTROLES DERECHOS (VERTICAL, HORIZONTAL, TRIGGER) -->
-                  <div class="zone-knobs-col">
-                    <button type="button" onclick="selectAnatomy('vertical')" id="zone-btn-vertical" class="anatomy-zone">
-                      <div class="zone-header" style="margin-bottom:0">
-                        <span class="zone-knob-title">2. Vertical (Vertical System)</span>
-                        <span class="zone-knob-circle">V</span>
-                      </div>
-                      <p class="zone-knob-desc">Volts/Div & Posición Vertical</p>
-                    </button>
+                  <button type="button" onclick="selectDmmAnatomy('jackcom')" id="dmm-zone-jackcom" class="dmm-zone jack-zone">
+                    <span class="jack-ring">COM</span>
+                    <span style="font-size:12px;font-weight:700;display:block">4. Borna COM</span>
+                    <span style="font-size:11px;color:#cee7e4;display:block">Cable Negro (-)</span>
+                  </button>
 
-                    <button type="button" onclick="selectAnatomy('horizontal')" id="zone-btn-horizontal" class="anatomy-zone">
-                      <div class="zone-header" style="margin-bottom:0">
-                        <span class="zone-knob-title">3. Horizontal (Time Base)</span>
-                        <span class="zone-knob-circle">T</span>
-                      </div>
-                      <p class="zone-knob-desc">Time/Div & Posición Horizontal</p>
-                    </button>
-
-                    <button type="button" onclick="selectAnatomy('trigger')" id="zone-btn-trigger" class="anatomy-zone">
-                      <div class="zone-header" style="margin-bottom:0">
-                        <span class="zone-knob-title">4. Disparo (Trigger System)</span>
-                        <span class="zone-knob-circle">⚡</span>
-                      </div>
-                      <p class="zone-knob-desc">Trigger Level & Sincronización</p>
-                    </button>
-                  </div>
+                  <button type="button" onclick="selectDmmAnatomy('jackvoma')" id="dmm-zone-jackvoma" class="dmm-zone jack-zone">
+                    <span class="jack-ring red">VΩmA</span>
+                    <span style="font-size:12px;font-weight:700;display:block">5. VΩmA</span>
+                    <span style="font-size:11px;color:#cee7e4;display:block">Cable Rojo (+)</span>
+                  </button>
                 </div>
-
-                <!-- ZONA 5: CANALES DE ENTRADA Y SONDA -->
-                <button type="button" onclick="selectAnatomy('probe')" id="zone-btn-probe" class="anatomy-zone zone-probe-bar">
-                  <div class="bnc-group">
-                    <span class="bnc-chip">CH1</span>
-                    <span class="bnc-chip">CH2</span>
-                    <div>
-                      <span class="zone-knob-title" style="display:block">5. Canales de Entrada y Sonda (Input Channels & Probe)</span>
-                      <span class="zone-knob-desc" style="display:block">Conector BNC, Punta de Sonda (Probe Tip) y Pinza de Tierra (Ground Clip)</span>
-                    </div>
-                  </div>
-                  <span class="zone-badge">Acoplamiento (Coupling)</span>
-                </button>
               </div>
 
-              <!-- Panel de Explicación Detallada de la Zona Seleccionada -->
+              <!-- Panel de Explicación Detallada -->
               <div class="card anatomy-detail-card">
-                <div id="anatomy-detail-content">
-                  <!-- Rellenado dinámicamente por JS -->
+                <div id="dmm-anatomy-detail">
+                  <!-- Rellenado por JS -->
                 </div>
 
                 <div class="anatomy-tabs-footer">
-                  <button type="button" onclick="selectAnatomy('screen')" class="btn small">1. Pantalla</button>
-                  <button type="button" onclick="selectAnatomy('vertical')" class="btn small">2. Vertical</button>
-                  <button type="button" onclick="selectAnatomy('horizontal')" class="btn small">3. Horizontal</button>
-                  <button type="button" onclick="selectAnatomy('trigger')" class="btn small">4. Disparo</button>
-                  <button type="button" onclick="selectAnatomy('probe')" class="btn small">5. Sonda</button>
+                  <button type="button" onclick="selectDmmAnatomy('display')" class="btn small">1. Pantalla</button>
+                  <button type="button" onclick="selectDmmAnatomy('dial')" class="btn small">2. Selector</button>
+                  <button type="button" onclick="selectDmmAnatomy('jack10a')" class="btn small">3. Borna 10A</button>
+                  <button type="button" onclick="selectDmmAnatomy('jackcom')" class="btn small">4. COM</button>
+                  <button type="button" onclick="selectDmmAnatomy('jackvoma')" class="btn small">5. VΩmA</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- MINI GLOSARIO BILINGÜE INTERACTIVO -->
+          <!-- ==================== GLOSARIO BILINGÜE INTERACTIVO ==================== -->
           <div>
             <div class="glossary-header">
               <div>
@@ -1790,7 +2089,7 @@
                   Glosario Bilingüe Interactivo <span class="muted-sub">(Bilingual Glossary)</span>
                 </h2>
                 <p style="margin:4px 0 0;color:var(--muted);font-size:14px">
-                  Los osciloscopios reales tienen sus botones rotulados en inglés. Haz clic en cada tarjeta para voltearla y ver su significado sencillo.
+                  Haz clic en cada tarjeta para voltearla y conocer los símbolos grabados en cualquier multímetro.
                 </p>
               </div>
 
@@ -1803,7 +2102,7 @@
                   id="glossary-search"
                   class="search-input"
                   oninput="filterGlossary()"
-                  placeholder="Buscar término (ej. Trigger, Período, Sonda)..."
+                  placeholder="Buscar término (ej. COM, Paralelo, OL)..."
                 />
               </div>
             </div>
@@ -1815,7 +2114,7 @@
 
           <div class="section-nav-footer" style="justify-content:flex-end">
             <button type="button" onclick="switchSection('simulator')" class="btn primary">
-              <span>Siguiente: Ir al Simulador Interactivo</span>
+              <span>Siguiente: Ir al Simulador de Multímetro</span>
               <span>→</span>
             </button>
           </div>
@@ -1823,208 +2122,168 @@
 
 
         <!-- =======================================================================
-             SECCIÓN 2: SIMULADOR INTERACTIVO DE OSCILOSCOPIO EN TIEMPO REAL
+             SECCIÓN 2: SIMULADOR INTERACTIVO DE MULTÍMETRO DIGITAL
         ======================================================================== -->
         <section id="section-simulator" class="section-view hidden space-y-md">
           <div class="section-header-row">
             <div>
-              <span class="num">Laboratorio Virtual en Tiempo Real</span>
+              <span class="num">Práctica Guiada en Pantalla</span>
               <h2>
-                Simulador de Osciloscopio <span class="muted-sub">(Interactive Oscilloscope)</span>
+                Simulador de Multímetro <span class="muted-sub">(Interactive Multimeter)</span>
               </h2>
               <p>
-                Modifica la señal de entrada y ajusta las escalas <strong>Volts/Div</strong>, <strong>Base de Tiempo (Time Base)</strong> y <strong>Disparo (Trigger)</strong>.
+                Elige un circuito de prueba, selecciona la <strong>clavija roja</strong>, ajusta el <strong>selector de escala</strong> y define la <strong>conexión</strong>.
               </p>
             </div>
 
+            <!-- Botones de Escenarios Rápidos -->
             <div class="presets-bar">
-              <span style="font-size:12.5px;font-weight:700;color:var(--muted)">Ajustes Rápidos:</span>
-              <button type="button" onclick="applySimulatorPreset('audio')" class="btn small">
-                🎵 Audio 500 Hz
+              <span style="font-size:12.5px;font-weight:700;color:var(--muted)">Circuitos:</span>
+              <button type="button" onclick="loadDmmScenario('dc_battery')" id="scen-btn-dc_battery" class="btn small active">
+                🔋 Batería 9V DC
               </button>
-              <button type="button" onclick="applySimulatorPreset('arduino')" class="btn small">
-                🤖 Pulso Digital 1 kHz
+              <button type="button" onclick="loadDmmScenario('ac_outlet')" id="scen-btn-ac_outlet" class="btn small">
+                🔌 Toma 120V AC
               </button>
-              <button type="button" onclick="applySimulatorPreset('triangle')" class="btn small">
-                📐 Rampa 250 Hz
+              <button type="button" onclick="loadDmmScenario('low_current')" id="scen-btn-low_current" class="btn small">
+                💡 Circuito 250 mA
+              </button>
+              <button type="button" onclick="loadDmmScenario('high_current')" id="scen-btn-high_current" class="btn small">
+                ⚙️ Motor 2.4 A
+              </button>
+              <button type="button" onclick="loadDmmScenario('resistor')" id="scen-btn-resistor" class="btn small">
+                🎚️ Resistor 4.7 kΩ
               </button>
             </div>
           </div>
 
           <div class="sim-layout">
-            <!-- COLUMNA IZQUIERDA: PANTALLA + CÁLCULOS -->
+            <!-- COLUMNA IZQUIERDA: MULTÍMETRO VIRTUAL + DIAGRAMA DE CONEXIÓN -->
             <div class="sim-left-col">
-              <div class="scope-screen-card">
+              <div class="meter-screen-card">
                 <div class="osd-bar">
-                  <div class="osd-group">
-                    <span class="osd-ch1">CH1 ON</span>
-                    <span id="osd-volts-div">Volts/Div: 1.0 V</span>
-                    <span>|</span>
-                    <span id="osd-time-div" style="color:var(--mint-bright)">Time/Div: 1.0 ms</span>
+                  <span class="osd-scen-pill" id="sim-scen-title">
+                    Escenario: Batería Alcalina 9.0 V DC
+                  </span>
+                  <span style="color:#cee7e4" id="sim-scen-hint">Objetivo: Medir Voltaje DC</span>
+                </div>
+
+                <!-- Pantalla LCD Principal del Simulador -->
+                <div class="lcd-display-box">
+                  <div class="lcd-top-meta">
+                    <span id="lcd-mode-badge" style="color:var(--mint-bright)">MODO: VOLTAJE DC (V⎓)</span>
+                    <span id="lcd-jack-badge" style="color:#ff9c94">CLAVIJA ROJA: VΩmA</span>
                   </div>
 
-                  <div class="osd-group">
-                    <span id="osd-trigger-badge" class="osd-trig">TRIG: ON (0.00 V)</span>
-                    <button type="button" onclick="toggleMeasureGuides()" id="btn-guides" class="osd-btn">
-                      📏 Guías: ON
-                    </button>
+                  <div class="lcd-readout-row">
+                    <span id="lcd-main-value" class="lcd-value">9.00</span>
+                    <span id="lcd-main-unit" class="lcd-unit">V</span>
+                  </div>
+
+                  <div class="lcd-bottom-meta">
+                    <span id="lcd-range-info">Escala seleccionada: 20 V DC</span>
+                    <span id="lcd-conn-info">Conexión: Paralelo</span>
                   </div>
                 </div>
 
-                <div class="canvas-wrap">
-                  <canvas id="sim-canvas"></canvas>
-                </div>
-
-                <div class="cursor-footer">
-                  <div id="cursor-readout">
-                    Cursor: Pasa el ratón o toca la pantalla para medir (V, ms)
+                <!-- Esquema SVG Dinámico de Conexión -->
+                <div class="diagram-box">
+                  <div class="diagram-head">
+                    <span>Esquema de Conexión en Vivo (Live Connection Diagram)</span>
+                    <span id="diagram-status-tag">Conexión Válida</span>
                   </div>
-                  <div>
-                    Cuadrícula (Graticule): 10 Div (X) × 8 Div (Y)
-                  </div>
+                  <svg id="connection-svg" viewBox="0 0 460 150">
+                    <!-- Renderizado dinámicamente por JS -->
+                  </svg>
                 </div>
               </div>
 
-              <!-- CÁLCULOS EN VIVO -->
-              <div class="card">
-                <div class="math-header">
-                  <span class="fx-badge">fx</span>
-                  <div>
-                    <h3 style="margin:0;font-size:17px">
-                      Cálculos y Lectura Paso a Paso <span class="muted-sub">(Live Math & Reading)</span>
-                    </h3>
-                    <p style="margin:2px 0 0;font-size:13px;color:var(--muted)">
-                      Observa cómo se obtienen los valores contando los cuadros de la pantalla
-                    </p>
-                  </div>
-                </div>
-
-                <div id="sim-pedagogical-alert" class="callout warning" style="display:none"></div>
-
-                <div class="math-grid">
-                  <div class="math-box">
-                    <div class="math-label">1. Voltaje Pico a Pico (Vpp)</div>
-                    <div class="math-formula" id="math-vpp-formula">4.0 div × 1.0 V/div</div>
-                    <div class="math-result" id="math-vpp-result">4.00 Vpp</div>
-                  </div>
-
-                  <div class="math-box">
-                    <div class="math-label">2. Período (Period - T)</div>
-                    <div class="math-formula" id="math-period-formula">2.0 div × 1.0 ms/div</div>
-                    <div class="math-result" id="math-period-result">2.00 ms</div>
-                  </div>
-
-                  <div class="math-box">
-                    <div class="math-label">3. Frecuencia (f = 1 / T)</div>
-                    <div class="math-formula" id="math-freq-formula">1 / 0.0020 s</div>
-                    <div class="math-result orange" id="math-freq-result">500 Hz</div>
-                  </div>
-                </div>
+              <!-- Panel de Diagnóstico Pedagógico y Seguridad en Vivo -->
+              <div id="dmm-feedback-box" class="callout">
+                <strong style="display:block;margin-bottom:4px" id="dmm-feedback-title">
+                  ✓ Lectura Correcta y Segura
+                </strong>
+                <span id="dmm-feedback-desc">
+                  Has conectado el multímetro en paralelo con la batería, usando la borna VΩmA y una escala de 20 V DC adecuada para medir 9 V.
+                </span>
               </div>
             </div>
 
-            <!-- COLUMNA DERECHA: CONTROLES DEL GENERADOR Y DEL OSCILOSCOPIO -->
+            <!-- COLUMNA DERECHA: CONTROLES DE CONFIGURACIÓN DEL MULTÍMETRO -->
             <div class="sim-right-col">
-              <!-- Panel A: Generador de Señal -->
+              <!-- Paso 1: Clavija Roja -->
               <div class="card">
                 <div class="ctrl-head">
                   <h3 class="ctrl-title">
-                    <span class="dot-indicator"></span>
-                    <span>Señal de Entrada (Input Signal)</span>
+                    <span class="dot-indicator red"></span>
+                    <span>1. Borna de la Punta Roja (Red Probe Jack)</span>
                   </h3>
-                  <span style="font-size:12px;color:var(--muted);font-weight:600">Generador Virtual</span>
+                  <span style="font-size:12px;color:var(--muted);font-weight:700">Negra en COM</span>
                 </div>
 
-                <div class="wave-selector">
-                  <button type="button" onclick="setWaveType('sine')" id="wave-btn-sine" class="wave-btn active">Senoidal</button>
-                  <button type="button" onclick="setWaveType('square')" id="wave-btn-square" class="wave-btn">Cuadrada</button>
-                  <button type="button" onclick="setWaveType('triangle')" id="wave-btn-triangle" class="wave-btn">Triangular</button>
-                  <button type="button" onclick="setWaveType('sawtooth')" id="wave-btn-sawtooth" class="wave-btn">Sierra</button>
-                </div>
-
-                <div class="slider-block">
-                  <div class="slider-label-row">
-                    <span>Voltaje Pico a Pico (Vpp)</span>
-                    <span class="slider-val" id="val-sig-vpp">4.0 V</span>
-                  </div>
-                  <input type="range" id="ctrl-sig-vpp" min="0.5" max="10" step="0.5" value="4" oninput="updateSimParams()" class="lab-slider" />
-                </div>
-
-                <div class="slider-block">
-                  <div class="slider-label-row">
-                    <span>Frecuencia (Frequency)</span>
-                    <span class="slider-val" id="val-sig-freq">500 Hz</span>
-                  </div>
-                  <input type="range" id="ctrl-sig-freq" min="100" max="2000" step="50" value="500" oninput="updateSimParams()" class="lab-slider" />
-                </div>
-              </div>
-
-              <!-- Panel B: Escalas Vertical y Horizontal -->
-              <div class="card">
-                <div class="ctrl-head">
-                  <h3 class="ctrl-title">
-                    <span class="dot-indicator"></span>
-                    <span>Escalas del Osciloscopio (Vertical & Horizontal)</span>
-                  </h3>
-                </div>
-
-                <div class="scales-grid">
-                  <div>
-                    <div class="slider-label-row">
-                      <span>Volts/Div</span>
-                      <span class="slider-val" id="val-volts-div">1.0 V</span>
-                    </div>
-                    <select id="ctrl-volts-div" onchange="updateSimParams()" class="lab-select">
-                      <option value="0.2">0.2 V/div</option>
-                      <option value="0.5">0.5 V/div</option>
-                      <option value="1" selected>1.0 V/div</option>
-                      <option value="2">2.0 V/div</option>
-                      <option value="5">5.0 V/div</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <div class="slider-label-row">
-                      <span>Time/Div</span>
-                      <span class="slider-val" id="val-time-div">1.0 ms</span>
-                    </div>
-                    <select id="ctrl-time-div" onchange="updateSimParams()" class="lab-select">
-                      <option value="0.2">0.2 ms/div</option>
-                      <option value="0.5">0.5 ms/div</option>
-                      <option value="1" selected>1.0 ms/div</option>
-                      <option value="2">2.0 ms/div</option>
-                      <option value="5">5.0 ms/div</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="slider-block">
-                  <div class="slider-label-row">
-                    <span>Posición Vertical (Y Offset)</span>
-                    <span class="slider-val" id="val-pos-y">0.0 div</span>
-                  </div>
-                  <input type="range" id="ctrl-pos-y" min="-3" max="3" step="0.5" value="0" oninput="updateSimParams()" class="lab-slider" />
-                </div>
-              </div>
-
-              <!-- Panel C: Control de Disparo (Trigger) -->
-              <div class="card">
-                <div class="ctrl-head">
-                  <h3 class="ctrl-title">
-                    <span class="dot-indicator orange"></span>
-                    <span>Sistema de Disparo (Trigger)</span>
-                  </h3>
-                  <button type="button" onclick="toggleTrigger()" id="btn-toggle-trigger" class="btn small">
-                    Estabilizar: ON
+                <div class="two-col-btns">
+                  <button type="button" onclick="setRedJack('voma')" id="btn-jack-voma" class="choice-btn center active-red">
+                    Borna VΩmA
+                  </button>
+                  <button type="button" onclick="setRedJack('10a')" id="btn-jack-10a" class="choice-btn center">
+                    Borna 10A (Alta I)
                   </button>
                 </div>
+              </div>
 
-                <div class="slider-block">
-                  <div class="slider-label-row">
-                    <span>Nivel de Disparo (Trigger Level)</span>
-                    <span class="slider-val orange" id="val-trig-level">0.0 V</span>
+              <!-- Paso 2: Selector Rotatorio -->
+              <div class="card">
+                <div class="ctrl-head">
+                  <h3 class="ctrl-title">
+                    <span class="dot-indicator"></span>
+                    <span>2. Perilla Selectora de Función y Escala</span>
+                  </h3>
+                </div>
+
+                <select id="ctrl-dmm-dial" onchange="updateDmmSim()" class="lab-select">
+                  <option value="OFF">OFF — Apagado</option>
+                  <option value="VDC_20" selected>V⎓ 20 V — Voltaje Continuo (hasta 20 V)</option>
+                  <option value="VDC_200">V⎓ 200 V — Voltaje Continuo (hasta 200 V)</option>
+                  <option value="VAC_600">V~ 600 V — Voltaje Alterno (hasta 600 V)</option>
+                  <option value="ADC_10A">A⎓ 10 A — Corriente Alta (Escala máxima)</option>
+                  <option value="ADC_400MA">mA⎓ 400 mA — Corriente Baja (hasta 400 mA)</option>
+                  <option value="OHM_2K">Ω 2 kΩ — Resistencia (hasta 2,000 Ω)</option>
+                  <option value="OHM_20K">Ω 20 kΩ — Resistencia (hasta 20,000 Ω)</option>
+                </select>
+              </div>
+
+              <!-- Paso 3: Forma de Conexión al Circuito -->
+              <div class="card">
+                <div class="ctrl-head">
+                  <h3 class="ctrl-title">
+                    <span class="dot-indicator"></span>
+                    <span>3. Cómo conectas las puntas al circuito</span>
+                  </h3>
+                </div>
+
+                <div class="stack-btns">
+                  <button type="button" onclick="setConnType('parallel')" id="btn-conn-parallel" class="choice-btn active">
+                    En Paralelo (Across component) — Para Voltaje
+                  </button>
+                  <button type="button" onclick="setConnType('series')" id="btn-conn-series" class="choice-btn">
+                    En Serie (In-line circuit) — Para Corriente
+                  </button>
+                  <button type="button" onclick="setConnType('isolated')" id="btn-conn-isolated" class="choice-btn">
+                    Componente Aislado (Sin energía) — Para Resistencia
+                  </button>
+                </div>
+              </div>
+
+              <!-- Interruptor de Energía del Circuito -->
+              <div class="card">
+                <div class="power-row">
+                  <div>
+                    <h4 style="margin:0 0 2px;font-size:15px">Energía del Circuito de Prueba</h4>
+                    <p style="margin:0;font-size:12.5px;color:var(--muted)">Apágala antes de medir resistencia (Ω)</p>
                   </div>
-                  <input type="range" id="ctrl-trig-level" min="-4" max="4" step="0.2" value="0" oninput="updateSimParams()" class="lab-slider amber-slider" />
+                  <button type="button" onclick="toggleCircuitPower()" id="btn-circuit-power" class="btn small active">
+                    ENERGÍA: ON
+                  </button>
                 </div>
               </div>
             </div>
@@ -2032,108 +2291,123 @@
 
           <div class="section-nav-footer">
             <button type="button" onclick="switchSection('intro')" class="btn">
-              ← Anterior: Conceptos
+              ← Anterior: Seguridad y Anatomía
             </button>
-            <button type="button" onclick="switchSection('waveforms')" class="btn primary">
-              Siguiente: Formas de Onda →
+            <button type="button" onclick="switchSection('modes')" class="btn primary">
+              Siguiente: Guía V, A y Ω →
             </button>
           </div>
         </section>
 
 
         <!-- =======================================================================
-             SECCIÓN 3: FORMAS DE ONDA Y EJEMPLOS REALES
+             SECCIÓN 3: PROCEDIMIENTO PASO A PASO PARA MEDIR VOLTAJE, CORRIENTE Y RESISTENCIA
         ======================================================================== -->
-        <section id="section-waveforms" class="section-view hidden space-y-md">
+        <section id="section-modes" class="section-view hidden space-y-md">
           <div>
-            <span class="num">Catálogo de Señales Eléctricas</span>
+            <span class="num">Procedimientos de Banco</span>
             <h2>
-              Formas de Onda Comunes <span class="muted-sub">(Common Waveforms)</span>
+              Cómo Medir Voltaje, Corriente y Resistencia <span class="muted-sub">(Measurement Procedures)</span>
             </h2>
             <p style="margin:4px 0 0;color:var(--muted);font-size:14px">
-              Identifica el aspecto visual de cada señal y en qué circuitos reales la encontrarás.
+              Cada magnitud exige una posición específica de las puntas y una forma distinta de conectar el multímetro al circuito.
             </p>
           </div>
 
-          <div class="waves-grid">
-            <!-- 1. Senoidal -->
-            <article class="card wave-card">
-              <div class="wave-card-top">
-                <h3 style="margin:0">1. Onda Senoidal <span class="muted-sub">(Sine Wave)</span></h3>
-                <span class="wave-tag">Analógica</span>
+          <div class="modes-grid">
+            <!-- TARJETA 1: MEDIR VOLTAJE -->
+            <article class="card mode-card">
+              <div class="space-y-md">
+                <div class="mode-card-top">
+                  <span class="mode-pill">1. VOLTAJE (V⎓ / V~)</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--muted)">En Paralelo</span>
+                </div>
+
+                <!-- Diagrama SVG Paralelo -->
+                <svg viewBox="0 0 240 100" class="mode-svg">
+                  <rect x="25" y="25" width="38" height="50" rx="6" fill="none" stroke="#cee7e4" stroke-width="2" />
+                  <text x="30" y="54" fill="#ffffff" font-size="9" font-family="sans-serif">Fuente</text>
+                  <line x1="63" y1="35" x2="140" y2="35" stroke="#cee7e4" stroke-width="2" />
+                  <line x1="63" y1="65" x2="140" y2="65" stroke="#cee7e4" stroke-width="2" />
+                  <rect x="130" y="35" width="20" height="30" fill="#1d4652" stroke="#82e3d2" stroke-width="2" />
+                  <circle cx="195" cy="50" r="16" fill="#091d26" stroke="#82e3d2" stroke-width="2" />
+                  <text x="190" y="54" fill="#82e3d2" font-size="12" font-family="sans-serif" font-weight="bold">V</text>
+                  <polyline points="140,35 195,35 195,34" fill="none" stroke="#ff9c94" stroke-width="2" />
+                  <polyline points="140,65 195,65 195,66" fill="none" stroke="#cee7e4" stroke-width="2" />
+                </svg>
+
+                <ol class="mode-steps">
+                  <li>Conecta el cable negro en <strong>COM</strong> y el rojo en <strong>VΩmA</strong>.</li>
+                  <li>Gira el selector a <strong>V⎓</strong> (corriente directa) o <strong>V~</strong> (alterna) en una escala mayor al voltaje esperado.</li>
+                  <li>Toca ambos extremos del componente (<strong>en paralelo</strong>) sin abrir el circuito y sin tocar las puntas metálicas.</li>
+                </ol>
               </div>
-              <svg viewBox="0 0 240 80" class="wave-svg-preview">
-                <line x1="0" y1="40" x2="240" y2="40" stroke="#82e3d2" stroke-opacity="0.25" stroke-dasharray="3 3" />
-                <path d="M 0 40 Q 30 5, 60 40 T 120 40 T 180 40 T 240 40" fill="none" stroke="#82e3d2" stroke-width="2.6" />
-              </svg>
-              <p style="margin:0;font-size:14.5px">
-                Representa una variación suave y continua. Es la forma natural de la corriente alterna (AC) de los enchufes domésticos (50/60 Hz) y de los tonos puros de audio.
-              </p>
-              <div>
-                <button type="button" onclick="loadWaveIntoSimulator('sine')" class="btn small">
-                  Probar en el simulador →
-                </button>
-              </div>
+
+              <button type="button" onclick="loadDmmScenario('dc_battery'); switchSection('simulator');" class="btn small">
+                Practicar medición de Voltaje →
+              </button>
             </article>
 
-            <!-- 2. Cuadrada -->
-            <article class="card wave-card">
-              <div class="wave-card-top">
-                <h3 style="margin:0">2. Onda Cuadrada <span class="muted-sub">(Square Wave)</span></h3>
-                <span class="wave-tag">Digital</span>
+            <!-- TARJETA 2: MEDIR CORRIENTE -->
+            <article class="card mode-card">
+              <div class="space-y-md">
+                <div class="mode-card-top">
+                  <span class="mode-pill amber">2. CORRIENTE (A / mA)</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--muted)">En Serie</span>
+                </div>
+
+                <!-- Diagrama SVG Serie -->
+                <svg viewBox="0 0 240 100" class="mode-svg">
+                  <rect x="20" y="25" width="35" height="50" rx="6" fill="none" stroke="#cee7e4" stroke-width="2" />
+                  <line x1="55" y1="35" x2="95" y2="35" stroke="#ff9c94" stroke-width="2" />
+                  <circle cx="115" cy="35" r="15" fill="#091d26" stroke="#ffd29d" stroke-width="2" />
+                  <text x="110" y="39" fill="#ffd29d" font-size="12" font-family="sans-serif" font-weight="bold">A</text>
+                  <line x1="130" y1="35" x2="180" y2="35" stroke="#cee7e4" stroke-width="2" />
+                  <rect x="170" y="35" width="20" height="30" fill="#1d4652" stroke="#82e3d2" stroke-width="2" />
+                  <line x1="55" y1="65" x2="180" y2="65" stroke="#cee7e4" stroke-width="2" />
+                </svg>
+
+                <ol class="mode-steps">
+                  <li>Coloca el selector en la <strong>escala más alta (10A)</strong> y conecta la punta roja en la borna <strong>10A</strong>.</li>
+                  <li>Apaga el circuito, abre el camino conductor e intercala el multímetro (<strong>en serie</strong>) para que la corriente pase a través de él.</li>
+                  <li>Enciende el circuito y lee el valor. Solo baja a <code>mA</code> si la lectura es menor a 400 mA.</li>
+                </ol>
               </div>
-              <svg viewBox="0 0 240 80" class="wave-svg-preview">
-                <line x1="0" y1="40" x2="240" y2="40" stroke="#82e3d2" stroke-opacity="0.25" stroke-dasharray="3 3" />
-                <path d="M 0 65 L 0 15 L 60 15 L 60 65 L 120 65 L 120 15 L 180 15 L 180 65 L 240 65" fill="none" stroke="#d8fff4" stroke-width="2.6" />
-              </svg>
-              <p style="margin:0;font-size:14.5px">
-                Alterna abruptamente entre dos niveles de voltaje (alto/1 lógico y bajo/0 lógico). Es fundamental en microcontroladores (Arduino), señales de reloj (Clock) y control PWM de motores.
-              </p>
-              <div>
-                <button type="button" onclick="loadWaveIntoSimulator('square')" class="btn small">
-                  Probar en el simulador →
-                </button>
-              </div>
+
+              <button type="button" onclick="loadDmmScenario('high_current'); switchSection('simulator');" class="btn small">
+                Practicar medición de Corriente →
+              </button>
             </article>
 
-            <!-- 3. Triangular -->
-            <article class="card wave-card">
-              <div class="wave-card-top">
-                <h3 style="margin:0">3. Onda Triangular <span class="muted-sub">(Triangle Wave)</span></h3>
-                <span class="wave-tag amber">Lineal</span>
-              </div>
-              <svg viewBox="0 0 240 80" class="wave-svg-preview">
-                <line x1="0" y1="40" x2="240" y2="40" stroke="#82e3d2" stroke-opacity="0.25" stroke-dasharray="3 3" />
-                <path d="M 0 40 L 30 12 L 90 68 L 150 12 L 210 68 L 240 40" fill="none" stroke="#ffd29d" stroke-width="2.6" />
-              </svg>
-              <p style="margin:0;font-size:14.5px">
-                Sube y baja a velocidad constante formando pendientes rectas. Se utiliza en generadores de funciones, sintetizadores de audio y circuitos de modulación por ancho de pulso (PWM).
-              </p>
-              <div>
-                <button type="button" onclick="loadWaveIntoSimulator('triangle')" class="btn small">
-                  Probar en el simulador →
-                </button>
-              </div>
-            </article>
+            <!-- TARJETA 3: MEDIR RESISTENCIA -->
+            <article class="card mode-card">
+              <div class="space-y-md">
+                <div class="mode-card-top">
+                  <span class="mode-pill">3. RESISTENCIA (Ω)</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--muted)">Sin Energía</span>
+                </div>
 
-            <!-- 4. Diente de Sierra -->
-            <article class="card wave-card">
-              <div class="wave-card-top">
-                <h3 style="margin:0">4. Diente de Sierra <span class="muted-sub">(Sawtooth Wave)</span></h3>
-                <span class="wave-tag">Barrido</span>
+                <!-- Diagrama SVG Resistor Aislado -->
+                <svg viewBox="0 0 240 100" class="mode-svg">
+                  <rect x="55" y="40" width="60" height="20" rx="4" fill="#1d4652" stroke="#82e3d2" stroke-width="2" />
+                  <line x1="30" y1="50" x2="55" y2="50" stroke="#cee7e4" stroke-width="2" />
+                  <line x1="115" y1="50" x2="140" y2="50" stroke="#cee7e4" stroke-width="2" />
+                  <circle cx="190" cy="50" r="16" fill="#091d26" stroke="#82e3d2" stroke-width="2" />
+                  <text x="184" y="54" fill="#82e3d2" font-size="12" font-family="sans-serif" font-weight="bold">Ω</text>
+                  <polyline points="35,50 35,22 190,22 190,34" fill="none" stroke="#ff9c94" stroke-width="2" />
+                  <polyline points="135,50 135,78 190,78 190,66" fill="none" stroke="#cee7e4" stroke-width="2" />
+                </svg>
+
+                <ol class="mode-steps">
+                  <li><strong>Desconecta toda fuente de energía</strong> y retira al menos una pata del componente del circuito.</li>
+                  <li>Conecta el cable negro en <strong>COM</strong> y el rojo en <strong>VΩmA</strong>, y selecciona la escala de <strong>Ω</strong>.</li>
+                  <li>Sujeta solo el plástico de las sondas y toca los dos terminales del resistor. Si muestra <code>OL</code>, sube la escala.</li>
+                </ol>
               </div>
-              <svg viewBox="0 0 240 80" class="wave-svg-preview">
-                <line x1="0" y1="40" x2="240" y2="40" stroke="#82e3d2" stroke-opacity="0.25" stroke-dasharray="3 3" />
-                <path d="M 0 65 L 60 15 L 60 65 L 120 15 L 120 65 L 180 15 L 180 65 L 240 15" fill="none" stroke="#82e3d2" stroke-width="2.6" />
-              </svg>
-              <p style="margin:0;font-size:14.5px">
-                Aumenta linealmente hasta un pico y cae de forma casi instantánea. Es la base de los circuitos de barrido horizontal en pantallas y fuentes conmutadas.
-              </p>
-              <div>
-                <button type="button" onclick="loadWaveIntoSimulator('sawtooth')" class="btn small">
-                  Probar en el simulador →
-                </button>
-              </div>
+
+              <button type="button" onclick="loadDmmScenario('resistor'); switchSection('simulator');" class="btn small">
+                Practicar medición de Resistencia →
+              </button>
             </article>
           </div>
 
@@ -2154,12 +2428,12 @@
         <section id="section-exercises" class="section-view hidden space-y-md">
           <div class="quiz-topbar">
             <div>
-              <span class="num">Pon a Prueba tu Lectura</span>
+              <span class="num">Comprueba lo Aprendido</span>
               <h2>
-                Ejercicios Prácticos <span class="muted-sub">(Practice Quiz)</span>
+                Ejercicios Prácticos <span class="muted-sub">(Multimeter Quiz)</span>
               </h2>
               <p style="margin:4px 0 0;color:var(--muted);font-size:14px">
-                Responde las 6 preguntas sobre escalas, controles y mediciones en el osciloscopio.
+                Responde estas 6 preguntas sobre seguridad, selección de escalas y conexión de puntas.
               </p>
             </div>
 
@@ -2178,8 +2452,8 @@
           </div>
 
           <div class="section-nav-footer">
-            <button type="button" onclick="switchSection('waveforms')" class="btn">
-              ← Anterior: Formas de Onda
+            <button type="button" onclick="switchSection('modes')" class="btn">
+              ← Anterior: Guía V, A y Ω
             </button>
           </div>
         </section>
@@ -2187,11 +2461,11 @@
       </div>
 
       <!-- =======================================================================
-           BOTÓN INFERIOR PARA VOLVER A INDEX.HTML (SIEMPRE VISIBLE AL FINAL)
+           BOTÓN INFERIOR PARA VOLVER A INDEX.HTML
       ======================================================================== -->
       <div class="back-home-bar">
         <p>
-          ¿Deseas explorar otro módulo de <strong>Aprendizaje electrónico interactivo</strong>?
+          ¿Deseas regresar al menú de áreas de <strong>Aprendizaje electrónico interactivo</strong>?
         </p>
         <a href="../index.html" class="btn dark">
           <span>←</span>
@@ -2206,10 +2480,10 @@
         <!-- Encabezado móvil del panel -->
         <div class="side-mobile-head">
           <span>Navegación</span>
-          <button type="button" onclick="toggleSidebar()" aria-label="Cerrar navegación" style="background:none;border:0;font-size:18px;color:var(--navy)">✕</button>
+          <button type="button" onclick="toggleSidebar()" aria-label="Cerrar navegación" style="background:none;border:0;font-size:18px;color:var(--heading-color)">✕</button>
         </div>
 
-        <!-- Bloque 1: Enlaces a las páginas del sitio -->
+        <!-- Bloque 1: Enlaces a las otras páginas del sitio -->
         <div class="side-group">
           <div class="side-group-head">
             <span class="side-group-title">Páginas del sitio</span>
@@ -2217,17 +2491,17 @@
           </div>
 
           <nav class="side-page-list">
-            <!-- Enlace 1: lab_interact_osc_1.html (Página actual resaltada) -->
-            <a href="lab_interact_osc_1.html" aria-current="page" class="side-page-link current">
+            <!-- Página 1 -->
+            <a href="lab_interact_osc_1.html" class="side-page-link">
               <span class="side-num">01</span>
               <div class="side-page-text">
                 <p class="side-page-title">Título página 1</p>
                 <p class="side-page-file">lab_interact_osc_1.html</p>
               </div>
-              <span class="side-arrow">●</span>
+              <span class="side-arrow">↗</span>
             </a>
 
-            <!-- Enlace 2: diodo_1.html -->
+            <!-- Página 2 -->
             <a href="diodo_1.html" class="side-page-link">
               <span class="side-num">02</span>
               <div class="side-page-text">
@@ -2237,7 +2511,7 @@
               <span class="side-arrow">↗</span>
             </a>
 
-            <!-- Enlace 3: binary_code_1.html -->
+            <!-- Página 3 -->
             <a href="binary_code_1.html" class="side-page-link">
               <span class="side-num">03</span>
               <div class="side-page-text">
@@ -2247,7 +2521,7 @@
               <span class="side-arrow">↗</span>
             </a>
 
-            <!-- Enlace 4: SCR_1.html -->
+            <!-- Página 4 -->
             <a href="SCR_1.html" class="side-page-link">
               <span class="side-num">04</span>
               <div class="side-page-text">
@@ -2257,7 +2531,7 @@
               <span class="side-arrow">↗</span>
             </a>
 
-            <!-- Enlace 5: basic_psd_1.html -->
+            <!-- Página 5 -->
             <a href="basic_psd_1.html" class="side-page-link">
               <span class="side-num">05</span>
               <div class="side-page-text">
@@ -2314,6 +2588,45 @@
 
   <!-- ==================== SCRIPTS INTERACTIVOS ==================== -->
   <script>
+    // 0. CONTROL DEL SELECTOR DE TEMA CLARO / TEMA OSCURO (SINCRONIZADO CON INDEX.HTML)
+    function syncThemeButton(theme) {
+      const label = document.getElementById('theme-label');
+      const moon = document.getElementById('theme-icon-moon');
+      const sun = document.getElementById('theme-icon-sun');
+      if (!label || !moon || !sun) return;
+
+      if (theme === 'dark') {
+        label.textContent = 'Tema claro';
+        moon.style.display = 'none';
+        sun.style.display = 'inline-block';
+      } else {
+        label.textContent = 'Tema oscuro';
+        moon.style.display = 'inline-block';
+        sun.style.display = 'none';
+      }
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      const isDark = root.getAttribute('data-theme') === 'dark';
+      const nextTheme = isDark ? 'light' : 'dark';
+
+      if (nextTheme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+      } else {
+        root.removeAttribute('data-theme');
+      }
+
+      try {
+        localStorage.setItem('site-theme', nextTheme);
+      } catch (e) {}
+
+      syncThemeButton(nextTheme);
+    }
+
+    // Sincronizar etiqueta e ícono del botón al cargar
+    syncThemeButton(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
     // 1. CONTROL DEL PANEL LATERAL DERECHO EN MÓVIL
     function toggleSidebar() {
       const sidebar = document.getElementById('side-panel');
@@ -2322,9 +2635,9 @@
       backdrop.classList.toggle('open');
     }
 
-    // 2. NAVEGACIÓN ENTRE PESTAÑAS DE OSCILOLAB
+    // 2. NAVEGACIÓN ENTRE PESTAÑAS DE MULTILAB
     function switchSection(sectionId) {
-      const sections = ['intro', 'simulator', 'waveforms', 'exercises'];
+      const sections = ['intro', 'simulator', 'modes', 'exercises'];
       sections.forEach(id => {
         const el = document.getElementById('section-' + id);
         const tab = document.getElementById('tab-' + id);
@@ -2336,75 +2649,71 @@
           tab.classList.remove('active');
         }
       });
-
-      if (sectionId === 'simulator') {
-        resizeSimCanvas();
-      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 3. ANATOMÍA INTERACTIVA DEL OSCILOSCOPIO
-    const anatomyData = {
-      screen: {
-        badge: 'ZONA 01 • PANTALLA',
-        title: 'Pantalla y Cuadrícula (Screen & Graticule)',
-        desc: 'Es la cuadrícula dividida típicamente en 10 divisiones horizontales (eje X: Tiempo) y 8 divisiones verticales (eje Y: Voltaje). Contar los cuadros que ocupa una onda permite calcular su amplitud y frecuencia exactas.',
-        tip: 'Cada cuadro principal se llama "División" (Div) y suele tener 5 subdivisiones internas de 0.2 div cada una.'
+    // 3. ANATOMÍA INTERACTIVA DEL MULTÍMETRO
+    const dmmAnatomyData = {
+      display: {
+        badge: 'PARTE 01 • PANTALLA DIGITAL',
+        title: 'Pantalla LCD (Digital Display)',
+        desc: 'Muestra el valor numérico medido junto con el signo negativo (-) si inviertes la polaridad en corriente continua, además de indicadores de unidad o sobrecarga (OL / 1.).',
+        tip: 'Si aparece "OL" (Overload) o un "1" a la izquierda, significa que el valor medido supera la escala seleccionada; gira la perilla a un rango mayor.'
       },
-      vertical: {
-        badge: 'ZONA 02 • CONTROL VERTICAL',
-        title: 'Sistema Vertical (Volts/Div & Position)',
-        desc: 'Controla el tamaño vertical de la señal en pantalla. La perilla Volts/Div define cuántos voltios representa cada cuadro vertical. Si la onda se sale por arriba o por abajo, aumenta el valor de Volts/Div.',
-        tip: 'Disminuir Volts/Div funciona como hacer zoom vertical para ver señales pequeñas con mayor detalle.'
+      dial: {
+        badge: 'PARTE 02 • SELECTOR ROTATORIO',
+        title: 'Perilla Selectora (Rotary Function Switch)',
+        desc: 'Permite encender el equipo y elegir exactamente qué magnitud eléctrica vas a medir: Voltaje DC (V⎓), Voltaje AC (V~), Corriente (A / mA) o Resistencia (Ω).',
+        tip: 'Coloca siempre la perilla en OFF al terminar tus prácticas para no agotar la batería interna del multímetro.'
       },
-      horizontal: {
-        badge: 'ZONA 03 • BASE DE TIEMPO',
-        title: 'Sistema Horizontal (Time/Div & Position)',
-        desc: 'Controla la escala de tiempo del eje horizontal. La perilla Time/Div indica cuántos milisegundos (ms) o microsegundos (µs) equivale cada cuadro de izquierda a derecha.',
-        tip: 'Ajusta Time/Div hasta ver entre 2 y 3 ciclos completos de la onda para medir el período con comodidad.'
+      jack10a: {
+        badge: 'PARTE 03 • BORNA DE ALTA CORRIENTE',
+        title: 'Entrada 10A (High Current Jack)',
+        desc: 'Conector exclusivo para medir corrientes elevadas (generalmente entre 400 mA y 10 A). Esta entrada suele tener un fusible de alta capacidad o derivación directa.',
+        tip: 'Empieza siempre aquí cuando midas corriente por primera vez y desconozcas el consumo del circuito.'
       },
-      trigger: {
-        badge: 'ZONA 04 • SINCRONIZACIÓN',
-        title: 'Sistema de Disparo (Trigger System)',
-        desc: 'Actúa como el obturador de una cámara: indica al osciloscopio en qué nivel de voltaje exacto debe empezar a dibujar la señal para que la onda quede congelada y estable en lugar de desplazarse sin control.',
-        tip: 'Mantén el nivel de Trigger dentro de la altura de la onda para evitar que la imagen "corra" lateralmente.'
+      jackcom: {
+        badge: 'PARTE 04 • REFERENCIA COMÚN',
+        title: 'Borna COM (Common / Ground Terminal)',
+        desc: 'Es el punto de referencia negativo o tierra. El cable de prueba negro permanece conectado aquí para absolutamente todas las mediciones (voltaje, corriente y resistencia).',
+        tip: 'El cable negro nunca cambia de borna.'
       },
-      probe: {
-        badge: 'ZONA 05 • CONEXIÓN FÍSICA',
-        title: 'Canales de Entrada y Sonda (Channels & Probe)',
-        desc: 'Los conectores BNC (CH1, CH2) reciben las sondas de medición. Toda sonda tiene una punta de prueba (Probe Tip) para tocar el punto de señal y una pinza de tierra (Ground Clip) que debe conectarse a la referencia GND del circuito.',
-        tip: 'Verifica si el interruptor de la sonda está en 1X o 10X para que la lectura de voltaje coincida con la escala.'
+      jackvoma: {
+        badge: 'PARTE 05 • ENTRADA ESTÁNDAR',
+        title: 'Borna VΩmA (Voltage, Resistance & Low Current)',
+        desc: 'Conector donde se inserta el cable rojo para medir voltaje, resistencia, continuidad y corrientes pequeñas (miliamperios).',
+        tip: 'Nunca conectes aquí el cable rojo si vas a medir más de 400 mA, ni conectes la red eléctrica con la perilla en mA u Ω.'
       }
     };
 
-    function selectAnatomy(zoneKey) {
-      const data = anatomyData[zoneKey];
+    function selectDmmAnatomy(key) {
+      const data = dmmAnatomyData[key];
       if (!data) return;
 
-      document.querySelectorAll('.anatomy-zone').forEach(btn => btn.classList.remove('anatomy-zone-active'));
-      const activeBtn = document.getElementById('zone-btn-' + zoneKey);
-      if (activeBtn) activeBtn.classList.add('anatomy-zone-active');
+      document.querySelectorAll('.dmm-zone').forEach(btn => btn.classList.remove('anatomy-zone-active'));
+      const active = document.getElementById('dmm-zone-' + key);
+      if (active) active.classList.add('anatomy-zone-active');
 
-      document.getElementById('anatomy-detail-content').innerHTML = `
+      document.getElementById('dmm-anatomy-detail').innerHTML = `
         <span class="anatomy-tag">${data.badge}</span>
         <h3>${data.title}</h3>
         <p style="margin:0 0 14px;font-size:14.5px">${data.desc}</p>
-        <div class="callout">
-          <strong>Consejo práctico:</strong> ${data.tip}
+        <div class="callout warning">
+          <strong>Nota clave:</strong> ${data.tip}
         </div>
       `;
     }
 
     // 4. GLOSARIO BILINGÜE INTERACTIVO
     const glossaryTerms = [
-      { en: 'Oscilloscope', es: 'Osciloscopio', def: 'Instrumento que grafica cómo cambia el voltaje de una señal eléctrica a lo largo del tiempo.' },
-      { en: 'Volts / Div', es: 'Voltios por División', def: 'Escala vertical que indica cuántos voltios representa cada cuadro de altura en la pantalla.' },
-      { en: 'Time / Div', es: 'Tiempo por División', def: 'Escala horizontal que indica cuánto tiempo representa cada cuadro de ancho en la pantalla.' },
-      { en: 'Trigger', es: 'Disparo / Sincronismo', def: 'Nivel de voltaje que estabiliza y congela una señal repetitiva en la pantalla.' },
-      { en: 'Peak-to-Peak (Vpp)', es: 'Voltaje Pico a Pico', def: 'Diferencia total de voltaje entre el punto más alto y el punto más bajo de una onda.' },
-      { en: 'Period (T)', es: 'Período', def: 'Tiempo exacto que tarda una onda en completar un ciclo completo antes de repetirse.' },
-      { en: 'Frequency (f)', es: 'Frecuencia', def: 'Cantidad de ciclos completos que ocurren en un segundo, medida en Hertz (Hz).' },
-      { en: 'Probe', es: 'Sonda de Prueba', def: 'Cable especial con punta de medición y pinza de tierra que conecta el circuito al osciloscopio.' }
+      { en: 'DC Voltage (V⎓)', es: 'Voltaje Continuo', def: 'Tensión eléctrica con polaridad fija (positivo y negativo), típica de pilas, baterías y fuentes reguladas.' },
+      { en: 'AC Voltage (V~)', es: 'Voltaje Alterno', def: 'Tensión que cambia periódicamente de polaridad, como la energía eléctrica de los tomacorrientes.' },
+      { en: 'Parallel Connection', es: 'Conexión en Paralelo', def: 'Colocar las puntas del multímetro a ambos lados de un componente sin desconectarlo. Obligatoria para medir voltaje.' },
+      { en: 'Series Connection', es: 'Conexión en Serie', def: 'Abrir el circuito e intercalar el multímetro como parte del camino de la corriente. Obligatoria para medir amperios.' },
+      { en: 'Overload (OL)', es: 'Sobrecarga / Fuera de Rango', def: 'Indica que la magnitud medida es mayor que la escala elegida o que existe un circuito abierto en resistencia.' },
+      { en: 'COM (Common)', es: 'Terminal Común', def: 'Borna de referencia negativa donde siempre se conecta la sonda de color negro.' },
+      { en: 'Test Leads / Probes', es: 'Puntas de Prueba', def: 'Cables aislados rojo (+) y negro (-) con puntas metálicas para hacer contacto con los puntos del circuito.' },
+      { en: 'Internal Fuse', es: 'Fusible Interno', def: 'Elemento de protección dentro del multímetro que se funde si se excede la corriente permitida en la borna mA o 10A.' }
     ];
 
     function renderGlossary(list) {
@@ -2426,7 +2735,7 @@
             <div class="flip-card-back">
               <span class="flip-back-title">${item.es} (${item.en})</span>
               <p class="flip-back-def">${item.def}</p>
-              <span style="font-size:11.5px;color:#075f5d;font-weight:700">Clic para regresar ↺</span>
+              <span class="flip-back-return">Clic para regresar ↺</span>
             </div>
           </div>
         </div>
@@ -2443,293 +2752,453 @@
       renderGlossary(filtered);
     }
 
-    // 5. SIMULADOR INTERACTIVO EN TIEMPO REAL
-    const simState = {
-      waveType: 'sine',
-      vpp: 4.0,
-      freq: 500,
-      voltsDiv: 1.0,
-      timeDivMs: 1.0,
-      posY: 0.0,
-      triggerOn: true,
-      triggerLevel: 0.0,
-      showGuides: true,
-      freePhase: 0
+    // 5. SIMULADOR INTERACTIVO DE MULTÍMETRO
+    const dmmScenarios = {
+      dc_battery: {
+        title: 'Escenario: Batería Alcalina 9.0 V DC',
+        hint: 'Objetivo: Medir Voltaje DC (Paralelo)',
+        type: 'VDC',
+        actualValue: 9.0,
+        unit: 'V',
+        defaultJack: 'voma',
+        defaultDial: 'VDC_20',
+        defaultConn: 'parallel',
+        defaultPower: true
+      },
+      ac_outlet: {
+        title: 'Escenario: Tomacorriente 120 V AC',
+        hint: 'Objetivo: Medir Voltaje AC (Paralelo)',
+        type: 'VAC',
+        actualValue: 120.0,
+        unit: 'V~',
+        defaultJack: 'voma',
+        defaultDial: 'VAC_600',
+        defaultConn: 'parallel',
+        defaultPower: true
+      },
+      low_current: {
+        title: 'Escenario: Circuito LED 250 mA (0.25 A)',
+        hint: 'Objetivo: Medir Corriente (Serie, empezar en 10A)',
+        type: 'IDC',
+        actualValue: 0.25,
+        unit: 'A',
+        defaultJack: '10a',
+        defaultDial: 'ADC_10A',
+        defaultConn: 'series',
+        defaultPower: true
+      },
+      high_current: {
+        title: 'Escenario: Motor DC 2.40 A (Alta Corriente)',
+        hint: 'Objetivo: Medir 2.40 A usando borna 10A en Serie',
+        type: 'IDC',
+        actualValue: 2.40,
+        unit: 'A',
+        defaultJack: '10a',
+        defaultDial: 'ADC_10A',
+        defaultConn: 'series',
+        defaultPower: true
+      },
+      resistor: {
+        title: 'Escenario: Resistor de 4.70 kΩ (4,700 Ω)',
+        hint: 'Objetivo: Medir Resistencia con Energía OFF',
+        type: 'OHM',
+        actualValue: 4700,
+        unit: 'kΩ',
+        defaultJack: 'voma',
+        defaultDial: 'OHM_20K',
+        defaultConn: 'isolated',
+        defaultPower: false
+      }
     };
 
-    function setWaveType(type) {
-      simState.waveType = type;
-      ['sine', 'square', 'triangle', 'sawtooth'].forEach(w => {
-        const btn = document.getElementById('wave-btn-' + w);
-        btn.classList.toggle('active', w === type);
+    const dmmState = {
+      scenarioKey: 'dc_battery',
+      redJack: 'voma',
+      dial: 'VDC_20',
+      connType: 'parallel',
+      circuitPower: true
+    };
+
+    function loadDmmScenario(key) {
+      const sc = dmmScenarios[key];
+      if (!sc) return;
+      dmmState.scenarioKey = key;
+      dmmState.redJack = sc.defaultJack;
+      dmmState.dial = sc.defaultDial;
+      dmmState.connType = sc.defaultConn;
+      dmmState.circuitPower = sc.defaultPower;
+
+      Object.keys(dmmScenarios).forEach(k => {
+        const btn = document.getElementById('scen-btn-' + k);
+        if (btn) btn.classList.toggle('active', k === key);
       });
-      updateSimCalculations();
+
+      document.getElementById('ctrl-dmm-dial').value = dmmState.dial;
+      syncDmmControlButtons();
+      updateDmmSim();
     }
 
-    function loadWaveIntoSimulator(type) {
-      switchSection('simulator');
-      setWaveType(type);
+    function setRedJack(jack) {
+      dmmState.redJack = jack;
+      syncDmmControlButtons();
+      updateDmmSim();
     }
 
-    function applySimulatorPreset(preset) {
-      if (preset === 'audio') {
-        setWaveType('sine');
-        document.getElementById('ctrl-sig-vpp').value = 4;
-        document.getElementById('ctrl-sig-freq').value = 500;
-        document.getElementById('ctrl-volts-div').value = '1';
-        document.getElementById('ctrl-time-div').value = '1';
-      } else if (preset === 'arduino') {
-        setWaveType('square');
-        document.getElementById('ctrl-sig-vpp').value = 5;
-        document.getElementById('ctrl-sig-freq').value = 1000;
-        document.getElementById('ctrl-volts-div').value = '2';
-        document.getElementById('ctrl-time-div').value = '0.5';
-      } else if (preset === 'triangle') {
-        setWaveType('triangle');
-        document.getElementById('ctrl-sig-vpp').value = 6;
-        document.getElementById('ctrl-sig-freq').value = 250;
-        document.getElementById('ctrl-volts-div').value = '2';
-        document.getElementById('ctrl-time-div').value = '2';
+    function setConnType(conn) {
+      dmmState.connType = conn;
+      syncDmmControlButtons();
+      updateDmmSim();
+    }
+
+    function toggleCircuitPower() {
+      dmmState.circuitPower = !dmmState.circuitPower;
+      syncDmmControlButtons();
+      updateDmmSim();
+    }
+
+    function syncDmmControlButtons() {
+      const vomaBtn = document.getElementById('btn-jack-voma');
+      const jack10aBtn = document.getElementById('btn-jack-10a');
+
+      vomaBtn.className = 'choice-btn center' + (dmmState.redJack === 'voma' ? ' active-red' : '');
+      jack10aBtn.className = 'choice-btn center' + (dmmState.redJack === '10a' ? ' active-amber' : '');
+
+      ['parallel', 'series', 'isolated'].forEach(c => {
+        const btn = document.getElementById('btn-conn-' + c);
+        btn.className = 'choice-btn' + (dmmState.connType === c ? ' active' : '');
+      });
+
+      const pBtn = document.getElementById('btn-circuit-power');
+      pBtn.textContent = dmmState.circuitPower ? 'ENERGÍA: ON' : 'ENERGÍA: OFF';
+      pBtn.classList.toggle('active', dmmState.circuitPower);
+    }
+
+    function updateDmmSim() {
+      dmmState.dial = document.getElementById('ctrl-dmm-dial').value;
+      const sc = dmmScenarios[dmmState.scenarioKey];
+
+      document.getElementById('sim-scen-title').textContent = sc.title;
+      document.getElementById('sim-scen-hint').textContent = sc.hint;
+      document.getElementById('lcd-jack-badge').textContent = `CLAVIJA ROJA: ${dmmState.redJack === '10a' ? '10A' : 'VΩmA'}`;
+
+      const connLabels = { parallel: 'Paralelo', series: 'Serie', isolated: 'Componente Aislado' };
+      document.getElementById('lcd-conn-info').textContent = `Conexión: ${connLabels[dmmState.connType]}`;
+
+      const dialLabels = {
+        OFF: 'Apagado (OFF)',
+        VDC_20: '20 V DC',
+        VDC_200: '200 V DC',
+        VAC_600: '600 V AC',
+        ADC_10A: '10 A DC',
+        ADC_400MA: '400 mA DC',
+        OHM_2K: '2 kΩ',
+        OHM_20K: '20 kΩ'
+      };
+      document.getElementById('lcd-range-info').textContent = `Escala: ${dialLabels[dmmState.dial]}`;
+
+      let valText = '0.00';
+      let unitText = '';
+      let modeText = 'MODO: APAGADO';
+      let statusLevel = 'ok';
+      let fbTitle = '';
+      let fbDesc = '';
+
+      if (dmmState.dial === 'OFF') {
+        valText = '----';
+        unitText = '';
+        modeText = 'MODO: APAGADO (OFF)';
+        statusLevel = 'warn';
+        fbTitle = 'Multímetro Apagado';
+        fbDesc = 'Gira la perilla selectora hacia la magnitud que deseas medir (V⎓, V~, A⎓ u Ω).';
       }
-      document.getElementById('ctrl-pos-y').value = 0;
-      document.getElementById('ctrl-trig-level').value = 0;
-      simState.triggerOn = true;
-      document.getElementById('btn-toggle-trigger').textContent = 'Estabilizar: ON';
-      updateSimParams();
-    }
-
-    function toggleTrigger() {
-      simState.triggerOn = !simState.triggerOn;
-      const btn = document.getElementById('btn-toggle-trigger');
-      btn.textContent = simState.triggerOn ? 'Estabilizar: ON' : 'Estabilizar: OFF';
-      updateSimParams();
-    }
-
-    function toggleMeasureGuides() {
-      simState.showGuides = !simState.showGuides;
-      const btn = document.getElementById('btn-guides');
-      btn.textContent = simState.showGuides ? '📏 Guías: ON' : '📏 Guías: OFF';
-    }
-
-    function updateSimParams() {
-      simState.vpp = parseFloat(document.getElementById('ctrl-sig-vpp').value);
-      simState.freq = parseFloat(document.getElementById('ctrl-sig-freq').value);
-      simState.voltsDiv = parseFloat(document.getElementById('ctrl-volts-div').value);
-      simState.timeDivMs = parseFloat(document.getElementById('ctrl-time-div').value);
-      simState.posY = parseFloat(document.getElementById('ctrl-pos-y').value);
-      simState.triggerLevel = parseFloat(document.getElementById('ctrl-trig-level').value);
-
-      document.getElementById('val-sig-vpp').textContent = `${simState.vpp.toFixed(1)} V`;
-      document.getElementById('val-sig-freq').textContent = `${simState.freq} Hz`;
-      document.getElementById('val-volts-div').textContent = `${simState.voltsDiv.toFixed(1)} V`;
-      document.getElementById('val-time-div').textContent = `${simState.timeDivMs.toFixed(1)} ms`;
-      document.getElementById('val-pos-y').textContent = `${simState.posY.toFixed(1)} div`;
-      document.getElementById('val-trig-level').textContent = `${simState.triggerLevel.toFixed(1)} V`;
-
-      document.getElementById('osd-volts-div').textContent = `Volts/Div: ${simState.voltsDiv.toFixed(1)} V`;
-      document.getElementById('osd-time-div').textContent = `Time/Div: ${simState.timeDivMs.toFixed(1)} ms`;
-      document.getElementById('osd-trigger-badge').textContent = simState.triggerOn
-        ? `TRIG: ON (${simState.triggerLevel.toFixed(2)} V)`
-        : 'TRIG: OFF (Libre)';
-
-      updateSimCalculations();
-    }
-
-    function updateSimCalculations() {
-      const vDivs = simState.vpp / simState.voltsDiv;
-      const periodSec = 1 / simState.freq;
-      const periodMs = periodSec * 1000;
-      const tDivs = periodMs / simState.timeDivMs;
-
-      document.getElementById('math-vpp-formula').textContent = `${vDivs.toFixed(2)} div × ${simState.voltsDiv.toFixed(1)} V/div`;
-      document.getElementById('math-vpp-result').textContent = `${simState.vpp.toFixed(2)} Vpp`;
-
-      document.getElementById('math-period-formula').textContent = `${tDivs.toFixed(2)} div × ${simState.timeDivMs.toFixed(1)} ms/div`;
-      document.getElementById('math-period-result').textContent = `${periodMs.toFixed(2)} ms`;
-
-      document.getElementById('math-freq-formula').textContent = `1 / ${periodSec.toFixed(4)} s`;
-      document.getElementById('math-freq-result').textContent = `${simState.freq} Hz`;
-
-      const alertBox = document.getElementById('sim-pedagogical-alert');
-      const halfAmp = simState.vpp / 2;
-      if (vDivs > 8) {
-        alertBox.className = 'callout danger';
-        alertBox.textContent = '⚠️ La señal supera los 8 cuadros verticales de la pantalla. Aumenta el selector Volts/Div para ver los picos completos.';
-        alertBox.style.display = 'block';
-      } else if (!simState.triggerOn || Math.abs(simState.triggerLevel) > halfAmp) {
-        alertBox.className = 'callout warning';
-        alertBox.textContent = '⚡ Sin disparo sincronizado (el nivel de Trigger está fuera de la onda o apagado), por eso la señal se desplaza horizontalmente.';
-        alertBox.style.display = 'block';
-      } else {
-        alertBox.style.display = 'none';
+      else if ((dmmState.dial === 'ADC_10A' || dmmState.dial === 'ADC_400MA') && dmmState.connType === 'parallel' && dmmState.circuitPower) {
+        valText = 'ERR !';
+        unitText = 'FUSE';
+        modeText = '¡PELIGRO DE CORTOCIRCUITO!';
+        statusLevel = 'danger';
+        fbTitle = '⚠ PELIGRO: Cortocircuito por conexión en paralelo en modo Corriente';
+        fbDesc = 'Nunca conectes el multímetro en paralelo cuando está configurado como amperímetro (A/mA). Su resistencia interna es casi nula y quemará el fusible o dañará la fuente.';
       }
-    }
-
-    const simCanvas = document.getElementById('sim-canvas');
-    const simCtx = simCanvas.getContext('2d');
-
-    function resizeSimCanvas() {
-      const rect = simCanvas.getBoundingClientRect();
-      if (rect.width === 0) return;
-      const dpr = window.devicePixelRatio || 1;
-      simCanvas.width = rect.width * dpr;
-      simCanvas.height = rect.height * dpr;
-      simCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function evaluateWave(type, phaseRad) {
-      const norm = ((phaseRad % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-      const t = norm / (2 * Math.PI);
-      if (type === 'sine') return Math.sin(phaseRad);
-      if (type === 'square') return t < 0.5 ? 1 : -1;
-      if (type === 'triangle') return 1 - 4 * Math.abs(Math.round(t - 0.25) - (t - 0.25));
-      if (type === 'sawtooth') return 2 * t - 1;
-      return Math.sin(phaseRad);
-    }
-
-    function drawSimulator() {
-      const w = simCanvas.clientWidth;
-      const h = simCanvas.clientHeight;
-      if (w > 0 && h > 0) {
-        simCtx.clearRect(0, 0, w, h);
-
-        const cols = 10;
-        const rows = 8;
-        const dx = w / cols;
-        const dy = h / rows;
-
-        // Cuadrícula
-        simCtx.strokeStyle = 'rgba(130, 227, 210, 0.18)';
-        simCtx.lineWidth = 1;
-        for (let i = 1; i < cols; i++) {
-          simCtx.beginPath();
-          simCtx.moveTo(i * dx, 0);
-          simCtx.lineTo(i * dx, h);
-          simCtx.stroke();
-        }
-        for (let j = 1; j < rows; j++) {
-          simCtx.beginPath();
-          simCtx.moveTo(0, j * dy);
-          simCtx.lineTo(w, j * dy);
-          simCtx.stroke();
-        }
-
-        // Ejes centrales
-        simCtx.strokeStyle = 'rgba(130, 227, 210, 0.42)';
-        simCtx.beginPath();
-        simCtx.moveTo(w / 2, 0);
-        simCtx.lineTo(w / 2, h);
-        simCtx.moveTo(0, h / 2);
-        simCtx.lineTo(w, h / 2);
-        simCtx.stroke();
-
-        // Línea de nivel de Trigger
-        const trigY = h / 2 - ((simState.triggerLevel / simState.voltsDiv) + simState.posY) * dy;
-        simCtx.save();
-        simCtx.strokeStyle = '#ffb347';
-        simCtx.setLineDash([5, 4]);
-        simCtx.beginPath();
-        simCtx.moveTo(0, trigY);
-        simCtx.lineTo(w, trigY);
-        simCtx.stroke();
-        simCtx.restore();
-
-        // Cálculo de fase inicial según Trigger
-        const halfAmp = simState.vpp / 2;
-        const isTriggered = simState.triggerOn && Math.abs(simState.triggerLevel) <= halfAmp;
-        let phaseOffset = 0;
-
-        if (isTriggered) {
-          const ratio = Math.max(-1, Math.min(1, simState.triggerLevel / halfAmp));
-          if (simState.waveType === 'sine') phaseOffset = Math.asin(ratio);
-          else if (simState.waveType === 'triangle') phaseOffset = (ratio + 1) * (Math.PI / 2) - Math.PI / 2;
-          else if (simState.waveType === 'sawtooth') phaseOffset = (ratio + 1) * Math.PI;
-          else phaseOffset = 0;
+      else if ((dmmState.dial === 'OHM_2K' || dmmState.dial === 'OHM_20K') && dmmState.circuitPower) {
+        valText = 'ERR Ω';
+        unitText = 'PWR!';
+        modeText = 'MODO: ÓHMETRO (Ω)';
+        statusLevel = 'danger';
+        fbTitle = '⚠ ADVERTENCIA: Circuito energizado al medir Resistencia';
+        fbDesc = 'Nunca midas resistencia con el circuito encendido. Apaga la energía (ENERGÍA: OFF) y aísla el componente para evitar lecturas erróneas y daños al multímetro.';
+      }
+      else if (dmmState.dial === 'VDC_20' || dmmState.dial === 'VDC_200') {
+        modeText = 'MODO: VOLTAJE DC (V⎓)';
+        unitText = 'V';
+        if (dmmState.redJack !== 'voma') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Clavija roja en borna incorrecta';
+          fbDesc = 'Para medir voltaje debes conectar la punta roja en la borna VΩmA, no en 10A.';
+        } else if (!dmmState.circuitPower) {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Circuito sin energía';
+          fbDesc = 'El circuito está apagado; enciende la energía para medir voltaje.';
+        } else if (sc.type !== 'VDC') {
+          valText = sc.type === 'VAC' ? '0.02' : '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Tipo de señal distinto';
+          fbDesc = sc.type === 'VAC'
+            ? 'Estás midiendo una fuente de Corriente Alterna (AC) con el selector en DC. Cambia a V~ 600 V.'
+            : 'Este escenario requiere medir corriente o resistencia, no voltaje DC.';
+        } else if (dmmState.connType !== 'parallel') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Conexión incorrecta para Voltaje';
+          fbDesc = 'El voltaje se mide siempre en PARALELO (tocando ambos extremos del componente).';
         } else {
-          simState.freePhase += 0.12;
-          phaseOffset = simState.freePhase;
-        }
-
-        // Dibujo de la onda
-        const totalTimeSec = (cols * simState.timeDivMs) / 1000;
-        simCtx.save();
-        simCtx.strokeStyle = '#30FF00';
-        simCtx.lineWidth = 2.8;
-        simCtx.shadowColor = 'rgba(130, 227, 210, 0.65)';
-        simCtx.shadowBlur = 8;
-        simCtx.beginPath();
-
-        for (let px = 0; px <= w; px += 1.5) {
-          const tSec = (px / w) * totalTimeSec;
-          const phase = 2 * Math.PI * simState.freq * tSec + phaseOffset;
-          const v = halfAmp * evaluateWave(simState.waveType, phase);
-          const py = h / 2 - ((v / simState.voltsDiv) + simState.posY) * dy;
-          if (px === 0) simCtx.moveTo(px, py);
-          else simCtx.lineTo(px, py);
-        }
-        simCtx.stroke();
-        simCtx.restore();
-
-        // Guías visuales de Vpp
-        if (simState.showGuides) {
-          const topY = h / 2 - ((halfAmp / simState.voltsDiv) + simState.posY) * dy;
-          const botY = h / 2 - ((-halfAmp / simState.voltsDiv) + simState.posY) * dy;
-          simCtx.save();
-          simCtx.strokeStyle = 'rgba(216, 255, 244, 0.55)';
-          simCtx.setLineDash([3, 3]);
-          simCtx.beginPath();
-          simCtx.moveTo(12, topY);
-          simCtx.lineTo(w - 12, topY);
-          simCtx.moveTo(12, botY);
-          simCtx.lineTo(w - 12, botY);
-          simCtx.stroke();
-          simCtx.restore();
+          const maxRange = dmmState.dial === 'VDC_20' ? 20 : 200;
+          if (sc.actualValue > maxRange) {
+            valText = 'OL';
+            statusLevel = 'warn';
+            fbTitle = 'Sobrecarga (OL) — Escala insuficiente';
+            fbDesc = 'El voltaje supera la escala elegida. Selecciona una escala superior.';
+          } else {
+            valText = sc.actualValue.toFixed(2);
+            statusLevel = 'ok';
+            fbTitle = '✓ Medición de Voltaje DC Correcta';
+            fbDesc = 'Conexión en paralelo, borna VΩmA y escala adecuada. Recuerda sujetar las puntas solo por el aislante.';
+          }
         }
       }
-      requestAnimationFrame(drawSimulator);
+      else if (dmmState.dial === 'VAC_600') {
+        modeText = 'MODO: VOLTAJE AC (V~)';
+        unitText = 'V~';
+        if (dmmState.redJack !== 'voma') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Clavija roja incorrecta';
+          fbDesc = 'Conecta la punta roja en VΩmA para medir voltaje alterno.';
+        } else if (sc.type !== 'VAC' || !dmmState.circuitPower) {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Sin señal alterna detectada';
+          fbDesc = 'Selecciona el escenario Toma 120V AC y verifica que la conexión esté en paralelo con energía ON.';
+        } else if (dmmState.connType !== 'parallel') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Conecta en Paralelo';
+          fbDesc = 'El voltaje alterno debe medirse en paralelo entre fase y neutro.';
+        } else {
+          valText = sc.actualValue.toFixed(1);
+          statusLevel = 'ok';
+          fbTitle = '✓ Medición de Voltaje AC Segura';
+          fbDesc = 'Escala de 600 V~ seleccionada correctamente para medir 120 V AC en paralelo.';
+        }
+      }
+      else if (dmmState.dial === 'ADC_10A' || dmmState.dial === 'ADC_400MA') {
+        modeText = dmmState.dial === 'ADC_10A' ? 'MODO: CORRIENTE 10A (A⎓)' : 'MODO: CORRIENTE mA (mA⎓)';
+        unitText = dmmState.dial === 'ADC_10A' ? 'A' : 'mA';
+
+        if (sc.type !== 'IDC' || !dmmState.circuitPower) {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Sin flujo de corriente en este escenario';
+          fbDesc = 'Para practicar corriente, selecciona "Circuito 250 mA" o "Motor 2.4 A" con el multímetro conectado en SERIE.';
+        } else if (dmmState.connType !== 'series') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'El amperímetro debe conectarse en SERIE';
+          fbDesc = 'Para medir corriente debes abrir el circuito e intercalar el multímetro en serie con la carga.';
+        } else if (dmmState.dial === 'ADC_10A' && dmmState.redJack !== '10a') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Cambia la punta roja a la borna 10A';
+          fbDesc = 'La escala de 10 A utiliza exclusivamente la entrada física 10A.';
+        } else if (dmmState.dial === 'ADC_400MA' && dmmState.redJack !== 'voma') {
+          valText = '0.00';
+          statusLevel = 'warn';
+          fbTitle = 'Cambia la punta roja a VΩmA';
+          fbDesc = 'La escala de 400 mA utiliza la borna VΩmA.';
+        } else if (dmmState.dial === 'ADC_400MA' && sc.actualValue > 0.4) {
+          valText = 'FUSE !';
+          statusLevel = 'danger';
+          fbTitle = '⚠ FUSIBLE QUEMADO: Corriente excede 400 mA';
+          fbDesc = 'Intentaste medir 2.40 A (2,400 mA) en la escala de 400 mA. Por seguridad, empieza siempre en la escala más alta (10A).';
+        } else {
+          valText = dmmState.dial === 'ADC_10A'
+            ? sc.actualValue.toFixed(2)
+            : (sc.actualValue * 1000).toFixed(0);
+          statusLevel = 'ok';
+          fbTitle = '✓ Medición de Corriente Correcta';
+          fbDesc = dmmState.dial === 'ADC_10A'
+            ? 'Excelente práctica: iniciaste en la escala más alta (10A) con conexión en serie.'
+            : 'Lectura precisa en miliamperios dentro del límite seguro de 400 mA.';
+        }
+      }
+      else if (dmmState.dial === 'OHM_2K' || dmmState.dial === 'OHM_20K') {
+        modeText = 'MODO: RESISTENCIA (Ω)';
+        unitText = 'kΩ';
+        if (dmmState.redJack !== 'voma') {
+          valText = 'OL';
+          statusLevel = 'warn';
+          fbTitle = 'Conecta la punta roja en VΩmA';
+          fbDesc = 'Para medir ohmios la punta roja debe estar en la borna VΩmA.';
+        } else if (sc.type !== 'OHM') {
+          valText = 'OL';
+          statusLevel = 'warn';
+          fbTitle = 'Selecciona el escenario Resistor 4.7 kΩ';
+          fbDesc = 'El óhmetro mide resistencia de componentes pasivos desconectados.';
+        } else if (dmmState.connType !== 'isolated') {
+          valText = 'OL';
+          statusLevel = 'warn';
+          fbTitle = 'Aísla el componente';
+          fbDesc = 'Desconecta el resistor del resto del circuito para evitar que otras ramas alteren la lectura.';
+        } else if (dmmState.dial === 'OHM_2K') {
+          valText = 'OL';
+          statusLevel = 'warn';
+          fbTitle = 'Sobrecarga (OL): El resistor supera 2 kΩ';
+          fbDesc = 'El resistor es de 4.7 kΩ y la escala máxima elegida es 2 kΩ. Cambia la perilla a 20 kΩ.';
+        } else {
+          valText = (sc.actualValue / 1000).toFixed(2);
+          statusLevel = 'ok';
+          fbTitle = '✓ Medición de Resistencia Correcta (4.70 kΩ)';
+          fbDesc = 'Circuito sin energía, componente aislado, borna VΩmA y escala de 20 kΩ.';
+        }
+      }
+
+      document.getElementById('lcd-mode-badge').textContent = modeText;
+      document.getElementById('lcd-main-value').textContent = valText;
+      document.getElementById('lcd-main-unit').textContent = unitText;
+
+      const valEl = document.getElementById('lcd-main-value');
+      const fbBox = document.getElementById('dmm-feedback-box');
+      const fbTitleEl = document.getElementById('dmm-feedback-title');
+      const diagTag = document.getElementById('diagram-status-tag');
+
+      valEl.className = 'lcd-value';
+      fbBox.className = 'callout';
+      diagTag.className = '';
+
+      if (statusLevel === 'ok') {
+        diagTag.textContent = 'Conexión Válida';
+      } else if (statusLevel === 'warn') {
+        valEl.classList.add('warn');
+        fbBox.classList.add('warning');
+        diagTag.classList.add('warn');
+        diagTag.textContent = 'Revisar Ajuste';
+      } else {
+        valEl.classList.add('danger');
+        fbBox.classList.add('danger');
+        diagTag.classList.add('danger');
+        diagTag.textContent = '¡Alerta de Seguridad!';
+      }
+
+      fbTitleEl.textContent = fbTitle;
+      document.getElementById('dmm-feedback-desc').textContent = fbDesc;
+
+      renderConnectionSvg();
     }
 
-    simCanvas.addEventListener('mousemove', (e) => {
-      const rect = simCanvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const timeMs = (x / rect.width) * 10 * simState.timeDivMs;
-      const volts = (((rect.height / 2 - y) / (rect.height / 8)) - simState.posY) * simState.voltsDiv;
-      document.getElementById('cursor-readout').textContent =
-        `Cursor: Tiempo = ${timeMs.toFixed(2)} ms | Voltaje = ${volts.toFixed(2)} V`;
-    });
+    function renderConnectionSvg() {
+      const svg = document.getElementById('connection-svg');
+      const redColor = dmmState.redJack === '10a' ? '#ffd29d' : '#ff9c94';
+
+      if (dmmState.connType === 'parallel') {
+        svg.innerHTML = `
+          <rect x="20" y="30" width="75" height="90" rx="10" fill="#1d4652" stroke="#85d9cc" stroke-width="2" />
+          <text x="30" y="72" fill="#ffffff" font-size="11" font-family="sans-serif" font-weight="bold">CIRCUITO</text>
+          <text x="33" y="88" fill="${dmmState.circuitPower ? '#82e3d2' : '#cee7e4'}" font-size="10" font-family="sans-serif">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
+          <line x1="95" y1="45" x2="215" y2="45" stroke="#cee7e4" stroke-width="2.5" />
+          <line x1="95" y1="105" x2="215" y2="105" stroke="#cee7e4" stroke-width="2.5" />
+          <rect x="200" y="45" width="30" height="60" rx="5" fill="#102c39" stroke="#82e3d2" stroke-width="2" />
+          <text x="205" y="79" fill="#82e3d2" font-size="10" font-family="sans-serif" font-weight="bold">DUT</text>
+          <polyline points="215,45 320,45 320,58" fill="none" stroke="${redColor}" stroke-width="3" />
+          <polyline points="215,105 320,105 320,92" fill="none" stroke="#cee7e4" stroke-width="3" />
+          <rect x="295" y="52" width="135" height="46" rx="10" fill="#102c39" stroke="#82e3d2" stroke-width="2" />
+          <text x="308" y="73" fill="#82e3d2" font-size="11" font-family="sans-serif" font-weight="bold">DMM (PARALELO)</text>
+          <text x="308" y="88" fill="${redColor}" font-size="10" font-family="sans-serif">Rojo: ${dmmState.redJack.toUpperCase()} | COM</text>
+        `;
+      } else if (dmmState.connType === 'series') {
+        svg.innerHTML = `
+          <rect x="20" y="30" width="75" height="90" rx="10" fill="#1d4652" stroke="#85d9cc" stroke-width="2" />
+          <text x="33" y="72" fill="#ffffff" font-size="11" font-family="sans-serif" font-weight="bold">FUENTE</text>
+          <text x="33" y="88" fill="${dmmState.circuitPower ? '#82e3d2' : '#cee7e4'}" font-size="10" font-family="sans-serif">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
+          <line x1="95" y1="45" x2="175" y2="45" stroke="${redColor}" stroke-width="3" />
+          <rect x="175" y="25" width="130" height="42" rx="10" fill="#102c39" stroke="#ffd29d" stroke-width="2" />
+          <text x="192" y="44" fill="#ffd29d" font-size="11" font-family="sans-serif" font-weight="bold">DMM (SERIE)</text>
+          <text x="192" y="58" fill="${redColor}" font-size="10" font-family="sans-serif">${dmmState.redJack.toUpperCase()} → COM</text>
+          <line x1="305" y1="45" x2="380" y2="45" stroke="#cee7e4" stroke-width="3" />
+          <rect x="365" y="45" width="32" height="60" rx="5" fill="#102c39" stroke="#ffd29d" stroke-width="2" />
+          <text x="368" y="79" fill="#ffd29d" font-size="9" font-family="sans-serif" font-weight="bold">CARGA</text>
+          <line x1="95" y1="105" x2="380" y2="105" stroke="#cee7e4" stroke-width="2.5" />
+        `;
+      } else {
+        svg.innerHTML = `
+          <rect x="45" y="55" width="120" height="36" rx="8" fill="#1d4652" stroke="#82e3d2" stroke-width="2" />
+          <text x="65" y="77" fill="#82e3d2" font-size="11" font-family="sans-serif" font-weight="bold">4.7 kΩ (AISLADO)</text>
+          <line x1="25" y1="73" x2="45" y2="73" stroke="#cee7e4" stroke-width="2.5" />
+          <line x1="165" y1="73" x2="185" y2="73" stroke="#cee7e4" stroke-width="2.5" />
+          <polyline points="30,73 30,28 310,28 310,50" fill="none" stroke="${redColor}" stroke-width="3" />
+          <polyline points="180,73 180,118 310,118 310,96" fill="none" stroke="#cee7e4" stroke-width="3" />
+          <rect x="275" y="50" width="150" height="46" rx="10" fill="#102c39" stroke="#82e3d2" stroke-width="2" />
+          <text x="292" y="70" fill="#82e3d2" font-size="11" font-family="sans-serif" font-weight="bold">DMM (ÓHMETRO)</text>
+          <text x="292" y="85" fill="#cee7e4" font-size="10" font-family="sans-serif">Circuito sin energía</text>
+        `;
+      }
+    }
 
     // 6. EJERCICIOS PRÁCTICOS (QUIZ DE 6 PREGUNTAS)
     const quizQuestions = [
       {
-        q: '1. ¿Qué magnitud eléctrica se representa en el eje vertical (Y) de un osciloscopio?',
-        options: ['Tiempo (Time)', 'Voltaje (Voltage)', 'Resistencia (Ohms)'],
+        q: '1. ¿Por qué debes evitar tocar las puntas metálicas del multímetro mientras realizas una medición?',
+        options: [
+          'Porque puedes sufrir una descarga eléctrica y alterar la lectura (especialmente en resistencia)',
+          'Porque la pantalla LCD se apaga automáticamente',
+          'Porque descarga la batería del multímetro'
+        ],
+        answer: 0
+      },
+      {
+        q: '2. Si vas a medir una corriente continua desconocida, ¿qué escala y borna debes usar primero?',
+        options: [
+          'La escala más baja (mA) en la borna VΩmA',
+          'La escala más alta (10A) con la punta roja en la borna 10A',
+          'La escala de 20 kΩ en la borna COM'
+        ],
         answer: 1
       },
       {
-        q: '2. Una onda ocupa exactamente 4 cuadros de altura y la escala está en 2 V/div. ¿Cuál es su Voltaje Pico a Pico (Vpp)?',
-        options: ['2 Vpp', '6 Vpp', '8 Vpp'],
+        q: '3. ¿Cómo se debe conectar el multímetro para medir el voltaje de una batería o resistencia?',
+        options: [
+          'En serie, cortando uno de los cables del circuito',
+          'En paralelo, tocando ambos terminales del componente',
+          'Con la fuente de alimentación apagada'
+        ],
+        answer: 1
+      },
+      {
+        q: '4. ¿Qué ocurre si conectas el multímetro en paralelo a una batería mientras está en modo Amperímetro (10A o mA)?',
+        options: [
+          'Mide el voltaje con mayor precisión',
+          'Provocas un cortocircuito directo que puede fundir el fusible interno del equipo',
+          'El multímetro cambia automáticamente a voltímetro'
+        ],
+        answer: 1
+      },
+      {
+        q: '5. ¿Qué precaución es indispensable antes de medir el valor de una resistencia (Ω)?',
+        options: [
+          'Desconectar la energía del circuito y aislar al menos un terminal del resistor',
+          'Colocar la punta roja en la borna 10A',
+          'Seleccionar el modo de voltaje alterno (V~)'
+        ],
+        answer: 0
+      },
+      {
+        q: '6. ¿En qué borna del multímetro debe permanecer siempre conectado el cable de prueba negro?',
+        options: [
+          'VΩmA',
+          '10A',
+          'COM'
+        ],
         answer: 2
-      },
-      {
-        q: '3. ¿Qué control debes ajustar para detener una onda que se desplaza sin parar de lado a lado?',
-        options: ['Trigger (Disparo)', 'Volts/Div', 'Posición Vertical'],
-        answer: 0
-      },
-      {
-        q: '4. Si un ciclo completo ocupa 5 cuadros horizontales con Time/Div = 1 ms, ¿cuál es el período (T)?',
-        options: ['5 ms', '0.2 ms', '50 ms'],
-        answer: 0
-      },
-      {
-        q: '5. Si el período de una señal es T = 2 ms (0.002 s), ¿cuál es su frecuencia (f = 1 / T)?',
-        options: ['200 Hz', '500 Hz', '2000 Hz'],
-        answer: 1
-      },
-      {
-        q: '6. ¿Dónde debes conectar la pinza tipo caimán (Ground Clip) de la sonda del osciloscopio?',
-        options: ['Al positivo de la fuente', 'A la referencia de tierra (GND) del circuito', 'A la salida del generador'],
-        answer: 1
       }
     ];
 
@@ -2774,13 +3243,10 @@
     }
 
     // Inicialización al cargar la página
-    window.addEventListener('resize', resizeSimCanvas);
-    selectAnatomy('screen');
+    selectDmmAnatomy('display');
     renderGlossary(glossaryTerms);
-    updateSimParams();
+    loadDmmScenario('dc_battery');
     renderQuiz();
-    resizeSimCanvas();
-    drawSimulator();
   </script>
 </body>
 </html>

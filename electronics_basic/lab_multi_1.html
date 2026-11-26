@@ -1209,7 +1209,7 @@
       justify-content: space-between;
       font-size: 12px;
       color: #cee7e4;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     #diagram-status-tag {
@@ -1225,9 +1225,21 @@
       color: #ff9c94;
     }
 
-    #connection-svg {
+    .connection-img-wrap {
       width: 100%;
-      height: 145px;
+      min-height: 145px;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #connection-img {
+      width: 100%;
+      max-height: 155px;
+      object-fit: contain;
       display: block;
     }
 
@@ -2186,15 +2198,15 @@
                   </div>
                 </div>
 
-                <!-- Esquema SVG Dinámico de Conexión -->
+                <!-- Esquema de Conexión con Imagen -->
                 <div class="diagram-box">
                   <div class="diagram-head">
                     <span>Esquema de Conexión en Vivo (Live Connection Diagram)</span>
                     <span id="diagram-status-tag">Conexión Válida</span>
                   </div>
-                  <svg id="connection-svg" viewBox="0 0 460 150">
-                    <!-- Renderizado dinámicamente por JS -->
-                  </svg>
+                  <div class="connection-img-wrap">
+                    <img id="connection-img" src="../images/VOmA_OK.png" alt="Diagrama de conexión entre el multímetro y el elemento a medir" />
+                  </div>
                 </div>
               </div>
 
@@ -2811,6 +2823,29 @@
       }
     };
 
+    const connectionImages = {
+      dc_battery: {
+        voma: '../images/VOmA_OK.png',
+        '10a': '../images/10A_Bad.png'
+      },
+      ac_outlet: {
+        voma: '../images/VOmA_OK.png',
+        '10a': '../images/10A_Bad.png'
+      },
+      low_current: {
+        voma: '../images/serie_250mA.png',
+        '10a': '../images/serie_10A.png'
+      },
+      high_current: {
+        voma: '../images/serie_250mA.png',
+        '10a': '../images/serie_10A.png'
+      },
+      resistor: {
+        voma: '../images/resist_VOma.png',
+        '10a': '../images/resist_10A.png'
+      }
+    };
+
     const dmmState = {
       scenarioKey: 'dc_battery',
       redJack: 'voma',
@@ -3093,55 +3128,19 @@
       fbTitleEl.textContent = fbTitle;
       document.getElementById('dmm-feedback-desc').textContent = fbDesc;
 
-      renderConnectionSvg();
+      renderConnectionImage();
     }
 
-    function renderConnectionSvg() {
-      const svg = document.getElementById('connection-svg');
-      const redColor = dmmState.redJack === '10a' ? '#ffd29d' : '#ff9c94';
+    function renderConnectionImage() {
+      const img = document.getElementById('connection-img');
+      if (!img) return;
+      const scenarioMap = connectionImages[dmmState.scenarioKey] || connectionImages.dc_battery;
+      const imgSrc = scenarioMap[dmmState.redJack] || scenarioMap.voma;
+      const sc = dmmScenarios[dmmState.scenarioKey];
+      const jackName = dmmState.redJack === '10a' ? 'Borna 10A (Alta I)' : 'Borna VΩmA';
 
-      if (dmmState.connType === 'parallel') {
-        svg.innerHTML = `
-          <rect x="20" y="30" width="75" height="90" rx="10" fill="#1d4652" stroke="#85d9cc" stroke-width="2" />
-          <text x="30" y="72" fill="#ffffff" font-size="11" font-family="sans-serif" font-weight="bold">CIRCUITO</text>
-          <text x="33" y="88" fill="${dmmState.circuitPower ? '#82e3d2' : '#cee7e4'}" font-size="10" font-family="sans-serif">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
-          <line x1="95" y1="45" x2="215" y2="45" stroke="#cee7e4" stroke-width="2.5" />
-          <line x1="95" y1="105" x2="215" y2="105" stroke="#cee7e4" stroke-width="2.5" />
-          <rect x="200" y="45" width="30" height="60" rx="5" fill="#102c39" stroke="#82e3d2" stroke-width="2" />
-          <text x="205" y="79" fill="#82e3d2" font-size="10" font-family="sans-serif" font-weight="bold">DUT</text>
-          <polyline points="215,45 320,45 320,58" fill="none" stroke="${redColor}" stroke-width="3" />
-          <polyline points="215,105 320,105 320,92" fill="none" stroke="#cee7e4" stroke-width="3" />
-          <rect x="295" y="52" width="135" height="46" rx="10" fill="#102c39" stroke="#82e3d2" stroke-width="2" />
-          <text x="308" y="73" fill="#82e3d2" font-size="11" font-family="sans-serif" font-weight="bold">DMM (PARALELO)</text>
-          <text x="308" y="88" fill="${redColor}" font-size="10" font-family="sans-serif">Rojo: ${dmmState.redJack.toUpperCase()} | COM</text>
-        `;
-      } else if (dmmState.connType === 'series') {
-        svg.innerHTML = `
-          <rect x="20" y="30" width="75" height="90" rx="10" fill="#1d4652" stroke="#85d9cc" stroke-width="2" />
-          <text x="33" y="72" fill="#ffffff" font-size="11" font-family="sans-serif" font-weight="bold">FUENTE</text>
-          <text x="33" y="88" fill="${dmmState.circuitPower ? '#82e3d2' : '#cee7e4'}" font-size="10" font-family="sans-serif">${dmmState.circuitPower ? 'PWR: ON' : 'PWR: OFF'}</text>
-          <line x1="95" y1="45" x2="175" y2="45" stroke="${redColor}" stroke-width="3" />
-          <rect x="175" y="25" width="130" height="42" rx="10" fill="#102c39" stroke="#ffd29d" stroke-width="2" />
-          <text x="192" y="44" fill="#ffd29d" font-size="11" font-family="sans-serif" font-weight="bold">DMM (SERIE)</text>
-          <text x="192" y="58" fill="${redColor}" font-size="10" font-family="sans-serif">${dmmState.redJack.toUpperCase()} → COM</text>
-          <line x1="305" y1="45" x2="380" y2="45" stroke="#cee7e4" stroke-width="3" />
-          <rect x="365" y="45" width="32" height="60" rx="5" fill="#102c39" stroke="#ffd29d" stroke-width="2" />
-          <text x="368" y="79" fill="#ffd29d" font-size="9" font-family="sans-serif" font-weight="bold">CARGA</text>
-          <line x1="95" y1="105" x2="380" y2="105" stroke="#cee7e4" stroke-width="2.5" />
-        `;
-      } else {
-        svg.innerHTML = `
-          <rect x="45" y="55" width="120" height="36" rx="8" fill="#1d4652" stroke="#82e3d2" stroke-width="2" />
-          <text x="65" y="77" fill="#82e3d2" font-size="11" font-family="sans-serif" font-weight="bold">4.7 kΩ (AISLADO)</text>
-          <line x1="25" y1="73" x2="45" y2="73" stroke="#cee7e4" stroke-width="2.5" />
-          <line x1="165" y1="73" x2="185" y2="73" stroke="#cee7e4" stroke-width="2.5" />
-          <polyline points="30,73 30,28 310,28 310,50" fill="none" stroke="${redColor}" stroke-width="3" />
-          <polyline points="180,73 180,118 310,118 310,96" fill="none" stroke="#cee7e4" stroke-width="3" />
-          <rect x="275" y="50" width="150" height="46" rx="10" fill="#102c39" stroke="#82e3d2" stroke-width="2" />
-          <text x="292" y="70" fill="#82e3d2" font-size="11" font-family="sans-serif" font-weight="bold">DMM (ÓHMETRO)</text>
-          <text x="292" y="85" fill="#cee7e4" font-size="10" font-family="sans-serif">Circuito sin energía</text>
-        `;
-      }
+      img.src = imgSrc;
+      img.alt = `Conexión para ${sc.title} usando ${jackName}`;
     }
 
     // 6. EJERCICIOS PRÁCTICOS (QUIZ DE 6 PREGUNTAS)
